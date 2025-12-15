@@ -8,6 +8,9 @@ import { Button } from './components/Button';
 import { Download, ChevronRight, Wand2, FileText, CheckCircle, RefreshCw, Settings } from 'lucide-react';
 import { LockScreen } from './components/LockScreen';
 import { ApiKeyModal } from './components/ApiKeyModal';
+// @ts-ignore
+import HTMLtoDOCX from 'html-to-docx';
+import { saveAs } from 'file-saver';
 
 const App: React.FC = () => {
   // Lock Screen State
@@ -559,84 +562,46 @@ QUAN TRỌNG:
   };
 
   // Export to Word
-  const exportToWord = () => {
+  const exportToWord = async () => {
     // @ts-ignore
     if (typeof marked === 'undefined') {
       alert("Library not loaded correctly. Please refresh.");
       return;
     }
 
-    // @ts-ignore
-    const htmlContent = marked.parse(state.fullDocument);
+    try {
+      // @ts-ignore
+      const htmlContent = marked.parse(state.fullDocument);
 
-    const preHtml = `<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
-    <head><meta charset='utf-8'><title>Export HTML To Doc</title>
-    <!--[if gte mso 9]>
-    <xml>
-    <w:WordDocument>
-    <w:View>Print</w:View>
-    <w:Zoom>100</w:Zoom>
-    <w:DoNotOptimizeForBrowser/>
-    </w:WordDocument>
-    </xml>
-    <![endif]-->
-    <style>
-      @page {
-          size: 21cm 29.7cm;
-          margin: 2cm 2cm 2cm 2cm;
-          mso-page-orientation: portrait;
-      }
-      body { 
-        font-family: 'Times New Roman', serif; 
-        font-size: 13pt; 
-        line-height: 1.3; 
-        tab-interval: 36pt;
-      }
-      h1, h2, h3, h4, h5, h6 {
-        font-weight: bold;
-        margin-top: 12pt;
-        margin-bottom: 6pt;
-        page-break-after: avoid;
-      }
-      h1 { font-size: 16pt; text-align: center; text-transform: uppercase; }
-      h2 { font-size: 14pt; }
-      h3 { font-size: 13pt; font-style: italic; }
-      p { 
-        margin-top: 0; 
-        margin-bottom: 6pt; 
-        text-align: justify; 
-      }
-      ul, ol { margin-top: 0; margin-bottom: 6pt; }
-      li { margin-bottom: 3pt; }
-      table { 
-        border-collapse: collapse; 
-        width: 100%; 
-        margin: 12pt 0; 
-      }
-      th, td { 
-        border: 1px solid black; 
-        padding: 5pt; 
-        vertical-align: top; 
-      }
-      /* Prevent blank pages caused by massive elements */
-      img { max-width: 100%; height: auto; }
-    </style>
-    </head><body><div class="Section1">`;
-    const postHtml = "</div></body></html>";
-    const html = preHtml + htmlContent + postHtml;
+      const headerHTML = `
+        <div style="text-align: center; font-family: 'Times New Roman', serif;">
+          <p style="font-size: 10pt; margin: 0;">SÁNG KIẾN KINH NGHIỆM</p>
+        </div>
+      `;
 
-    const blob = new Blob(['\ufeff', html], {
-      type: 'application/msword'
-    });
+      const footerHTML = `
+        <div style="text-align: center; font-family: 'Times New Roman', serif; font-size: 10pt;">
+          <span>Trang <span class="pageNumber"></span></span>
+        </div>
+      `;
 
-    const url = 'data:application/vnd.ms-word;charset=utf-8,' + encodeURIComponent(html);
+      // HTMLtoDOCX expects a full HTML page or content string
+      const fileBuffer = await HTMLtoDOCX(htmlContent, headerHTML, {
+        table: { row: { cantSplit: true } },
+        footer: true,
+        pageNumber: true,
+        font: 'Times New Roman',
+      }, footerHTML);
 
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `SKKN_${userInfo.topic.substring(0, 50)}.doc`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+      const blob = new Blob([fileBuffer], {
+        type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+      });
+
+      saveAs(blob, `SKKN_${userInfo.topic.substring(0, 50).replace(/[^a-zA-Z0-9àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ\s]/g, '_')}.docx`);
+    } catch (error) {
+      console.error("Export failed:", error);
+      alert("Xuất file thất bại. Vui lòng thử lại hoặc kiểm tra console.");
+    }
   };
 
   // Render Logic
