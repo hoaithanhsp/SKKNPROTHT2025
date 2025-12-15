@@ -1,12 +1,19 @@
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { UserInfo } from '../types';
 import { Button } from './Button';
-import { BookOpen, School, GraduationCap, PenTool, MapPin, Calendar, Users, Cpu, Target, Monitor } from 'lucide-react';
+import { BookOpen, School, GraduationCap, PenTool, MapPin, Calendar, Users, Cpu, Target, Monitor, FileUp, Sparkles, ClipboardPaste, Loader2 } from 'lucide-react';
+import * as mammoth from 'mammoth';
+import * as pdfjsLib from 'pdfjs-dist';
+
+// Define worker source for PDF.js
+// Using a CDN to avoid complex build configuration for web workers in standard Vite setups
+pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js`;
 
 interface Props {
   userInfo: UserInfo;
   onChange: (field: keyof UserInfo, value: string) => void;
   onSubmit: () => void;
+  onManualSubmit: (content: string) => void;
   isSubmitting: boolean;
 }
 
@@ -31,14 +38,77 @@ const InputGroup: React.FC<InputGroupProps> = ({ label, icon: Icon, required, ch
   </div>
 );
 
-export const SKKNForm: React.FC<Props> = ({ userInfo, onChange, onSubmit, isSubmitting }) => {
+export const SKKNForm: React.FC<Props> = ({ userInfo, onChange, onSubmit, onManualSubmit, isSubmitting }) => {
+  const [mode, setMode] = useState<'ai' | 'manual'>('ai');
+  const [manualContent, setManualContent] = useState('');
+  const [isProcessingFile, setIsProcessingFile] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     onChange(e.target.name as keyof UserInfo, e.target.value);
   };
 
-  // Only check required fields for validation
+  const extractTextFromPdf = async (arrayBuffer: ArrayBuffer): Promise<string> => {
+    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+    let fullText = '';
+    
+    for (let i = 1; i <= pdf.numPages; i++) {
+      const page = await pdf.getPage(i);
+      const textContent = await page.getTextContent();
+      const pageText = textContent.items
+        .map((item: any) => item.str)
+        .join(' ');
+      fullText += pageText + '\n\n';
+    }
+    return fullText;
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsProcessingFile(true);
+    try {
+      const arrayBuffer = await file.arrayBuffer();
+      let extractedText = '';
+
+      if (file.type === 'application/pdf') {
+        extractedText = await extractTextFromPdf(arrayBuffer);
+      } else if (
+        file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' || 
+        file.name.endsWith('.docx')
+      ) {
+        const result = await mammoth.extractRawText({ arrayBuffer });
+        extractedText = result.value;
+        if (result.messages.length > 0) {
+          console.warn("Mammoth messages:", result.messages);
+        }
+      } else {
+        // Fallback for text files
+        extractedText = await new Promise<string>((resolve) => {
+            const reader = new FileReader();
+            reader.onload = (e) => resolve(e.target?.result as string);
+            reader.readAsText(file);
+        });
+      }
+
+      setManualContent(prev => prev ? prev + '\n\n' + extractedText : extractedText);
+    } catch (error) {
+      console.error("Error reading file:", error);
+      alert("Không thể đọc file. Vui lòng thử lại hoặc copy nội dung thủ công.");
+    } finally {
+      setIsProcessingFile(false);
+      // Reset input value to allow re-uploading the same file if needed
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
+  // Check valid based on mode
   const requiredFields: (keyof UserInfo)[] = ['topic', 'subject', 'level', 'grade', 'school', 'location', 'facilities'];
-  const isFormValid = requiredFields.every(key => userInfo[key].trim() !== '');
+  const isInfoValid = requiredFields.every(key => userInfo[key].trim() !== '');
+  const isManualValid = manualContent.trim().length > 50; // Minimum length check
 
   return (
     <div className="w-full max-w-4xl mx-auto bg-white rounded-xl shadow-xl border border-sky-100 overflow-hidden my-8">
@@ -214,17 +284,102 @@ export const SKKNForm: React.FC<Props> = ({ userInfo, onChange, onSubmit, isSubm
           </div>
         </div>
 
-        <div className="pt-4">
-          <Button 
-            onClick={onSubmit} 
-            disabled={!isFormValid || isSubmitting} 
-            isLoading={isSubmitting}
-            className="w-full py-4 text-lg font-bold shadow-sky-500/30 shadow-lg"
-          >
-            {isSubmitting ? 'Đang khởi tạo...' : 'Bắt đầu lập dàn ý chi tiết'}
-          </Button>
-          {!isFormValid && (
-              <p className="text-center text-red-500 text-sm mt-2">Vui lòng điền đầy đủ các thông tin bắt buộc (*)</p>
+        {/* SECTION 3: MODE SELECTION */}
+        <div className="pt-4 border-t border-gray-100">
+          <h3 className="text-lg font-bold text-sky-800 mb-4">Tùy chọn khởi tạo</h3>
+          
+          <div className="flex space-x-4 mb-6">
+            <button
+              onClick={() => setMode('ai')}
+              className={`flex-1 py-3 px-4 rounded-lg border-2 flex items-center justify-center gap-2 transition-all ${
+                mode === 'ai' 
+                  ? 'border-sky-500 bg-sky-50 text-sky-700 font-bold shadow-sm' 
+                  : 'border-gray-200 text-gray-500 hover:border-gray-300'
+              }`}
+            >
+              <Sparkles size={20} />
+              AI Lập Dàn Ý Chi Tiết
+            </button>
+            <button
+              onClick={() => setMode('manual')}
+              className={`flex-1 py-3 px-4 rounded-lg border-2 flex items-center justify-center gap-2 transition-all ${
+                mode === 'manual' 
+                  ? 'border-sky-500 bg-sky-50 text-sky-700 font-bold shadow-sm' 
+                  : 'border-gray-200 text-gray-500 hover:border-gray-300'
+              }`}
+            >
+              <FileUp size={20} />
+              Sử Dụng Dàn Ý Có Sẵn
+            </button>
+          </div>
+
+          {mode === 'ai' ? (
+             <div className="space-y-4 animate-fadeIn">
+               <div className="bg-blue-50 p-4 rounded-lg text-sm text-blue-800 flex items-start gap-2">
+                 <Sparkles className="w-5 h-5 flex-shrink-0 mt-0.5"/>
+                 <p>Hệ thống AI sẽ tự động phân tích đề tài và tạo ra dàn ý chi tiết gồm 6 phần chuẩn Bộ GD&ĐT. Bạn có thể chỉnh sửa lại sau khi tạo xong.</p>
+               </div>
+               <Button 
+                onClick={onSubmit} 
+                disabled={!isInfoValid || isSubmitting} 
+                isLoading={isSubmitting}
+                className="w-full py-4 text-lg font-bold shadow-sky-500/30 shadow-lg"
+              >
+                {isSubmitting ? 'Đang khởi tạo...' : '🚀 Bắt đầu lập dàn ý ngay'}
+              </Button>
+             </div>
+          ) : (
+             <div className="space-y-4 animate-fadeIn">
+                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 relative">
+                   {isProcessingFile && (
+                     <div className="absolute inset-0 bg-white/80 flex items-center justify-center z-10 backdrop-blur-sm rounded-lg">
+                        <div className="flex flex-col items-center gap-2">
+                          <Loader2 className="w-8 h-8 text-sky-600 animate-spin" />
+                          <p className="text-sm font-medium text-sky-700">Đang đọc tài liệu...</p>
+                        </div>
+                     </div>
+                   )}
+                   <div className="flex justify-between items-center mb-2">
+                      <label className="text-sm font-semibold text-gray-700">Nội dung dàn ý của bạn:</label>
+                      <div>
+                        <input 
+                           type="file" 
+                           ref={fileInputRef}
+                           onChange={handleFileUpload}
+                           className="hidden"
+                           accept=".txt,.md,.docx,.pdf" 
+                        />
+                        <button 
+                           onClick={() => fileInputRef.current?.click()}
+                           className="text-xs font-semibold text-sky-600 bg-sky-50 px-3 py-1.5 rounded hover:bg-sky-100 transition-colors flex items-center gap-1.5 border border-sky-100"
+                        >
+                           <FileUp size={14}/> Upload (.docx, .pdf, .txt)
+                        </button>
+                      </div>
+                   </div>
+                   <textarea
+                      value={manualContent}
+                      onChange={(e) => setManualContent(e.target.value)}
+                      placeholder="Nội dung sẽ xuất hiện ở đây sau khi upload file, hoặc bạn có thể dán (paste) trực tiếp..."
+                      className="w-full h-64 p-3 border border-gray-300 rounded-md text-sm focus:ring-sky-500 focus:border-sky-500 font-mono"
+                   />
+                </div>
+                <Button 
+                  onClick={() => onManualSubmit(manualContent)} 
+                  disabled={!isInfoValid || !isManualValid || isProcessingFile} 
+                  className="w-full py-4 text-lg font-bold bg-green-600 hover:bg-green-700 shadow-green-500/30 shadow-lg"
+                  icon={<ClipboardPaste size={20}/>}
+                >
+                  Sử dụng Dàn ý này & Tiếp tục
+                </Button>
+                {!isManualValid && (
+                   <p className="text-center text-xs text-gray-500">Vui lòng nhập nội dung dàn ý (tối thiểu 50 ký tự)</p>
+                )}
+             </div>
+          )}
+
+          {!isInfoValid && (
+              <p className="text-center text-red-500 text-sm mt-4">Vui lòng điền đầy đủ các thông tin bắt buộc (*) ở phần trên trước khi tiếp tục.</p>
           )}
         </div>
       </div>

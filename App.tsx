@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { UserInfo, GenerationStep, GenerationState } from './types';
 import { STEPS_INFO, SOLUTION_MODE_PROMPT } from './constants';
@@ -7,9 +6,51 @@ import { SKKNForm } from './components/SKKNForm';
 import { DocumentPreview } from './components/DocumentPreview';
 import { Button } from './components/Button';
 import { Download, ChevronRight, Wand2, FileText, CheckCircle, RefreshCw, Settings } from 'lucide-react';
+import { LockScreen } from './components/LockScreen';
 import { ApiKeyModal } from './components/ApiKeyModal';
 
 const App: React.FC = () => {
+  // Lock Screen State
+  const [isUnlocked, setIsUnlocked] = useState(false);
+  const [checkingAuth, setCheckingAuth] = useState(true);
+
+  // API Key State
+  const [apiKey, setApiKey] = useState('');
+  const [showApiKeyModal, setShowApiKeyModal] = useState(false);
+
+  // Check LocalStorage on Mount
+  useEffect(() => {
+    const authState = localStorage.getItem('skkn_app_unlocked');
+    if (authState === 'true') {
+      setIsUnlocked(true);
+    }
+
+    // Check for API Key
+    const storedKey = localStorage.getItem('USER_GEMINI_API_KEY');
+    if (storedKey) {
+      setApiKey(storedKey);
+    } else if (!process.env.API_KEY) {
+      // If no env key and no user key, prompt optional but recommended
+      // We delay this slightly to not conflict with lock screen if needed, 
+      // or just let the user open it manually via settings if they want.
+      // But per instructions: "If missing, must show popup".
+      // We'll show it if they try to generate.
+    }
+
+    setCheckingAuth(false);
+  }, []);
+
+  const handleUnlock = () => {
+    localStorage.setItem('skkn_app_unlocked', 'true');
+    setIsUnlocked(true);
+  };
+
+  const getEffectiveApiKey = () => {
+    if (apiKey) return apiKey;
+    if (process.env.API_KEY) return process.env.API_KEY;
+    return null;
+  };
+
   const [userInfo, setUserInfo] = useState<UserInfo>({
     topic: '',
     subject: '',
@@ -35,40 +76,56 @@ const App: React.FC = () => {
 
   const [outlineFeedback, setOutlineFeedback] = useState("");
 
-  const [apiKey, setApiKey] = useState(() => localStorage.getItem('gemini_api_key') || '');
-  const [showApiModal, setShowApiModal] = useState(false);
-
-  const handleSaveApiKey = (key: string) => {
-    localStorage.setItem('gemini_api_key', key);
-    setApiKey(key);
-    setShowApiModal(false);
-    setState(prev => ({ ...prev, error: null }));
-  };
-
   // Handle Input Changes
   const handleUserChange = (field: keyof UserInfo, value: string) => {
     setUserInfo(prev => ({ ...prev, [field]: value }));
   };
 
+  // Handle Manual Document Edit
+  const handleDocumentUpdate = (newContent: string) => {
+    setState(prev => ({ ...prev, fullDocument: newContent }));
+  };
+
+  // Handle Manual Outline Submission (Skip Generation)
+  const handleManualOutlineSubmit = (content: string) => {
+    const key = getEffectiveApiKey();
+    if (!key) {
+      setShowApiKeyModal(true);
+      return;
+    }
+
+    // Initialize chat session silently so it's ready for next steps
+    initializeGeminiChat(key);
+
+    setState(prev => ({
+      ...prev,
+      fullDocument: content,
+      step: GenerationStep.OUTLINE, // Go to Outline step so user can Review/Confirm
+      isStreaming: false,
+      error: null
+    }));
+  };
+
   // Start the Generation Process
   const startGeneration = async () => {
-    const keyToUse = apiKey || process.env.API_KEY;
-
-    if (!keyToUse) {
-      setShowApiModal(true);
+    const key = getEffectiveApiKey();
+    if (!key) {
+      setShowApiKeyModal(true);
       return;
     }
 
     try {
       setState(prev => ({ ...prev, step: GenerationStep.OUTLINE, isStreaming: true, error: null }));
 
-      initializeGeminiChat(keyToUse);
+      initializeGeminiChat(key);
 
       const initMessage = `
 Bạn là chuyên gia giáo dục cấp quốc gia, có 20+ năm kinh nghiệm viết, thẩm định và chấm điểm Sáng kiến Kinh nghiệm (SKKN) đạt giải cấp Bộ, cấp tỉnh tại Việt Nam.
 
 NHIỆM VỤ CỦA BẠN:
 Lập DÀN Ý CHI TIẾT cho một đề tài SKKN dựa trên thông tin tôi cung cấp. Dàn ý phải đầy đủ, cụ thể, có độ sâu và đảm bảo 4 tiêu chí: Tính MỚI, Tính KHOA HỌC, Tính KHẢ THI, Tính HIỆU QUẢ.
+
+BẮT ĐẦU phản hồi bằng MENU NAVIGATION trạng thái Bước 2 (Lập Dàn Ý - Đang thực hiện).
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 THÔNG TIN ĐỀ TÀI:
@@ -255,7 +312,14 @@ I. TÊN PHẦN LỚN
 
 Sử dụng icon để dễ nhìn: ✓ → • ○ ▪ ■
 
-QUAN TRỌNG: Kết thúc phần dàn ý, hãy xuống dòng và hỏi in đậm câu sau: "Bạn có muốn chỉnh sửa dàn ý không?"
+QUAN TRỌNG:
+1. HIỂN THỊ "📱 MENU NAVIGATION" ĐẦU TIÊN (Bước 2: Đang thực hiện).
+2. Cuối dàn ý, hiển thị hộp thoại xác nhận:
+┌─────────────────────────────────┐
+│ ✅ Đồng ý dàn ý này?            │
+│ ✏️ Bạn có thể CHỈNH SỬA trực   │
+│    tiếp bằng nút "Chỉnh sửa"    │
+└─────────────────────────────────┘
 `;
 
       let generatedText = "";
@@ -282,6 +346,8 @@ QUAN TRỌNG: Kết thúc phần dàn ý, hãy xuống dòng và hỏi in đậm
       setState(prev => ({ ...prev, isStreaming: true, error: null, fullDocument: '' }));
 
       const feedbackMessage = `
+      BẮT ĐẦU phản hồi bằng MENU NAVIGATION trạng thái Bước 2 (Lập Dàn Ý - Đang thực hiện).
+
       Dựa trên dàn ý đã lập, người dùng có yêu cầu chỉnh sửa sau:
       "${outlineFeedback}"
       
@@ -292,7 +358,12 @@ QUAN TRỌNG: Kết thúc phần dàn ý, hãy xuống dòng và hỏi in đậm
       - Xuống dòng sau mỗi câu.
       - Tách đoạn rõ ràng.
       
-      Kết thúc phần dàn ý, hãy xuống dòng và hỏi in đậm: "Bạn có muốn chỉnh sửa dàn ý không?"
+      Kết thúc phần dàn ý, hãy xuống dòng và hiển thị hộp thoại:
+      ┌─────────────────────────────────┐
+      │ ✅ Đồng ý dàn ý này?            │
+      │ ✏️ Bạn có thể CHỈNH SỬA trực   │
+      │    tiếp bằng nút "Chỉnh sửa"    │
+      └─────────────────────────────────┘
       `;
 
       let generatedText = "";
@@ -314,114 +385,160 @@ QUAN TRỌNG: Kết thúc phần dàn ý, hãy xuống dòng và hỏi in đậm
 
   // Generate Next Section
   const generateNextSection = async () => {
-    const nextStepMap: Record<number, { prompt: string, nextStep: GenerationStep }> = {
-      [GenerationStep.OUTLINE]: {
-        prompt: `Dàn ý rất tốt, tôi đồng ý với dàn ý này. Hãy tiếp tục BƯỚC 3: Viết chi tiết PHẦN I (Đặt vấn đề) và PHẦN II (Cơ sở lý luận). 
+    let currentStepPrompt = "";
+    let nextStepEnum = GenerationStep.PART_I_II;
+
+    // Logic for OUTLINE step specifically handles manual edits synchronization
+    if (state.step === GenerationStep.OUTLINE) {
+      // We inject the CURRENT fullDocument (which might have been edited by user) into the prompt
+      // This ensures the AI uses the user's finalized outline.
+      currentStepPrompt = `
+        BẮT ĐẦU phản hồi bằng MENU NAVIGATION trạng thái Bước 3 (Viết Phần I & II - Đang thực hiện).
+        
+        Đây là bản DÀN Ý CHÍNH THỨC mà tôi đã chốt (tôi có thể đã chỉnh sửa trực tiếp). 
+        Hãy DÙNG CHÍNH XÁC NỘI DUNG NÀY để làm cơ sở triển khai các phần tiếp theo, không tự ý thay đổi cấu trúc của nó:
+
+        --- BẮT ĐẦU DÀN Ý CHÍNH THỨC ---
+        ${state.fullDocument}
+        --- KẾT THÚC DÀN Ý CHÍNH THỨC ---
+
+        NHIỆM VỤ TIẾP THEO:
+        Hãy tiếp tục BƯỚC 3: Viết chi tiết PHẦN I (Đặt vấn đề) và PHẦN II (Cơ sở lý luận). 
         
         ⚠️ LƯU Ý FORMAT: 
         - Viết từng câu xuống dòng riêng.
         - Tách đoạn rõ ràng.
         - Không viết dính chữ.
+        - Menu Navigation: Đánh dấu Bước 2 đã xong (✅), Bước 3 đang làm (🔵).
         
-        Viết sâu sắc, học thuật, đúng cấu trúc đã đề ra. Lưu ý bám sát thông tin về trường và địa phương đã cung cấp.`,
-        nextStep: GenerationStep.PART_I_II
-      },
-      [GenerationStep.PART_I_II]: {
-        prompt: `Tiếp tục BƯỚC 3 (tiếp): Viết chi tiết PHẦN III (Thực trạng vấn đề). 
-        Nhớ tạo bảng số liệu khảo sát giả định logic phù hợp với đối tượng nghiên cứu là: ${userInfo.researchSubjects || "Học sinh"}.
-        Phân tích nguyên nhân và thực trạng tại ${userInfo.school}, ${userInfo.location} và điều kiện CSVC thực tế: ${userInfo.facilities}.
-        
-        ⚠️ LƯU Ý FORMAT: 
-        - Viết từng câu xuống dòng riêng.
-        - Tách đoạn rõ ràng.
-        - Bảng số liệu phải tuân thủ format Markdown chuẩn: | Tiêu đề | Số liệu |.`,
-        nextStep: GenerationStep.PART_III
-      },
-      [GenerationStep.PART_III]: {
-        // ULTRA MODE INJECTION FOR PART IV START
-        prompt: `${SOLUTION_MODE_PROMPT}
+        Viết sâu sắc, học thuật, đúng cấu trúc đã đề ra. Lưu ý bám sát thông tin về trường và địa phương đã cung cấp.`;
 
-        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        🚀 THỰC THI NHIỆM VỤ (PHẦN IV - GIẢI PHÁP 1)
-        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        
-        Thông tin đề tài: "${userInfo.topic}"
-        Môn: ${userInfo.subject} - Lớp: ${userInfo.grade}
-        Trường: ${userInfo.school}
-        SGK: ${userInfo.textbook}
-        Công nghệ/AI: ${userInfo.applyAI}
-        CSVC hiện có: ${userInfo.facilities}
-        
-        YÊU CẦU:
-        Hãy viết chi tiết GIẢI PHÁP 1 (Giải pháp trọng tâm nhất) tuân thủ nghiêm ngặt 10 NGUYÊN TẮC VÀNG.
-        Giải pháp phải khả thi với điều kiện CSVC: ${userInfo.facilities}.
-        
-        QUAN TRỌNG: Tuân thủ "YÊU CẦU ĐỊNH DẠNG OUTPUT" vừa cung cấp:
-        1. Xuống dòng sau mỗi câu.
-        2. Xuống 2 dòng sau mỗi đoạn.
-        3. Sử dụng Format "KẾT THÚC GIẢI PHÁP" ở cuối.
-        
-        Lưu ý đặc biệt: Phải có VÍ DỤ MINH HỌA (Giáo án/Hoạt động) cụ thể theo SGK ${userInfo.textbook}.`,
-        nextStep: GenerationStep.PART_IV_SOL1
-      },
-      [GenerationStep.PART_IV_SOL1]: {
-        // ULTRA MODE CONTINUATION
-        prompt: `
-        Tiếp tục giữ vững vai trò CHUYÊN GIA GIÁO DỤC (ULTRA MODE).
-        
-        Nhiệm vụ: Viết tiếp GIẢI PHÁP 2 và GIẢI PHÁP 3 cho đề tài: "${userInfo.topic}".
-        
-        Yêu cầu:
-        1. Nội dung độc đáo, không trùng lặp.
-        2. Tận dụng tối đa CSVC: ${userInfo.facilities}.
-        3. BẮT BUỘC TUÂN THỦ FORMAT "YÊU CẦU ĐỊNH DẠNG OUTPUT":
-           - Xuống dòng sau mỗi câu.
-           - Xuống 2 dòng sau mỗi đoạn.
-           - Có khung "KẾT THÚC GIẢI PHÁP" ở cuối mỗi giải pháp.
-        `,
-        nextStep: GenerationStep.PART_IV_SOL2
-      },
-      [GenerationStep.PART_IV_SOL2]: {
-        // ULTRA MODE CONTINUATION
-        prompt: `
-        Tiếp tục giữ vững vai trò CHUYÊN GIA GIÁO DỤC (ULTRA MODE).
-        
-        Nhiệm vụ: Viết tiếp GIẢI PHÁP 4 và GIẢI PHÁP 5 cho đề tài: "${userInfo.topic}".
-        Nếu đã đủ ý ở các giải pháp trước, có thể viết các biện pháp bổ trợ hoặc mở rộng nâng cao.
-        
-        Yêu cầu:
-        1. Nội dung độc đáo, không trùng lặp.
-        2. BẮT BUỘC TUÂN THỦ FORMAT "YÊU CẦU ĐỊNH DẠNG OUTPUT":
-           - Xuống dòng sau mỗi câu.
-           - Xuống 2 dòng sau mỗi đoạn.
-           - Có khung "KẾT THÚC GIẢI PHÁP" ở cuối mỗi giải pháp.
-        `,
-        nextStep: GenerationStep.PART_IV_SOL3
-      },
-      [GenerationStep.PART_IV_SOL3]: {
-        prompt: `Tiếp tục viết PHẦN V (Hiệu quả), PHẦN VI (Kết luận & Khuyến nghị) và PHỤ LỤC (Tài liệu tham khảo, mẫu phiếu). 
-        Đảm bảo số liệu phần Hiệu quả phải logic và chứng minh được sự tiến bộ so với phần Thực trạng.
-        
-        ⚠️ LƯU Ý FORMAT: 
-        - Viết từng câu xuống dòng riêng.
-        - Tách đoạn rõ ràng.
-        - Không viết dính chữ.`,
-        nextStep: GenerationStep.PART_V_VI
-      },
-      [GenerationStep.PART_V_VI]: {
-        prompt: "", // Should not happen
-        nextStep: GenerationStep.COMPLETED
-      }
-    };
+      nextStepEnum = GenerationStep.PART_I_II;
+    } else {
+      // Standard flow for other steps
+      const nextStepMap: Record<number, { prompt: string, nextStep: GenerationStep }> = {
+        [GenerationStep.PART_I_II]: {
+          prompt: `
+              BẮT ĐẦU phản hồi bằng MENU NAVIGATION trạng thái Bước 4 (Viết Phần III - Đang thực hiện).
 
-    const currentAction = nextStepMap[state.step];
-    if (!currentAction) return;
+              Tiếp tục BƯỚC 3 (tiếp): Viết chi tiết PHẦN III (Thực trạng vấn đề). 
+              Nhớ tạo bảng số liệu khảo sát giả định logic phù hợp với đối tượng nghiên cứu là: ${userInfo.researchSubjects || "Học sinh"}.
+              Phân tích nguyên nhân và thực trạng tại ${userInfo.school}, ${userInfo.location} và điều kiện CSVC thực tế: ${userInfo.facilities}.
+              
+              ⚠️ LƯU Ý FORMAT: 
+              - Viết từng câu xuống dòng riêng.
+              - Tách đoạn rõ ràng.
+              - Bảng số liệu phải tuân thủ format Markdown chuẩn: | Tiêu đề | Số liệu |.`,
+          nextStep: GenerationStep.PART_III
+        },
+        [GenerationStep.PART_III]: {
+          // ULTRA MODE INJECTION FOR PART IV START
+          prompt: `
+              BẮT ĐẦU phản hồi bằng MENU NAVIGATION trạng thái Bước 5 (Viết Phần IV - Đang thực hiện).
 
-    setState(prev => ({ ...prev, isStreaming: true, error: null, step: currentAction.nextStep }));
+              ${SOLUTION_MODE_PROMPT}
+      
+              ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+              🚀 THỰC THI NHIỆM VỤ (PHẦN IV - GIẢI PHÁP 1)
+              ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+              
+              Thông tin đề tài: "${userInfo.topic}"
+              Môn: ${userInfo.subject} - Lớp: ${userInfo.grade}
+              Trường: ${userInfo.school}
+              SGK: ${userInfo.textbook}
+              Công nghệ/AI: ${userInfo.applyAI}
+              CSVC hiện có: ${userInfo.facilities}
+              
+              YÊU CẦU:
+              Hãy viết chi tiết GIẢI PHÁP 1 (Giải pháp trọng tâm nhất) tuân thủ nghiêm ngặt 10 NGUYÊN TẮC VÀNG.
+              Giải pháp phải khả thi với điều kiện CSVC: ${userInfo.facilities}.
+              
+              QUAN TRỌNG: Tuân thủ "YÊU CẦU ĐỊNH DẠNG OUTPUT" vừa cung cấp:
+              1. Xuống dòng sau mỗi câu.
+              2. Xuống 2 dòng sau mỗi đoạn.
+              3. Sử dụng Format "KẾT THÚC GIẢI PHÁP" ở cuối.
+              
+              Lưu ý đặc biệt: Phải có VÍ DỤ MINH HỌA (Giáo án/Hoạt động) cụ thể theo SGK ${userInfo.textbook}.
+              Menu Navigation: Đánh dấu Bước 5 đang làm (🔵).`,
+          nextStep: GenerationStep.PART_IV_SOL1
+        },
+        [GenerationStep.PART_IV_SOL1]: {
+          // ULTRA MODE CONTINUATION
+          prompt: `
+              BẮT ĐẦU phản hồi bằng MENU NAVIGATION trạng thái Bước 5 (Viết Phần IV - Đang thực hiện).
+
+              Tiếp tục giữ vững vai trò CHUYÊN GIA GIÁO DỤC (ULTRA MODE).
+              
+              Nhiệm vụ: Viết tiếp GIẢI PHÁP 2 và GIẢI PHÁP 3 cho đề tài: "${userInfo.topic}".
+              
+              Yêu cầu:
+              1. Nội dung độc đáo, không trùng lặp.
+              2. Tận dụng tối đa CSVC: ${userInfo.facilities}.
+              3. BẮT BUỘC TUÂN THỦ FORMAT "YÊU CẦU ĐỊNH DẠNG OUTPUT":
+                 - Xuống dòng sau mỗi câu.
+                 - Xuống 2 dòng sau mỗi đoạn.
+                 - Có khung "KẾT THÚC GIẢI PHÁP" ở cuối mỗi giải pháp.
+              `,
+          nextStep: GenerationStep.PART_IV_SOL2
+        },
+        [GenerationStep.PART_IV_SOL2]: {
+          // ULTRA MODE CONTINUATION
+          prompt: `
+              BẮT ĐẦU phản hồi bằng MENU NAVIGATION trạng thái Bước 5 (Viết Phần IV - Đang thực hiện).
+
+              Tiếp tục giữ vững vai trò CHUYÊN GIA GIÁO DỤC (ULTRA MODE).
+              
+              Nhiệm vụ: Viết tiếp GIẢI PHÁP 4 và GIẢI PHÁP 5 cho đề tài: "${userInfo.topic}".
+              Nếu đã đủ ý ở các giải pháp trước, có thể viết các biện pháp bổ trợ hoặc mở rộng nâng cao.
+              
+              Yêu cầu:
+              1. Nội dung độc đáo, không trùng lặp.
+              2. BẮT BUỘC TUÂN THỦ FORMAT "YÊU CẦU ĐỊNH DẠNG OUTPUT":
+                 - Xuống dòng sau mỗi câu.
+                 - Xuống 2 dòng sau mỗi đoạn.
+                 - Có khung "KẾT THÚC GIẢI PHÁP" ở cuối mỗi giải pháp.
+              `,
+          nextStep: GenerationStep.PART_IV_SOL3
+        },
+        [GenerationStep.PART_IV_SOL3]: {
+          prompt: `
+              BẮT ĐẦU phản hồi bằng MENU NAVIGATION trạng thái Bước 6 (Kết luận & Khuyến nghị - Đang thực hiện).
+
+              Tiếp tục viết PHẦN V (Hiệu quả), PHẦN VI (Kết luận & Khuyến nghị) và PHỤ LỤC (Tài liệu tham khảo, mẫu phiếu). 
+              Đảm bảo số liệu phần Hiệu quả phải logic và chứng minh được sự tiến bộ so với phần Thực trạng.
+              
+              ⚠️ LƯU Ý FORMAT: 
+              - Viết từng câu xuống dòng riêng.
+              - Tách đoạn rõ ràng.
+              - Không viết dính chữ.
+              - Menu Navigation: Đánh dấu Bước 5 đã xong (✅), Bước 6 đang làm (🔵).`,
+          nextStep: GenerationStep.PART_V_VI
+        },
+        [GenerationStep.PART_V_VI]: {
+          prompt: "", // Should not happen
+          nextStep: GenerationStep.COMPLETED
+        }
+      };
+      const stepConfig = nextStepMap[state.step];
+      if (!stepConfig) return;
+      currentStepPrompt = stepConfig.prompt;
+      nextStepEnum = stepConfig.nextStep;
+    }
+
+    if (!currentStepPrompt) return;
+
+    // Append a separator before starting the new section to ensure clean Markdown parsing
+    setState(prev => ({
+      ...prev,
+      isStreaming: true,
+      error: null,
+      step: nextStepEnum,
+      fullDocument: prev.fullDocument + "\n\n"
+    }));
 
     try {
-      let sectionText = "\n\n---\n\n"; // Separator
-      await sendMessageStream(currentAction.prompt, (chunk) => {
+      let sectionText = "";
+      await sendMessageStream(currentStepPrompt, (chunk) => {
         sectionText += chunk;
         setState(prev => ({
           ...prev,
@@ -430,7 +547,7 @@ QUAN TRỌNG: Kết thúc phần dàn ý, hãy xuống dòng và hỏi in đậm
       });
 
       // If we just finished the last part, move to completed
-      if (currentAction.nextStep === GenerationStep.PART_V_VI) {
+      if (nextStepEnum === GenerationStep.PART_V_VI) {
         setState(prev => ({ ...prev, step: GenerationStep.COMPLETED, isStreaming: false }));
       } else {
         setState(prev => ({ ...prev, isStreaming: false }));
@@ -454,17 +571,58 @@ QUAN TRỌNG: Kết thúc phần dàn ý, hãy xuống dòng và hỏi in đậm
 
     const preHtml = `<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
     <head><meta charset='utf-8'><title>Export HTML To Doc</title>
+    <!--[if gte mso 9]>
+    <xml>
+    <w:WordDocument>
+    <w:View>Print</w:View>
+    <w:Zoom>100</w:Zoom>
+    <w:DoNotOptimizeForBrowser/>
+    </w:WordDocument>
+    </xml>
+    <![endif]-->
     <style>
-      body { font-family: 'Times New Roman', serif; font-size: 14pt; line-height: 1.5; }
-      h1 { font-size: 24pt; font-weight: bold; text-align: center; }
-      h2 { font-size: 18pt; font-weight: bold; margin-top: 20px; }
-      h3 { font-size: 16pt; font-weight: bold; margin-top: 15px; }
-      p { margin-bottom: 10px; text-align: justify; }
-      table { border-collapse: collapse; width: 100%; margin: 20px 0; }
-      th, td { border: 1px solid black; padding: 8px; }
+      @page {
+          size: 21cm 29.7cm;
+          margin: 2cm 2cm 2cm 2cm;
+          mso-page-orientation: portrait;
+      }
+      body { 
+        font-family: 'Times New Roman', serif; 
+        font-size: 13pt; 
+        line-height: 1.3; 
+        tab-interval: 36pt;
+      }
+      h1, h2, h3, h4, h5, h6 {
+        font-weight: bold;
+        margin-top: 12pt;
+        margin-bottom: 6pt;
+        page-break-after: avoid;
+      }
+      h1 { font-size: 16pt; text-align: center; text-transform: uppercase; }
+      h2 { font-size: 14pt; }
+      h3 { font-size: 13pt; font-style: italic; }
+      p { 
+        margin-top: 0; 
+        margin-bottom: 6pt; 
+        text-align: justify; 
+      }
+      ul, ol { margin-top: 0; margin-bottom: 6pt; }
+      li { margin-bottom: 3pt; }
+      table { 
+        border-collapse: collapse; 
+        width: 100%; 
+        margin: 12pt 0; 
+      }
+      th, td { 
+        border: 1px solid black; 
+        padding: 5pt; 
+        vertical-align: top; 
+      }
+      /* Prevent blank pages caused by massive elements */
+      img { max-width: 100%; height: auto; }
     </style>
-    </head><body>`;
-    const postHtml = "</body></html>";
+    </head><body><div class="Section1">`;
+    const postHtml = "</div></body></html>";
     const html = preHtml + htmlContent + postHtml;
 
     const blob = new Blob(['\ufeff', html], {
@@ -475,7 +633,7 @@ QUAN TRỌNG: Kết thúc phần dàn ý, hãy xuống dòng và hỏi in đậm
 
     const link = document.createElement('a');
     link.href = url;
-    link.download = `SKKN_${userInfo.topic.substring(0, 30)}.doc`; // .doc works better with simple HTML wrap than .docx
+    link.download = `SKKN_${userInfo.topic.substring(0, 50)}.doc`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -485,12 +643,21 @@ QUAN TRỌNG: Kết thúc phần dàn ý, hãy xuống dòng và hỏi in đậm
   const renderSidebar = () => {
     return (
       <div className="w-full lg:w-80 bg-white border-r border-gray-200 p-6 flex-shrink-0 flex flex-col h-full overflow-y-auto shadow-[4px_0_24px_rgba(0,0,0,0.02)]">
-        <div className="mb-8">
-          <h1 className="text-2xl font-bold text-sky-600 flex items-center gap-2">
-            <Wand2 className="h-6 w-6" />
-            SKKN PRO
-          </h1>
-          <p className="text-xs text-gray-900 font-semibold mt-1 tracking-wide opacity-70">Trợ lý viết SKKN được nâng cấp bởi Trần Hoài Thanh</p>
+        <div className="mb-8 flex items-start justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-sky-600 flex items-center gap-2">
+              <Wand2 className="h-6 w-6" />
+              SKKN PRO
+            </h1>
+            <p className="text-xs text-gray-900 font-semibold mt-1 tracking-wide opacity-70">Trợ lý viết SKKN được nâng cấp bởi Trần Hoài Thanh</p>
+          </div>
+          <button
+            onClick={() => setShowApiKeyModal(true)}
+            className="p-2 text-gray-400 hover:text-sky-600 hover:bg-sky-50 rounded-lg transition-colors"
+            title="Cấu hình API Key"
+          >
+            <Settings size={20} />
+          </button>
         </div>
 
         {/* Progress Stepper */}
@@ -544,11 +711,16 @@ QUAN TRỌNG: Kết thúc phần dàn ý, hãy xuống dòng và hỏi in đậm
                     {/* Feedback / Review Section only for OUTLINE Step */}
                     {state.step === GenerationStep.OUTLINE && (
                       <div className="mb-2 space-y-2 border-t border-gray-100 pt-2">
-                        <p className="text-sm font-semibold text-sky-700">Điều chỉnh dàn ý:</p>
+                        <p className="text-sm font-semibold text-sky-700">Điều chỉnh:</p>
+
+                        <div className="text-xs text-gray-500 italic mb-2">
+                          💡 Mẹo: Bạn có thể sửa trực tiếp Dàn ý ở màn hình bên phải trước khi bấm "Chốt & Viết tiếp".
+                        </div>
+
                         <textarea
                           value={outlineFeedback}
                           onChange={(e) => setOutlineFeedback(e.target.value)}
-                          placeholder="Ví dụ: Thêm phần giải pháp về CNTT, bỏ phần lịch sử..."
+                          placeholder="Hoặc nhập yêu cầu để AI viết lại..."
                           className="w-full p-2 text-sm border border-gray-300 rounded focus:ring-sky-500 focus:border-sky-500"
                           rows={3}
                         />
@@ -559,7 +731,7 @@ QUAN TRỌNG: Kết thúc phần dàn ý, hãy xuống dòng và hỏi in đậm
                           className="w-full text-sm"
                           icon={<RefreshCw size={14} />}
                         >
-                          Yêu cầu sửa lại Dàn ý
+                          Yêu cầu AI viết lại
                         </Button>
                       </div>
                     )}
@@ -578,20 +750,18 @@ QUAN TRỌNG: Kết thúc phần dàn ý, hãy xuống dòng và hỏi in đậm
               )}
             </div>
           )}
-
-          <div className="mt-4 pt-4 border-t border-gray-100">
-            <button
-              onClick={() => setShowApiModal(true)}
-              className="flex items-center gap-2 text-xs text-gray-500 hover:text-sky-600 transition-colors w-full p-2 rounded hover:bg-gray-50"
-            >
-              <Settings size={14} />
-              {apiKey ? 'Thay đổi API Key' : 'Cấu hình API Key'}
-            </button>
-          </div>
         </div>
       </div>
     );
   };
+
+  if (checkingAuth) {
+    return <div className="h-screen w-screen bg-white flex items-center justify-center"></div>;
+  }
+
+  if (!isUnlocked) {
+    return <LockScreen onUnlock={handleUnlock} />;
+  }
 
   return (
     <div className="min-h-screen bg-white flex flex-col lg:flex-row font-sans text-gray-900">
@@ -608,20 +778,15 @@ QUAN TRỌNG: Kết thúc phần dàn ý, hãy xuống dòng và hỏi in đậm
         <div className="lg:hidden mb-4 bg-white p-4 rounded-lg shadow border border-gray-100 flex flex-col gap-2">
           <div className="flex justify-between items-center">
             <h1 className="font-bold text-sky-600 text-xl">SKKN PRO</h1>
-            <div className="flex items-center gap-2">
-              <button onClick={() => setShowApiModal(true)} className="p-1 text-gray-400 hover:text-sky-600">
-                <Settings size={20} />
-              </button>
-              <span className="text-xs bg-sky-100 text-sky-800 px-2 py-1 rounded-full">
-                {STEPS_INFO[state.step < 9 ? state.step : 8].label}
-              </span>
-            </div>
+            <span className="text-xs bg-sky-100 text-sky-800 px-2 py-1 rounded-full">
+              {STEPS_INFO[state.step < 9 ? state.step : 8].label}
+            </span>
           </div>
           <p className="text-xs text-gray-500 font-medium">Trợ lý viết SKKN được nâng cấp bởi Trần Hoài Thanh</p>
         </div>
 
         {state.error && (
-          <div className="bg-red-50 text-red-700 p-4 rounded-lg mb-4 border border-red-200">
+          <div className="bg-red-50 text-red-700 p-4 rounded-lg mb-4 border border-red-200 break-words whitespace-pre-wrap">
             Lỗi: {state.error}
           </div>
         )}
@@ -632,12 +797,18 @@ QUAN TRỌNG: Kết thúc phần dàn ý, hãy xuống dòng và hỏi in đậm
               userInfo={userInfo}
               onChange={handleUserChange}
               onSubmit={startGeneration}
+              onManualSubmit={handleManualOutlineSubmit}
               isSubmitting={state.isStreaming}
             />
           </div>
         ) : (
           <div className="flex-1 flex flex-col min-h-0 relative">
-            <DocumentPreview content={state.fullDocument} />
+            <DocumentPreview
+              content={state.fullDocument}
+              onUpdate={handleDocumentUpdate}
+              // Only allow direct editing in the OUTLINE step and when not streaming
+              isEditable={state.step === GenerationStep.OUTLINE && !state.isStreaming}
+            />
 
             {/* Mobile Controls Floating */}
             <div className="lg:hidden absolute bottom-4 left-4 right-4 flex gap-2 shadow-lg">
@@ -654,14 +825,18 @@ QUAN TRỌNG: Kết thúc phần dàn ý, hãy xuống dòng và hỏi in đậm
         )}
       </div>
 
-
       <ApiKeyModal
-        isOpen={showApiModal}
-        onClose={() => setShowApiModal(false)}
-        onSave={handleSaveApiKey}
-        initialKey={apiKey}
+        isOpen={showApiKeyModal}
+        onClose={() => setShowApiKeyModal(false)}
+        onSave={(key) => {
+          localStorage.setItem('USER_GEMINI_API_KEY', key);
+          setApiKey(key);
+          setShowApiKeyModal(false);
+        }}
+        existingKey={apiKey}
+        isMandatory={!apiKey && !process.env.API_KEY}
       />
-    </div >
+    </div>
   );
 };
 
