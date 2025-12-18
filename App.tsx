@@ -5,12 +5,10 @@ import { initializeGeminiChat, sendMessageStream } from './services/geminiServic
 import { SKKNForm } from './components/SKKNForm';
 import { DocumentPreview } from './components/DocumentPreview';
 import { Button } from './components/Button';
-import { Download, ChevronRight, Wand2, FileText, CheckCircle, RefreshCw, Settings } from 'lucide-react';
-import { LockScreen } from './components/LockScreen';
 import { ApiKeyModal } from './components/ApiKeyModal';
-// @ts-ignore
-import HTMLtoDOCX from 'html-to-docx';
-import { saveAs } from 'file-saver';
+import { Download, ChevronRight, Wand2, FileText, CheckCircle, RefreshCw, Settings, AlertTriangle } from 'lucide-react';
+
+import { LockScreen } from './components/LockScreen';
 
 const App: React.FC = () => {
   // Lock Screen State
@@ -19,7 +17,7 @@ const App: React.FC = () => {
 
   // API Key State
   const [apiKey, setApiKey] = useState('');
-  const [showApiKeyModal, setShowApiKeyModal] = useState(false);
+  const [showApiModal, setShowApiModal] = useState(false);
 
   // Check LocalStorage on Mount
   useEffect(() => {
@@ -28,30 +26,25 @@ const App: React.FC = () => {
       setIsUnlocked(true);
     }
 
-    // Check for API Key
-    const storedKey = localStorage.getItem('USER_GEMINI_API_KEY');
-    if (storedKey) {
-      setApiKey(storedKey);
-    } else if (!process.env.API_KEY) {
-      // If no env key and no user key, prompt optional but recommended
-      // We delay this slightly to not conflict with lock screen if needed, 
-      // or just let the user open it manually via settings if they want.
-      // But per instructions: "If missing, must show popup".
-      // We'll show it if they try to generate.
+    const savedKey = localStorage.getItem('gemini_api_key');
+    if (savedKey) {
+      setApiKey(savedKey);
+    } else {
+      setShowApiModal(true);
     }
 
     setCheckingAuth(false);
   }, []);
 
+  const handleSaveApiKey = (key: string) => {
+    localStorage.setItem('gemini_api_key', key);
+    setApiKey(key);
+    setShowApiModal(false);
+  };
+
   const handleUnlock = () => {
     localStorage.setItem('skkn_app_unlocked', 'true');
     setIsUnlocked(true);
-  };
-
-  const getEffectiveApiKey = () => {
-    if (apiKey) return apiKey;
-    if (process.env.API_KEY) return process.env.API_KEY;
-    return null;
   };
 
   const [userInfo, setUserInfo] = useState<UserInfo>({
@@ -91,14 +84,13 @@ const App: React.FC = () => {
 
   // Handle Manual Outline Submission (Skip Generation)
   const handleManualOutlineSubmit = (content: string) => {
-    const key = getEffectiveApiKey();
-    if (!key) {
-      setShowApiKeyModal(true);
+    if (!apiKey) {
+      setShowApiModal(true);
       return;
     }
 
     // Initialize chat session silently so it's ready for next steps
-    initializeGeminiChat(key);
+    initializeGeminiChat(apiKey);
 
     setState(prev => ({
       ...prev,
@@ -111,16 +103,15 @@ const App: React.FC = () => {
 
   // Start the Generation Process
   const startGeneration = async () => {
-    const key = getEffectiveApiKey();
-    if (!key) {
-      setShowApiKeyModal(true);
+    if (!apiKey) {
+      setShowApiModal(true);
       return;
     }
 
     try {
       setState(prev => ({ ...prev, step: GenerationStep.OUTLINE, isStreaming: true, error: null }));
 
-      initializeGeminiChat(key);
+      initializeGeminiChat(apiKey);
 
       const initMessage = `
 Bạn là chuyên gia giáo dục cấp quốc gia, có 20+ năm kinh nghiệm viết, thẩm định và chấm điểm Sáng kiến Kinh nghiệm (SKKN) đạt giải cấp Bộ, cấp tỉnh tại Việt Nam.
@@ -530,17 +521,10 @@ QUAN TRỌNG:
 
     if (!currentStepPrompt) return;
 
-    // Append a separator before starting the new section to ensure clean Markdown parsing
-    setState(prev => ({
-      ...prev,
-      isStreaming: true,
-      error: null,
-      step: nextStepEnum,
-      fullDocument: prev.fullDocument + "\n\n"
-    }));
+    setState(prev => ({ ...prev, isStreaming: true, error: null, step: nextStepEnum }));
 
     try {
-      let sectionText = "";
+      let sectionText = "\n\n---\n\n"; // Separator
       await sendMessageStream(currentStepPrompt, (chunk) => {
         sectionText += chunk;
         setState(prev => ({
@@ -562,67 +546,55 @@ QUAN TRỌNG:
   };
 
   // Export to Word
-  const exportToWord = async () => {
+  const exportToWord = () => {
     // @ts-ignore
     if (typeof marked === 'undefined') {
       alert("Library not loaded correctly. Please refresh.");
       return;
     }
 
-    try {
-      // @ts-ignore
-      const htmlContent = marked.parse(state.fullDocument);
+    // @ts-ignore
+    const htmlContent = marked.parse(state.fullDocument);
 
-      const headerHTML = `
-        <div style="text-align: center; font-family: 'Times New Roman', serif;">
-          <p style="font-size: 10pt; margin: 0;">SÁNG KIẾN KINH NGHIỆM</p>
-        </div>
-      `;
+    const preHtml = `<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+    <head><meta charset='utf-8'><title>Export HTML To Doc</title>
+    <style>
+      body { font-family: 'Times New Roman', serif; font-size: 14pt; line-height: 1.5; }
+      h1 { font-size: 24pt; font-weight: bold; text-align: center; }
+      h2 { font-size: 18pt; font-weight: bold; margin-top: 20px; }
+      h3 { font-size: 16pt; font-weight: bold; margin-top: 15px; }
+      p { margin-bottom: 10px; text-align: justify; }
+      table { border-collapse: collapse; width: 100%; margin: 20px 0; }
+      th, td { border: 1px solid black; padding: 8px; }
+    </style>
+    </head><body>`;
+    const postHtml = "</body></html>";
+    const html = preHtml + htmlContent + postHtml;
 
-      const footerHTML = `
-        <div style="text-align: center; font-family: 'Times New Roman', serif; font-size: 10pt;">
-          <span>Trang <span class="pageNumber"></span></span>
-        </div>
-      `;
+    const blob = new Blob(['\ufeff', html], {
+      type: 'application/msword'
+    });
 
-      // HTMLtoDOCX expects a full HTML page or content string
-      const fileBuffer = await HTMLtoDOCX(htmlContent, headerHTML, {
-        table: { row: { cantSplit: true } },
-        footer: true,
-        pageNumber: true,
-        font: 'Times New Roman',
-      }, footerHTML);
+    const url = 'data:application/vnd.ms-word;charset=utf-8,' + encodeURIComponent(html);
 
-      const blob = new Blob([fileBuffer], {
-        type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-      });
-
-      saveAs(blob, `SKKN_${userInfo.topic.substring(0, 50).replace(/[^a-zA-Z0-9àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ\s]/g, '_')}.docx`);
-    } catch (error) {
-      console.error("Export failed:", error);
-      alert("Xuất file thất bại. Vui lòng thử lại hoặc kiểm tra console.");
-    }
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `SKKN_${userInfo.topic.substring(0, 30)}.doc`; // .doc works better with simple HTML wrap than .docx
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   // Render Logic
   const renderSidebar = () => {
     return (
       <div className="w-full lg:w-80 bg-white border-r border-gray-200 p-6 flex-shrink-0 flex flex-col h-full overflow-y-auto shadow-[4px_0_24px_rgba(0,0,0,0.02)]">
-        <div className="mb-8 flex items-start justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-sky-600 flex items-center gap-2">
-              <Wand2 className="h-6 w-6" />
-              SKKN PRO
-            </h1>
-            <p className="text-xs text-gray-900 font-semibold mt-1 tracking-wide opacity-70">Trợ lý viết SKKN được nâng cấp bởi Trần Hoài Thanh</p>
-          </div>
-          <button
-            onClick={() => setShowApiKeyModal(true)}
-            className="p-2 text-gray-400 hover:text-sky-600 hover:bg-sky-50 rounded-lg transition-colors"
-            title="Cấu hình API Key"
-          >
-            <Settings size={20} />
-          </button>
+        <div className="mb-8">
+          <h1 className="text-2xl font-bold text-sky-600 flex items-center gap-2">
+            <Wand2 className="h-6 w-6" />
+            SKKN PRO
+          </h1>
+          <p className="text-xs text-gray-900 font-semibold mt-1 tracking-wide opacity-70">Trợ lý viết SKKN được nâng cấp bởi Trần Hoài Thanh</p>
         </div>
 
         {/* Progress Stepper */}
@@ -634,7 +606,12 @@ QUAN TRỌNG:
             let statusColor = "text-gray-400 border-gray-200";
             let icon = <div className="w-2 h-2 rounded-full bg-gray-300" />;
 
-            if (state.step === stepNum && state.isStreaming) {
+            // ERROR STATE HANDLING
+            if (state.error && state.step === stepNum) {
+              statusColor = "text-red-600 border-red-600 bg-red-50";
+              icon = <AlertTriangle className="w-4 h-4 text-red-600" />;
+            }
+            else if (state.step === stepNum && state.isStreaming) {
               statusColor = "text-sky-600 border-sky-600 bg-sky-50";
               icon = <div className="w-2 h-2 rounded-full bg-sky-500 animate-ping" />;
             } else if (state.step > stepNum) {
@@ -646,9 +623,11 @@ QUAN TRỌNG:
             }
 
             return (
-              <div key={key} className={`flex items-start pl-4 border-l-2 ${statusColor.includes('border-sky') ? 'border-sky-500' : 'border-gray-200'} py-1 transition-all`}>
+              <div key={key} className={`flex items-start pl-4 border-l-2 ${statusColor.includes('border-sky') ? 'border-sky-500' : statusColor.includes('border-red') ? 'border-red-500' : 'border-gray-200'} py-1 transition-all`}>
                 <div className="flex-1">
-                  <h4 className={`text-sm ${statusColor.includes('text-sky') ? 'text-sky-900' : 'text-gray-500'} font-medium`}>{info.label}</h4>
+                  <h4 className={`text-sm ${statusColor.includes('text-sky') ? 'text-sky-900' : statusColor.includes('text-red') ? 'text-red-700' : 'text-gray-500'} font-medium`}>
+                    {state.error && state.step === stepNum ? "Đã dừng do lỗi" : info.label}
+                  </h4>
                   <p className="text-xs text-gray-400">{info.description}</p>
                 </div>
                 <div className="ml-2 mt-1">
@@ -730,6 +709,21 @@ QUAN TRỌNG:
 
   return (
     <div className="min-h-screen bg-white flex flex-col lg:flex-row font-sans text-gray-900">
+      <ApiKeyModal
+        isOpen={showApiModal}
+        onSave={handleSaveApiKey}
+        onClose={() => setShowApiModal(false)}
+        isDismissible={!!apiKey}
+      />
+
+      {/* Header Button for Settings */}
+      <button
+        onClick={() => setShowApiModal(true)}
+        className="fixed top-4 right-4 z-50 p-2 bg-white/80 backdrop-blur rounded-full shadow-lg border border-gray-200 text-gray-600 hover:text-sky-600 transition-all"
+        title="Cấu hình API Key"
+      >
+        <Settings size={20} />
+      </button>
 
       {/* Sidebar (Desktop) */}
       <div className="hidden lg:block h-screen sticky top-0 z-20">
@@ -751,7 +745,7 @@ QUAN TRỌNG:
         </div>
 
         {state.error && (
-          <div className="bg-red-50 text-red-700 p-4 rounded-lg mb-4 border border-red-200 break-words whitespace-pre-wrap">
+          <div className="bg-red-50 text-red-700 p-4 rounded-lg mb-4 border border-red-200">
             Lỗi: {state.error}
           </div>
         )}
@@ -789,18 +783,6 @@ QUAN TRỌNG:
           </div>
         )}
       </div>
-
-      <ApiKeyModal
-        isOpen={showApiKeyModal}
-        onClose={() => setShowApiKeyModal(false)}
-        onSave={(key) => {
-          localStorage.setItem('USER_GEMINI_API_KEY', key);
-          setApiKey(key);
-          setShowApiKeyModal(false);
-        }}
-        existingKey={apiKey}
-        isMandatory={!apiKey && !process.env.API_KEY}
-      />
     </div>
   );
 };

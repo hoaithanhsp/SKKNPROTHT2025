@@ -1,5 +1,15 @@
 
 
+
+export const MODEL_NAME = 'gemini-3-pro-preview';
+
+export const FALLBACK_MODELS = [
+  'gemini-3-pro-preview',
+  'gemini-3-flash-preview',
+  'gemini-2.5-flash',
+  'gemini-2.5-pro'
+];
+
 export const SYSTEM_INSTRUCTION = `
 # 🔮 KÍCH HOẠT CHẾ ĐỘ: CHUYÊN GIA GIÁO DỤC CẤP QUỐC GIA (ULTRA-DETAILED MODE)
 
