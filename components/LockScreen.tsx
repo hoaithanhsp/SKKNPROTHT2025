@@ -9,15 +9,23 @@ interface LockScreenProps {
 export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!password) return;
 
     setIsLoading(true);
+    setError('');
+
     // Fake loading delay for realism
     setTimeout(() => {
-      onUnlock();
+      if (password === 'SKKN100') {
+        onUnlock();
+      } else {
+        setError('Mật khẩu không đúng. Vui lòng thử lại.');
+        setIsLoading(false);
+      }
     }, 800);
   };
 
@@ -48,14 +56,19 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
                   autoFocus
                 />
               </div>
+              {error && (
+                <p className="text-sm text-red-500 font-medium animate-pulse">
+                  {error}
+                </p>
+              )}
               <p className="text-xs text-gray-400 flex items-center gap-1">
                 <ShieldCheck size={12} />
                 Kết nối an toàn được mã hóa
               </p>
             </div>
 
-            <Button 
-              type="submit" 
+            <Button
+              type="submit"
               className="w-full py-3 text-lg shadow-sky-500/30"
               isLoading={isLoading}
               disabled={!password}
@@ -64,7 +77,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
             </Button>
           </form>
         </div>
-        
+
         <div className="bg-gray-50 p-4 text-center border-t border-gray-100">
           <p className="text-xs text-gray-500">
             Phiên bản: v8.0.2 (Education Enterprise)
