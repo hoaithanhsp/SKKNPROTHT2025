@@ -20,7 +20,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
 
     // Fake loading delay for realism
     setTimeout(() => {
-      if (password === 'SKKN100') {
+      if (password === 'SKKN100' || password === 'SKKN111') {
         onUnlock();
       } else {
         setError('Mật khẩu không đúng. Vui lòng thử lại.');
