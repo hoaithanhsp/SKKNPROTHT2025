@@ -406,10 +406,20 @@ export const SKKNForm: React.FC<Props> = ({ userInfo, onChange, onSubmit, onManu
                 </div>
               </div>
             ) : (
-              <div className="text-center py-6 text-gray-400">
+              <div className="text-center py-4 text-gray-500">
                 <FileUp size={32} className="mx-auto mb-2 opacity-50" />
-                <p className="text-sm">Chưa có tài liệu nào được tải lên</p>
-                <p className="text-xs mt-1">Tải lên các file PDF, Word chứa tài liệu tham khảo để AI bám sát nội dung khi viết SKKN</p>
+                <p className="text-sm font-medium text-gray-600 mb-2">Chưa có tài liệu nào được tải lên</p>
+                <div className="text-xs text-left bg-white p-3 rounded-lg border border-gray-100 max-w-md mx-auto">
+                  <p className="font-semibold text-sky-700 mb-2">💡 Gợi ý tài liệu nên tải lên:</p>
+                  <ul className="space-y-1 text-gray-600">
+                    <li>• <strong>SGK/Sách giáo viên</strong> - Bài học liên quan đến đề tài</li>
+                    <li>• <strong>Tài liệu chuyên môn</strong> - Phương pháp, lý thuyết giáo dục</li>
+                    <li>• <strong>SKKN mẫu</strong> - Tham khảo cấu trúc, cách viết</li>
+                    <li>• <strong>Đề kiểm tra/Bài tập</strong> - Minh họa cho giải pháp</li>
+                    <li>• <strong>Văn bản pháp quy</strong> - Thông tư, Nghị định liên quan</li>
+                  </ul>
+                  <p className="text-gray-400 mt-2 italic text-xs">AI sẽ bám sát nội dung tài liệu để viết SKKN phù hợp và chính xác hơn.</p>
+                </div>
               </div>
             )}
           </div>
