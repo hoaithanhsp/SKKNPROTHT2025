@@ -59,7 +59,8 @@ const App: React.FC = () => {
     researchSubjects: '',
     timeframe: '',
     applyAI: '',
-    focus: ''
+    focus: '',
+    referenceDocuments: ''
   });
 
   const [state, setState] = useState<GenerationState>({
@@ -136,6 +137,16 @@ THÔNG TIN ĐỀ TÀI:
 • Đối tượng nghiên cứu: ${userInfo.researchSubjects || "Học sinh tại đơn vị"}
 • Thời gian thực hiện: ${userInfo.timeframe || "Năm học hiện tại"}
 • Đặc thù/Công nghệ/AI: ${userInfo.applyAI ? userInfo.applyAI : ''} ${userInfo.focus ? `- ${userInfo.focus}` : ''}
+
+${userInfo.referenceDocuments ? `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+TÀI LIỆU THAM KHẢO (DO GIÁO VIÊN CUNG CẤP):
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Dưới đây là nội dung các tài liệu tham khảo mà giáo viên đã tải lên. BẮT BUỘC phải bám sát vào nội dung này để viết SKKN phù hợp và chính xác:
+
+${userInfo.referenceDocuments}
+
+[HẾT TÀI LIỆU THAM KHẢO]
+` : ''}
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ⚠️ YÊU CẦU ĐỊNH DẠNG OUTPUT (BẮT BUỘC):

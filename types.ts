@@ -14,6 +14,9 @@ export interface UserInfo {
   timeframe: string; // Thời gian thực hiện
   applyAI: string; // Có ứng dụng AI không
   focus: string; // Trọng tâm/Đặc thù
+
+  // Tài liệu tham khảo
+  referenceDocuments: string; // Nội dung các tài liệu PDF được tải lên
 }
 
 export enum GenerationStep {
