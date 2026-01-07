@@ -762,7 +762,7 @@ QUAN TRỌNG:
         )}
 
         {state.step === GenerationStep.INPUT_FORM ? (
-          <div className="flex-1 flex items-center justify-center overflow-y-auto">
+          <div className="flex-1 flex items-start justify-center overflow-y-auto">
             <SKKNForm
               userInfo={userInfo}
               onChange={handleUserChange}
