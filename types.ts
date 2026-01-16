@@ -20,6 +20,9 @@ export interface UserInfo {
 
   // Mẫu SKKN (tùy chọn)
   skknTemplate: string; // Nội dung mẫu SKKN nếu người dùng tải lên
+
+  // Yêu cầu khác
+  specialRequirements: string; // Các yêu cầu đặc biệt: giới hạn trang, viết ngắn gọn, thêm bài toán...
 }
 
 export enum GenerationStep {
