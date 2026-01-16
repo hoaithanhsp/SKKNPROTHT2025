@@ -17,6 +17,9 @@ export interface UserInfo {
 
   // Tài liệu tham khảo
   referenceDocuments: string; // Nội dung các tài liệu PDF được tải lên
+
+  // Mẫu SKKN (tùy chọn)
+  skknTemplate: string; // Nội dung mẫu SKKN nếu người dùng tải lên
 }
 
 export enum GenerationStep {

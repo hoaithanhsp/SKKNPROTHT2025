@@ -1,14 +1,30 @@
 
 
 
-export const MODEL_NAME = 'gemini-3-pro-preview';
+export const MODEL_NAME = 'gemini-3-flash-preview';
 
 export const FALLBACK_MODELS = [
-  'gemini-3-pro-preview',
   'gemini-3-flash-preview',
-  'gemini-2.5-flash',
-  'gemini-2.5-pro'
+  'gemini-3-pro-preview',
+  'gemini-2.5-flash'
 ];
+
+// Thông tin hiển thị cho các model AI
+export const MODEL_INFO: Record<string, { name: string; description: string; isDefault?: boolean }> = {
+  'gemini-3-flash-preview': {
+    name: 'Gemini 3 Flash',
+    description: 'Nhanh, hiệu quả cho tác vụ thông thường',
+    isDefault: true
+  },
+  'gemini-3-pro-preview': {
+    name: 'Gemini 3 Pro',
+    description: 'Mạnh mẽ, phù hợp tác vụ phức tạp'
+  },
+  'gemini-2.5-flash': {
+    name: 'Gemini 2.5 Flash',
+    description: 'Ổn định, tốc độ cao'
+  }
+};
 
 export const SYSTEM_INSTRUCTION = `
 # 🔮 KÍCH HOẠT CHẾ ĐỘ: CHUYÊN GIA GIÁO DỤC CẤP QUỐC GIA (ULTRA-DETAILED MODE)

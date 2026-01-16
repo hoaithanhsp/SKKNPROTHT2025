@@ -4,10 +4,12 @@ import { SYSTEM_INSTRUCTION, FALLBACK_MODELS } from "../constants";
 
 let chatSession: Chat | null = null;
 let currentApiKey: string | null = null;
+let currentSelectedModel: string | null = null;
 let history: any[] = []; // Store history to restore when switching models
 
-export const initializeGeminiChat = (apiKey: string) => {
+export const initializeGeminiChat = (apiKey: string, selectedModel?: string) => {
   currentApiKey = apiKey;
+  currentSelectedModel = selectedModel || FALLBACK_MODELS[0];
   chatSession = null;
   history = []; // Reset history on new initialization
 };
@@ -32,15 +34,32 @@ const createChatSession = (model: string) => {
   });
 };
 
+// Sắp xếp models với model được chọn đầu tiên
+const getOrderedModels = (): string[] => {
+  if (!currentSelectedModel || !FALLBACK_MODELS.includes(currentSelectedModel)) {
+    return FALLBACK_MODELS;
+  }
+
+  // Đưa model được chọn lên đầu, giữ nguyên thứ tự các model còn lại
+  const orderedModels = [currentSelectedModel];
+  for (const model of FALLBACK_MODELS) {
+    if (model !== currentSelectedModel) {
+      orderedModels.push(model);
+    }
+  }
+  return orderedModels;
+};
+
 export const sendMessageStream = async (message: string, onChunk: (text: string) => void) => {
   if (!currentApiKey) throw new Error("API Key not initialized");
 
   let lastError: any = null;
+  const modelsToTry = getOrderedModels();
 
   // Try through the fallback models
-  for (const model of FALLBACK_MODELS) {
+  for (const model of modelsToTry) {
     try {
-      console.log(`Trying model: ${model}`);
+      console.log(`🤖 Đang thử model: ${model}`);
 
       // Always recreate session with current history to ensure we use the selected model
       // (or optimize to reuse if same model, but recreation is safer for fallback)
@@ -59,15 +78,16 @@ export const sendMessageStream = async (message: string, onChunk: (text: string)
       // If successful, update history and break
       history.push({ role: 'user', parts: [{ text: message }] });
       history.push({ role: 'model', parts: [{ text: fullResponse }] });
+      console.log(`✅ Model ${model} thành công!`);
       return;
 
     } catch (error: any) {
-      console.error(`Model ${model} failed:`, error);
+      console.error(`❌ Model ${model} thất bại:`, error.message || error);
       lastError = error;
       // Continue to next model
     }
   }
 
   // If all models fail
-  throw lastError || new Error("All models failed to respond.");
+  throw lastError || new Error("Tất cả models đều thất bại. Vui lòng kiểm tra API key hoặc thử lại sau.");
 };

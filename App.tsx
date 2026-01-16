@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { UserInfo, GenerationStep, GenerationState } from './types';
-import { STEPS_INFO, SOLUTION_MODE_PROMPT } from './constants';
+import { STEPS_INFO, SOLUTION_MODE_PROMPT, FALLBACK_MODELS } from './constants';
 import { initializeGeminiChat, sendMessageStream } from './services/geminiService';
 import { SKKNForm } from './components/SKKNForm';
 import { DocumentPreview } from './components/DocumentPreview';
@@ -18,6 +18,7 @@ const App: React.FC = () => {
   // API Key State
   const [apiKey, setApiKey] = useState('');
   const [showApiModal, setShowApiModal] = useState(false);
+  const [selectedModel, setSelectedModel] = useState(FALLBACK_MODELS[0]);
 
   // Check LocalStorage on Mount
   useEffect(() => {
@@ -27,18 +28,24 @@ const App: React.FC = () => {
     }
 
     const savedKey = localStorage.getItem('gemini_api_key');
+    const savedModel = localStorage.getItem('selected_model');
     if (savedKey) {
       setApiKey(savedKey);
     } else {
       setShowApiModal(true);
     }
+    if (savedModel && FALLBACK_MODELS.includes(savedModel)) {
+      setSelectedModel(savedModel);
+    }
 
     setCheckingAuth(false);
   }, []);
 
-  const handleSaveApiKey = (key: string) => {
+  const handleSaveApiKey = (key: string, model: string) => {
     localStorage.setItem('gemini_api_key', key);
+    localStorage.setItem('selected_model', model);
     setApiKey(key);
+    setSelectedModel(model);
     setShowApiModal(false);
   };
 
@@ -60,7 +67,8 @@ const App: React.FC = () => {
     timeframe: '',
     applyAI: '',
     focus: '',
-    referenceDocuments: ''
+    referenceDocuments: '',
+    skknTemplate: ''
   });
 
   const [state, setState] = useState<GenerationState>({
@@ -91,7 +99,7 @@ const App: React.FC = () => {
     }
 
     // Initialize chat session silently so it's ready for next steps
-    initializeGeminiChat(apiKey);
+    initializeGeminiChat(apiKey, selectedModel);
 
     setState(prev => ({
       ...prev,
@@ -112,7 +120,7 @@ const App: React.FC = () => {
     try {
       setState(prev => ({ ...prev, step: GenerationStep.OUTLINE, isStreaming: true, error: null }));
 
-      initializeGeminiChat(apiKey);
+      initializeGeminiChat(apiKey, selectedModel);
 
       const initMessage = `
 Bạn là chuyên gia giáo dục cấp quốc gia, có 20+ năm kinh nghiệm viết, thẩm định và chấm điểm Sáng kiến Kinh nghiệm (SKKN) đạt giải cấp Bộ, cấp tỉnh tại Việt Nam.
@@ -146,6 +154,22 @@ Dưới đây là nội dung các tài liệu tham khảo mà giáo viên đã t
 ${userInfo.referenceDocuments}
 
 [HẾT TÀI LIỆU THAM KHẢO]
+` : ''}
+
+${userInfo.skknTemplate ? `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📋 MẪU YÊU CẦU SKKN (BẮT BUỘC TUÂN THỦ):
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+⚠️ QUAN TRỌNG: Giáo viên đã cung cấp MẪU YÊU CẦU SKKN bên dưới.
+BẠN BẮT BUỘC PHẢI:
+1. Bám sát CHÍNH XÁC cấu trúc, các mục, các phần trong mẫu này
+2. Tuân theo trình tự và nội dung yêu cầu của từng mục
+3. Không thay đổi, bỏ qua hoặc thêm mục nếu mẫu không yêu cầu
+4. Viết đúng theo format và quy cách mẫu đề ra
+
+NỘI DUNG MẪU SKKN:
+${userInfo.skknTemplate}
+
+[HẾT MẪU SKKN]
 ` : ''}
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -730,10 +754,11 @@ QUAN TRỌNG:
       {/* Header Button for Settings */}
       <button
         onClick={() => setShowApiModal(true)}
-        className="fixed top-4 right-4 z-50 p-2 bg-white/80 backdrop-blur rounded-full shadow-lg border border-gray-200 text-gray-600 hover:text-sky-600 transition-all"
+        className="fixed top-4 right-4 z-50 flex items-center gap-2 px-3 py-2 bg-white/90 backdrop-blur rounded-lg shadow-lg border border-gray-200 hover:bg-white hover:shadow-xl transition-all"
         title="Cấu hình API Key"
       >
-        <Settings size={20} />
+        <Settings size={18} className="text-gray-600" />
+        <span className="text-red-500 font-semibold text-sm hidden sm:inline">Lấy API key để sử dụng app</span>
       </button>
 
       {/* Sidebar (Desktop) */}
