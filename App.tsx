@@ -68,7 +68,8 @@ const App: React.FC = () => {
     applyAI: '',
     focus: '',
     referenceDocuments: '',
-    skknTemplate: ''
+    skknTemplate: '',
+    specialRequirements: ''
   });
 
   const [state, setState] = useState<GenerationState>({
@@ -170,6 +171,24 @@ NỘI DUNG MẪU SKKN:
 ${userInfo.skknTemplate}
 
 [HẾT MẪU SKKN]
+` : ''}
+
+${userInfo.specialRequirements ? `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📝 YÊU CẦU ĐẶC BIỆT TỪ GIÁO VIÊN (BẮT BUỘC THỰC HIỆN):
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+⚠️ QUAN TRỌNG: Giáo viên đã đưa ra các yêu cầu đặc biệt sau.
+BẠN BẮT BUỘC PHẢI TUÂN THỦ NGHIÊM NGẶT:
+
+${userInfo.specialRequirements}
+
+Hãy phân tích kỹ các yêu cầu trên và áp dụng CHÍNH XÁC vào toàn bộ bài viết.
+Ví dụ:
+- Nếu yêu cầu "giới hạn số trang" → Viết ngắn gọn, súc tích theo số trang yêu cầu
+- Nếu yêu cầu "viết ngắn gọn phần lý thuyết" → Tóm tắt cô đọng phần cơ sở lý luận
+- Nếu yêu cầu "thêm nhiều bài toán thực tế" → Bổ sung ví dụ toán thực tế phong phú
+- Nếu yêu cầu "tập trung vào giải pháp" → Ưu tiên phần IV với nhiều chi tiết hơn
+
+[HẾT YÊU CẦU ĐẶC BIỆT]
 ` : ''}
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
