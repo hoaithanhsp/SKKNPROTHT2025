@@ -542,7 +542,36 @@ export const SKKNForm: React.FC<Props> = ({ userInfo, onChange, onSubmit, onManu
           </div>
         </div>
 
-        {/* SECTION 4: MODE SELECTION */}
+        {/* SECTION 4: SPECIAL REQUIREMENTS */}
+        <div>
+          <h3 className="text-lg font-bold text-sky-800 border-b border-sky-100 pb-2 mb-4 uppercase tracking-wide flex items-center">
+            4. Yêu cầu khác
+            <span className="ml-2 text-xs bg-purple-100 text-purple-800 py-1 px-2 rounded-full font-normal capitalize normal-case tracking-normal">
+              (Tùy chọn - AI sẽ tuân thủ nghiêm ngặt)
+            </span>
+          </h3>
+
+          <div className="bg-purple-50 p-4 rounded-lg border border-purple-200">
+            <textarea
+              name="specialRequirements"
+              value={userInfo.specialRequirements || ''}
+              onChange={handleChange}
+              placeholder="Nhập các yêu cầu đặc biệt của bạn. Ví dụ:
+• Giới hạn SKKN trong 25-30 trang
+• Viết ngắn gọn phần cơ sở lý luận (khoảng 3 trang)
+• Thêm nhiều bài toán thực tế, ví dụ minh họa
+• Tập trung vào giải pháp ứng dụng AI
+• Bổ sung thêm bảng biểu, số liệu thống kê
+• Viết theo phong cách học thuật nghiêm túc..."
+              className="w-full h-32 p-3 border border-purple-200 rounded-lg text-sm focus:ring-purple-500 focus:border-purple-500 bg-white placeholder-gray-400 resize-none"
+            />
+            <p className="mt-2 text-xs text-purple-700">
+              💡 AI sẽ phân tích và thực hiện NGHIÊM NGẶT các yêu cầu bạn đưa ra trong suốt quá trình viết SKKN.
+            </p>
+          </div>
+        </div>
+
+        {/* SECTION 5: MODE SELECTION */}
         <div className="pt-4 border-t border-gray-100">
           <h3 className="text-lg font-bold text-sky-800 mb-4">Tùy chọn khởi tạo</h3>
 
