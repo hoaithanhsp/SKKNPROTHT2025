@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { UserInfo, GenerationStep, GenerationState } from './types';
 import { STEPS_INFO, SOLUTION_MODE_PROMPT, FALLBACK_MODELS } from './constants';
-import { initializeGeminiChat, sendMessageStream } from './services/geminiService';
+import { initializeGeminiChat, sendMessageStream, getFriendlyErrorMessage } from './services/geminiService';
 import { SKKNForm } from './components/SKKNForm';
 import { DocumentPreview } from './components/DocumentPreview';
 import { Button } from './components/Button';
@@ -799,11 +799,60 @@ QUAN TRỌNG:
           <p className="text-xs text-gray-500 font-medium">Trợ lý viết SKKN được nâng cấp bởi Trần Hoài Thanh</p>
         </div>
 
-        {state.error && (
-          <div className="bg-red-50 text-red-700 p-4 rounded-lg mb-4 border border-red-200">
-            Lỗi: {state.error}
-          </div>
-        )}
+        {state.error && (() => {
+          const errorInfo = getFriendlyErrorMessage({ message: state.error });
+          return (
+            <div className="bg-gradient-to-r from-red-50 to-orange-50 border border-red-200 rounded-xl p-5 mb-4 shadow-sm">
+              {/* Header */}
+              <div className="flex items-start gap-3 mb-3">
+                <div className="flex-shrink-0 w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
+                  <AlertTriangle className="w-5 h-5 text-red-600" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-bold text-red-800 text-lg">{errorInfo.title}</h3>
+                  <p className="text-red-700 text-sm mt-1">{errorInfo.message}</p>
+                </div>
+              </div>
+
+              {/* Suggestions */}
+              <div className="bg-white/70 rounded-lg p-4 mt-3 border border-red-100">
+                <p className="text-sm font-semibold text-gray-700 mb-2">💡 Gợi ý khắc phục:</p>
+                <ul className="space-y-2">
+                  {errorInfo.suggestions.map((suggestion, index) => (
+                    <li key={index} className="text-sm text-gray-600 flex items-start gap-2">
+                      <span className="text-gray-400">•</span>
+                      {suggestion}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Action buttons */}
+              <div className="flex flex-wrap gap-2 mt-4">
+                <button
+                  onClick={() => setState(prev => ({ ...prev, error: null }))}
+                  className="px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+                >
+                  ✕ Đóng thông báo
+                </button>
+                <button
+                  onClick={() => setShowApiModal(true)}
+                  className="px-4 py-2 bg-sky-600 text-white rounded-lg text-sm font-medium hover:bg-sky-700 transition-colors"
+                >
+                  🔑 Đổi API Key
+                </button>
+                <a
+                  href="https://ai.google.dev/gemini-api/docs/api-key"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700 transition-colors"
+                >
+                  📖 Hướng dẫn lấy API Key
+                </a>
+              </div>
+            </div>
+          );
+        })()}
 
         {state.step === GenerationStep.INPUT_FORM ? (
           <div className="flex-1 flex items-start justify-center overflow-y-auto">
