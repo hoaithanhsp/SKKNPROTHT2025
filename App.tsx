@@ -248,21 +248,21 @@ Ví dụ:
 2. SAU MỖI ĐOẠN: Cách 1 dòng trống.
 3. KHÔNG viết dính liền (wall of text).
 4. Sử dụng gạch đầu dòng và tiêu đề rõ ràng.
-5. TIÊU ĐỀ MỤC (BẮT BUỘC IN ĐẬM + IN NGHIÊNG):
-   - Các tiêu đề mục như "1.1.", "3.2.", "5.3." phải được định dạng: ***1.1. Tên mục***
-   - Ví dụ: ***3.1. Mục tiêu của giải pháp***, ***3.2. Nội dung và cách thực hiện***
-   - Điều này giúp phân biệt rõ ràng giữa tiêu đề mục và nội dung chi tiết.
+5. TIÊU ĐỀ MỤC (BẮT BUỘC IN ĐẬM):
+   - Các tiêu đề mục như "1.1.", "3.2.", "5.3." phải được in đậm: **1.1. Tên mục**
+   - Ví dụ: **3.1. Mục tiêu của giải pháp**, **3.2. Nội dung và cách thực hiện**
+   - KHÔNG dùng *** (3 dấu sao), chỉ dùng ** (2 dấu sao) cho in đậm.
 6. CÁC BƯỚC THỰC HIỆN (IN NGHIÊNG):
-   - Các chỗ như "Bước 1:", "Bước 2:", "Bước 3:"... phải được in nghiêng: *Bước 1:*, *Bước 2:*
-   - Ví dụ: *Bước 1: Chuẩn bị*, *Bước 2: Triển khai*, *Bước 3: Đánh giá*
+   - Các chỗ như "Bước 1:", "Bước 2:"... phải được in nghiêng dùng dấu gạch dưới: _Bước 1:_, _Bước 2:_
+   - Ví dụ: _Bước 1: Chuẩn bị_, _Bước 2: Triển khai_, _Bước 3: Đánh giá_
 7. KÝ HIỆU GẠCH ĐẦU DÒNG (BẮT BUỘC):
    - Mục lớn/tiêu đề nhỏ: Dùng dấu gạch ngang "-"
-   - Mục con/chi tiết bên trong: Dùng dấu "+)"
+   - Mục con/chi tiết bên trong: Dùng dấu "+"
    - Ví dụ đúng:
      - Đặc điểm địa phương TP Hải Phòng:
-     +) Là một thành phố cảng lớn, trung tâm kinh tế...
-     +) Có định hướng phát triển mạnh về công nghệ...
-   - KHÔNG dùng: Dấu chấm tròn (•, ◦), dấu sao (*), hoặc ký hiệu phức tạp khác.
+     + Là một thành phố cảng lớn, trung tâm kinh tế...
+     + Có định hướng phát triển mạnh về công nghệ...
+   - KHÔNG dùng: Dấu chấm tròn (•, ◦), hoặc ký hiệu phức tạp khác.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 CẤU TRÚC SKKN CHUẨN (ÁP DỤNG KHI KHÔNG CÓ MẪU RIÊNG):
