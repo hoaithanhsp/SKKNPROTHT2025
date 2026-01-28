@@ -117,7 +117,8 @@ export function saveFormToHistory(formData: Record<string, string>): void {
         'researchSubjects',
         'timeframe',
         'applyAI',
-        'focus'
+        'focus',
+        'specialRequirements'
     ];
 
     fieldsToSave.forEach(field => {
