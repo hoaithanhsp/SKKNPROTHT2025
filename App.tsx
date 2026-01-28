@@ -737,7 +737,33 @@ QUAN TRỌNG:
         📎 NHIỆM VỤ: TẠO ĐẦY ĐỦ CÁC TÀI LIỆU PHỤ LỤC
         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         
-        Dựa trên NỘI DUNG SKKN đã viết, hãy tạo ĐẦY ĐỦ, CHI TIẾT từng tài liệu phụ lục sau:
+        ⚠️ QUAN TRỌNG: Bạn PHẢI dựa vào NỘI DUNG SKKN ĐÃ VIẾT bên dưới để tạo phụ lục.
+        Các phụ lục phải KHỚP với nội dung, số liệu, giải pháp đã đề cập trong SKKN.
+        KHÔNG tạo phụ lục liên quan đến hình ảnh, video (vì không thể hiển thị).
+        
+        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        📄 NỘI DUNG SKKN ĐÃ VIẾT (ĐỌC KỸ ĐỂ TẠO PHỤ LỤC PHÙ HỢP):
+        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        
+        ${state.fullDocument}
+        
+        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        📋 THÔNG TIN ĐỀ TÀI:
+        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        - Tên đề tài: ${userInfo.topic}
+        - Môn học: ${userInfo.subject}
+        - Cấp học: ${userInfo.level}
+        - Khối lớp: ${userInfo.grade}
+        - Trường: ${userInfo.school}
+        - Địa điểm: ${userInfo.location}
+        - CSVC: ${userInfo.facilities}
+        - SGK: ${userInfo.textbook || "Hiện hành"}
+        
+        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        📎 YÊU CẦU TẠO PHỤ LỤC:
+        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        
+        Dựa trên NỘI DUNG SKKN ĐÃ VIẾT ở trên, hãy tạo ĐẦY ĐỦ, CHI TIẾT từng tài liệu phụ lục sau:
 
         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         📋 PHỤ LỤC 1: PHIẾU KHẢO SÁT ĐÁNH GIÁ MỨC ĐỘ HỨNG THÚ VÀ HIỆU QUẢ HỌC TẬP CỦA HỌC SINH
@@ -871,8 +897,19 @@ QUAN TRỌNG:
         - Số liệu phải LOGIC và KHỚP với các bảng trong phần Kết quả của SKKN
 
         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        ⚠️ YÊU CẦU FORMAT (BẮT BUỘC):
+        ⚠️ YÊU CẦU FORMAT VÀ NỘI DUNG (BẮT BUỘC):
         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        
+        📌 VỀ NỘI DUNG:
+        - VIẾT ĐẦY ĐỦ NỘI DUNG thực tế cho từng phụ lục, KHÔNG viết tắt hay bỏ sót
+        - Phiếu khảo sát phải có ĐẦY ĐỦ 10-15 câu hỏi cụ thể (không ghi "...")
+        - Giáo án minh họa phải VIẾT CHI TIẾT từng hoạt động, có lời thoại GV-HS mẫu
+        - Rubric phải có ĐẦY ĐỦ tiêu chí và mô tả các mức độ
+        - Bài tập mẫu phải có ĐẦY ĐỦ đề bài và đáp án/hướng dẫn giải
+        - Số liệu bảng tổng hợp phải KHỚP với số liệu trong phần Kết quả SKKN
+        - Nếu dàn ý SKKN có đề cập phụ lục khác (chưa liệt kê ở trên), hãy TẠO THÊM
+        
+        📌 VỀ FORMAT:
         - Markdown chuẩn, bảng dùng |---|
         - BẢNG PHẢI CÓ ĐẦY ĐỦ TẤT CẢ CÁC CỘT, không được bỏ sót cột nào
         - Mỗi hàng trong bảng phải có đủ số ô tương ứng với số cột ở header
@@ -880,6 +917,11 @@ QUAN TRỌNG:
         - Xuống dòng sau mỗi câu
         - Tách đoạn rõ ràng
         - Đánh số phụ lục rõ ràng: PHỤ LỤC 1, PHỤ LỤC 2...
+        - KHÔNG ghi "...", "[nội dung]", "[điền vào]" - phải viết nội dung thực tế
+        
+        📌 KHÔNG TẠO:
+        - Phụ lục hình ảnh, video, ảnh chụp màn hình (không thể hiển thị)
+        - Phụ lục yêu cầu file đính kèm
         
         📍 KẾT THÚC bằng dòng:
         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
