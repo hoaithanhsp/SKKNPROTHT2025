@@ -33,11 +33,11 @@ interface ParsedElement {
  */
 function parseInlineFormatting(text: string): TextRun[] {
   const runs: TextRun[] = [];
-  
+
   // Regex để tìm bold (**text** hoặc __text__) và italic (*text* hoặc _text_)
   const regex = /(\*\*|__)(.*?)\1|(\*|_)(.*?)\3|`([^`]+)`|([^*_`]+)/g;
   let match;
-  
+
   while ((match = regex.exec(text)) !== null) {
     if (match[2]) {
       // Bold text
@@ -53,11 +53,11 @@ function parseInlineFormatting(text: string): TextRun[] {
       runs.push(new TextRun({ text: match[6] }));
     }
   }
-  
+
   if (runs.length === 0) {
     runs.push(new TextRun({ text: text }));
   }
-  
+
   return runs;
 }
 
@@ -68,16 +68,16 @@ function parseMarkdown(markdown: string): ParsedElement[] {
   const lines = markdown.split('\n');
   const elements: ParsedElement[] = [];
   let i = 0;
-  
+
   while (i < lines.length) {
     const line = lines[i].trim();
-    
+
     // Skip empty lines
     if (!line) {
       i++;
       continue;
     }
-    
+
     // Headings
     const headingMatch = line.match(/^(#{1,6})\s+(.+)$/);
     if (headingMatch) {
@@ -89,7 +89,7 @@ function parseMarkdown(markdown: string): ParsedElement[] {
       i++;
       continue;
     }
-    
+
     // Ordered list
     if (/^\d+\.\s+/.test(line)) {
       const items: string[] = [];
@@ -100,7 +100,7 @@ function parseMarkdown(markdown: string): ParsedElement[] {
       elements.push({ type: 'list', content: '', items, isOrdered: true });
       continue;
     }
-    
+
     // Unordered list
     if (/^[-*+]\s+/.test(line)) {
       const items: string[] = [];
@@ -111,7 +111,7 @@ function parseMarkdown(markdown: string): ParsedElement[] {
       elements.push({ type: 'list', content: '', items, isOrdered: false });
       continue;
     }
-    
+
     // Table
     if (line.includes('|')) {
       const rows: string[][] = [];
@@ -129,7 +129,7 @@ function parseMarkdown(markdown: string): ParsedElement[] {
       }
       continue;
     }
-    
+
     // Code block
     if (line.startsWith('```')) {
       let codeContent = '';
@@ -142,12 +142,12 @@ function parseMarkdown(markdown: string): ParsedElement[] {
       elements.push({ type: 'code', content: codeContent.trim() });
       continue;
     }
-    
+
     // Regular paragraph
     elements.push({ type: 'paragraph', content: line });
     i++;
   }
-  
+
   return elements;
 }
 
@@ -157,21 +157,21 @@ function parseMarkdown(markdown: string): ParsedElement[] {
 function elementsToDocxChildren(elements: ParsedElement[], numberingConfig: any[]): any[] {
   const children: any[] = [];
   let listCounter = 0;
-  
+
   for (const element of elements) {
     switch (element.type) {
       case 'heading':
         const headingLevel = element.level === 1 ? HeadingLevel.HEADING_1 :
-                            element.level === 2 ? HeadingLevel.HEADING_2 :
-                            element.level === 3 ? HeadingLevel.HEADING_3 :
-                            HeadingLevel.HEADING_4;
+          element.level === 2 ? HeadingLevel.HEADING_2 :
+            element.level === 3 ? HeadingLevel.HEADING_3 :
+              HeadingLevel.HEADING_4;
         children.push(new Paragraph({
           heading: headingLevel,
           children: parseInlineFormatting(element.content),
           spacing: { before: 240, after: 120 }
         }));
         break;
-        
+
       case 'paragraph':
         children.push(new Paragraph({
           children: parseInlineFormatting(element.content),
@@ -179,10 +179,10 @@ function elementsToDocxChildren(elements: ParsedElement[], numberingConfig: any[
           alignment: AlignmentType.JUSTIFIED
         }));
         break;
-        
+
       case 'list':
         const refName = element.isOrdered ? `numbered-${listCounter}` : `bullet-${listCounter}`;
-        
+
         // Add numbering config
         numberingConfig.push({
           reference: refName,
@@ -194,7 +194,7 @@ function elementsToDocxChildren(elements: ParsedElement[], numberingConfig: any[
             style: { paragraph: { indent: { left: 720, hanging: 360 } } }
           }]
         });
-        
+
         for (const item of element.items || []) {
           children.push(new Paragraph({
             numbering: { reference: refName, level: 0 },
@@ -204,18 +204,25 @@ function elementsToDocxChildren(elements: ParsedElement[], numberingConfig: any[
         }
         listCounter++;
         break;
-        
+
       case 'table':
         if (element.rows && element.rows.length > 0) {
-          const colCount = element.rows[0].length;
-          const colWidth = Math.floor(9360 / colCount);
-          const tableBorder = { style: BorderStyle.SINGLE, size: 1, color: 'CCCCCC' };
+          // Tìm số cột lớn nhất trong bảng để đảm bảo tất cả hàng đều có đủ cột
+          const maxColCount = Math.max(...element.rows.map(row => row.length));
+          const colWidth = Math.floor(9360 / maxColCount);
+          const tableBorder = { style: BorderStyle.SINGLE, size: 1, color: '000000' };
           const cellBorders = { top: tableBorder, bottom: tableBorder, left: tableBorder, right: tableBorder };
-          
-          const tableRows = element.rows.map((row, rowIndex) => 
-            new TableRow({
+
+          const tableRows = element.rows.map((row, rowIndex) => {
+            // Đảm bảo mỗi hàng có đủ số cột
+            const normalizedRow = [...row];
+            while (normalizedRow.length < maxColCount) {
+              normalizedRow.push(''); // Thêm cell rỗng nếu thiếu
+            }
+
+            return new TableRow({
               tableHeader: rowIndex === 0,
-              children: row.map(cell => 
+              children: normalizedRow.map(cell =>
                 new TableCell({
                   borders: cellBorders,
                   width: { size: colWidth, type: WidthType.DXA },
@@ -226,22 +233,22 @@ function elementsToDocxChildren(elements: ParsedElement[], numberingConfig: any[
                   })]
                 })
               )
-            })
-          );
-          
+            });
+          });
+
           children.push(new Table({
-            columnWidths: Array(colCount).fill(colWidth),
+            columnWidths: Array(maxColCount).fill(colWidth),
             rows: tableRows
           }));
         }
         break;
-        
+
       case 'code':
         const codeLines = element.content.split('\n');
         for (const codeLine of codeLines) {
           children.push(new Paragraph({
-            children: [new TextRun({ 
-              text: codeLine, 
+            children: [new TextRun({
+              text: codeLine,
               font: 'Consolas',
               size: 20 // 10pt
             })],
@@ -254,7 +261,7 @@ function elementsToDocxChildren(elements: ParsedElement[], numberingConfig: any[
         break;
     }
   }
-  
+
   return children;
 }
 
@@ -265,7 +272,7 @@ export async function exportMarkdownToDocx(markdown: string, filename: string): 
   const elements = parseMarkdown(markdown);
   const numberingConfig: any[] = [];
   const children = elementsToDocxChildren(elements, numberingConfig);
-  
+
   const doc = new Document({
     styles: {
       default: {
@@ -315,7 +322,7 @@ export async function exportMarkdownToDocx(markdown: string, filename: string): 
       children: children
     }]
   });
-  
+
   // Generate blob and download
   const blob = await Packer.toBlob(doc);
   const url = window.URL.createObjectURL(blob);
