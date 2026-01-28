@@ -236,14 +236,14 @@ VIẾT PHẦN IV: GIẢI PHÁP THỰC HIỆN (10-15 trang) cho một đề tài 
    ❌ KHÔNG dùng bảng ASCII (+--+) hay HTML.
    ✅ Bảng bắt đầu từ đầu dòng.
 
-4. TIÊU ĐỀ MỤC (BẮT BUỘC IN ĐẬM + IN NGHIÊNG):
-   ✅ Các tiêu đề mục như "1.1.", "3.2.", "5.3." phải được định dạng: ***1.1. Tên mục***
-   ✅ Ví dụ: ***3.1. Mục tiêu của giải pháp***, ***3.2. Nội dung và cách thực hiện***
-   ✅ Điều này giúp phân biệt rõ ràng giữa tiêu đề mục và nội dung chi tiết.
+4. TIÊU ĐỀ MỤC (BẮT BUỘC IN ĐẬM):
+   ✅ Các tiêu đề mục như "1.1.", "3.2.", "5.3." phải được in đậm: **1.1. Tên mục**
+   ✅ Ví dụ: **3.1. Mục tiêu của giải pháp**, **3.2. Nội dung và cách thực hiện**
+   ❌ KHÔNG dùng *** (3 dấu sao), chỉ dùng ** (2 dấu sao).
 
 5. CÁC BƯỚC THỰC HIỆN (IN NGHIÊNG):
-   ✅ Các chỗ như "Bước 1:", "Bước 2:", "Bước 3:"... phải được in nghiêng: *Bước 1:*, *Bước 2:*
-   ✅ Ví dụ: *Bước 1: Chuẩn bị*, *Bước 2: Triển khai hoạt động*, *Bước 3: Đánh giá kết quả*
+   ✅ Các chỗ như "Bước 1:", "Bước 2:"... dùng dấu gạch dưới: _Bước 1:_, _Bước 2:_
+   ✅ Ví dụ: _Bước 1: Chuẩn bị_, _Bước 2: Triển khai_, _Bước 3: Đánh giá_
 
 6. CẤU TRÚC XUẤT RA MỖI GIẢI PHÁP:
    Mỗi khi viết xong 1 GIẢI PHÁP, phải xuất ra theo format:
