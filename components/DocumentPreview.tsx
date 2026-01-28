@@ -15,21 +15,23 @@ function formatContent(text: string): string {
 
   let formatted = text;
 
-  // Pattern 1: Xuống dòng trước "• Bước X:" hoặc "Bước X:" 
-  formatted = formatted.replace(/([^\n])\s*(•\s*Bước\s+\d+)/gi, '$1\n\n$2');
-  formatted = formatted.replace(/([^\n])\s*(Bước\s+\d+\s*:)/gi, '$1\n\n$2');
+  // Pattern 1: Xuống dòng trước "Bước X:" nếu không ở đầu dòng
+  formatted = formatted.replace(/([^\n])(\s*Bước\s+\d+\s*:)/gi, '$1\n\n$2');
 
-  // Pattern 2: Xuống dòng trước bullet points "•" nếu không ở đầu dòng
-  formatted = formatted.replace(/([^\n•])\s*•\s+/g, '$1\n\n• ');
+  // Pattern 2: Xuống dòng trước các mục số lớn "1.", "2.", "3." etc nếu không ở đầu dòng
+  // Chỉ áp dụng khi theo sau là chữ in hoa (tiêu đề mới)
+  formatted = formatted.replace(/([^\n\d])(\s*\d+\.\s+[A-ZĐÀÁẢÃẠ])/g, '$1\n\n$2');
 
-  // Pattern 3: Xuống dòng trước các mục số "1.", "2.", "3." etc nếu không ở đầu dòng
-  formatted = formatted.replace(/([^\n\d])\s+(\d+\.\s+[A-ZĐ])/g, '$1\n\n$2');
+  // Pattern 3: Xuống dòng trước các tiêu đề có số như "1.1.", "1.2.", "2.1." etc
+  formatted = formatted.replace(/([^\n])(\s*\d+\.\d+\.?\s+[A-ZĐ])/g, '$1\n\n$2');
 
-  // Pattern 4: Xuống dòng trước "Trạm X:" patterns
-  formatted = formatted.replace(/([^\n])\s*(Trạm\s+\d+\s*:)/gi, '$1\n\n$2');
+  // Pattern 4: Xuống dòng trước dấu gạch ngang "-" khi là mục lớn (theo sau là chữ in hoa)
+  // KHÔNG thêm xuống dòng nếu đã ở đầu dòng
+  formatted = formatted.replace(/([^\n-])(\s*-\s+[A-ZĐÀÁẢÃẠ])/g, '$1\n\n$2');
 
-  // Pattern 5: Xuống dòng trước các tiêu đề có số như "1.1.", "1.2.", "2.1." etc
-  formatted = formatted.replace(/([^\n])\s+(\d+\.\d+\.?\s+[A-ZĐ])/g, '$1\n\n$2');
+  // Pattern 5: Xuống dòng trước "+)" khi là mục con
+  // KHÔNG thêm xuống dòng nếu đã ở đầu dòng
+  formatted = formatted.replace(/([^\n+])(\s*\+\)\s+)/g, '$1\n$2');
 
   // Pattern 6: Xuống dòng trước các keyword quan trọng
   const keywords = [
