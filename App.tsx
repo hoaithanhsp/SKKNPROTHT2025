@@ -726,6 +726,9 @@ QUAN TRỌNG:
 
     setIsAppendixLoading(true);
 
+    // Khởi tạo lại chat session với API key hiện tại (quan trọng khi user thay đổi API key)
+    initializeGeminiChat(apiKey, selectedModel);
+
     try {
       const appendixPrompt = `
         BẮT ĐẦU phản hồi bằng MENU NAVIGATION trạng thái Bước 8 (Tạo Phụ lục chi tiết - Đang thực hiện).
