@@ -298,7 +298,8 @@ export const STEPS_INFO = {
   [3]: { label: "Phần III", description: "Thực trạng vấn đề" },
   [4]: { label: "Giải pháp 1", description: "Giải pháp trọng tâm (Ultra Mode)" },
   [5]: { label: "Giải pháp 2-3", description: "Hoàn thiện các giải pháp (Ultra Mode)" },
-  [6]: { label: "Phần V, VI & Phụ lục", description: "Hiệu quả & Kết luận" },
-  [7]: { label: "Hoàn tất", description: "Đã xong" }
+  [6]: { label: "Phần V, VI", description: "Hiệu quả & Kết luận" },
+  [7]: { label: "Tạo Phụ lục", description: "Tài liệu phụ lục chi tiết" },
+  [8]: { label: "Hoàn tất", description: "Đã xong" }
 };
 

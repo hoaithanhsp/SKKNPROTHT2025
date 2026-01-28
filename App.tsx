@@ -232,8 +232,25 @@ BẠN BẮT BUỘC PHẢI TUÂN THỦ NGHIÊM NGẶT:
 ${userInfo.specialRequirements}
 
 Hãy phân tích kỹ các yêu cầu trên và áp dụng CHÍNH XÁC vào toàn bộ bài viết.
-Ví dụ:
-- Nếu yêu cầu "giới hạn số trang" → Viết ngắn gọn, súc tích theo số trang yêu cầu
+
+📌 HƯỚNG DẪN XỬ LÝ GIỚI HẠN SỐ TRANG:
+- Nếu yêu cầu "giới hạn X trang" → Số trang này tính từ PHẦN I & II đến hết PHẦN V, VI & KẾT LUẬN
+- KHÔNG tính dàn ý vào giới hạn số trang
+- KHÔNG tính Phụ lục vào giới hạn số trang (Phụ lục được tạo riêng, không giới hạn)
+- Phân bổ số trang hợp lý cho NỘI DUNG CHÍNH (không tính Phụ lục):
+  + Phần I & II: TỐI ĐA 4 trang (khoảng 10%)
+  + Phần III (Thực trạng): TỐI ĐA 3 trang (khoảng 7-8%)
+  + Phần IV (Giải pháp): khoảng 55-65% tổng số trang (phần quan trọng nhất)
+  + Phần V, VI & Kết luận: khoảng 15-20% tổng số trang
+
+Ví dụ: Nếu giới hạn 40 trang (KHÔNG tính Phụ lục):
+  + Phần I & II: 3-4 trang (TỐI ĐA 4 trang)
+  + Phần III: 2-3 trang (TỐI ĐA 3 trang)
+  + Phần IV: 24-28 trang
+  + Phần V, VI & Kết luận: 6-8 trang
+  + Phụ lục: TÍNH RIÊNG (không giới hạn)
+
+Các yêu cầu khác:
 - Nếu yêu cầu "viết ngắn gọn phần lý thuyết" → Tóm tắt cô đọng phần cơ sở lý luận
 - Nếu yêu cầu "thêm nhiều bài toán thực tế" → Bổ sung ví dụ toán thực tế phong phú
 - Nếu yêu cầu "tập trung vào giải pháp" → Ưu tiên phần IV với nhiều chi tiết hơn
@@ -398,19 +415,19 @@ CẤU TRÚC SKKN CHUẨN (ÁP DỤNG KHI KHÔNG CÓ MẪU RIÊNG):
    → Sản phẩm học sinh
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-YÊU CẦU CHẤT LƯỢNG DÀN Ý:
+YÊU CẦU DÀN Ý (NGẮN GỌN - CHỈ ĐẦU MỤC):
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-✓ CHỈ 3 GIẢI PHÁP - nhưng mỗi giải pháp phải HOÀN THIỆN, CHỈN CHU
-✓ Dàn ý phải CỤ THỂ, không chung chung
-✓ Mỗi mục phải có ý nhỏ chi tiết (bullet points)
-✓ Có gợi ý số liệu cần thu thập
-✓ Có gợi ý ví dụ minh họa cụ thể theo SGK
+⚠️ QUAN TRỌNG: Dàn ý phải NGẮN GỌN, chỉ liệt kê CÁC ĐẦU MỤC CHÍNH.
+Nội dung chi tiết sẽ được triển khai ở các bước viết sau.
+
+✓ CHỈ 3 GIẢI PHÁP - liệt kê TÊN giải pháp, không triển khai chi tiết
+✓ Mỗi phần chỉ ghi tiêu đề mục và các ý chính (1-2 dòng mỗi ý)
+✓ KHÔNG viết đoạn văn dài trong dàn ý
+✓ KHÔNG triển khai chi tiết nội dung - chỉ gợi ý hướng đi
+✓ Gợi ý danh sách phụ lục cần tạo (dựa trên các giải pháp)
 ✓ Phù hợp với đặc thù môn ${userInfo.subject} và cấp ${userInfo.level}
-✓ Đảm bảo tính logic, mạch lạc
-✓ Thể hiện rõ tính MỚI và SÁNG TẠO
-✓ Tính khả thi cao với điều kiện thực tế
-✓ Có thể triển khai ngay
+✓ Có thể triển khai ngay ở các bước sau
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ĐỊNH DẠNG ĐẦU RA:
@@ -625,7 +642,7 @@ QUAN TRỌNG:
         },
         [GenerationStep.PART_V_VI]: {
           prompt: `
-              BẮT ĐẦU phản hồi bằng MENU NAVIGATION trạng thái Bước 6 (Kết luận & Khuyến nghị - Đang thực hiện).
+              BẮT ĐẦU phản hồi bằng MENU NAVIGATION trạng thái Bước 7 (Kết luận & Khuyến nghị - Đang thực hiện).
 
               Tiếp tục viết:
               
@@ -642,8 +659,6 @@ QUAN TRỌNG:
               
               TÀI LIỆU THAM KHẢO (8-12 tài liệu)
               
-              PHỤ LỤC (Phiếu khảo sát, Giáo án, Hình ảnh)
-              
               Đảm bảo số liệu phần Kết quả phải LOGIC và chứng minh được sự tiến bộ so với phần Thực trạng.
               Sử dụng số liệu lẻ (42.3%, 67.8%) không dùng số tròn.
               
@@ -651,7 +666,86 @@ QUAN TRỌNG:
               - Viết từng câu xuống dòng riêng.
               - Tách đoạn rõ ràng.
               - Không viết dính chữ.
-              - Menu Navigation: Đánh dấu các bước đã xong (✅), Bước 6 đang làm (🔵).`,
+              - Menu Navigation: Đánh dấu các bước đã xong (✅), Bước 7 đang làm (🔵).
+              
+              📌 LƯU Ý: Chưa viết phần PHỤ LỤC chi tiết, chỉ gợi ý danh sách phụ lục.
+              Phụ lục chi tiết sẽ được tạo ở bước tiếp theo.`,
+          nextStep: GenerationStep.APPENDIX
+        },
+        [GenerationStep.APPENDIX]: {
+          prompt: `
+              BẮT ĐẦU phản hồi bằng MENU NAVIGATION trạng thái Bước 8 (Tạo Phụ lục chi tiết - Đang thực hiện).
+
+              ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+              📎 NHIỆM VỤ: TẠO ĐẦY ĐỦ CÁC TÀI LIỆU PHỤ LỤC
+              ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+              
+              Dựa trên NỘI DUNG DÀN Ý SKKN đã lập (đặc biệt là phần gợi ý Phụ lục), 
+              hãy viết ĐẦY ĐỦ, CHI TIẾT từng tài liệu phụ lục sau:
+
+              ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+              📋 PHỤ LỤC 1: PHIẾU KHẢO SÁT GIÁO VIÊN TRƯỚC KHI THỰC HIỆN SÁNG KIẾN
+              ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+              - Viết phiếu khảo sát HOÀN CHỈNH với 10-15 câu hỏi
+              - Dạng câu hỏi: Trắc nghiệm mức độ (Rất thường xuyên / Thường xuyên / Thỉnh thoảng / Hiếm khi / Không bao giờ)
+              - Nội dung: Khảo sát thực trạng sử dụng phương pháp/công nghệ trong đề tài "${userInfo.topic}"
+              - Format: Bảng Markdown chuẩn (|---|)
+
+              ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+              📋 PHỤ LỤC 2: PHIẾU KHẢO SÁT HỌC SINH TRƯỚC VÀ SAU KHI THỰC HIỆN SÁNG KIẾN
+              ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+              - PHẦN A: Phiếu khảo sát TRƯỚC khi áp dụng sáng kiến (10-12 câu)
+              - PHẦN B: Phiếu khảo sát SAU khi áp dụng sáng kiến (12-15 câu)
+              - Dạng: Likert 5 mức độ (Rất đồng ý → Rất không đồng ý)
+              - Nội dung: Đánh giá mức độ hứng thú, khó khăn, hiệu quả với môn ${userInfo.subject}
+              - Đối tượng: ${userInfo.researchSubjects || "Học sinh tại đơn vị"}
+
+              ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+              📋 PHỤ LỤC 3: GIÁO ÁN MINH HỌA 
+              ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+              - Theo format giáo án chuẩn Thông tư 32 (nếu THPT) / Thông tư 27 (nếu tiểu học)
+              - Bài học cụ thể từ SGK ${userInfo.textbook || "hiện hành"}
+              - Phải có đầy đủ:
+                + I. Mục tiêu (Kiến thức, Năng lực, Phẩm chất)
+                + II. Thiết bị dạy học và học liệu
+                + III. Tiến trình dạy học (5 hoạt động: Mở đầu, Hình thành kiến thức, Luyện tập, Vận dụng, Mở rộng)
+                + IV. Phương án đánh giá
+              - Tích hợp công cụ/phương pháp của GIẢI PHÁP 1 vào giáo án
+
+              ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+              📋 PHỤ LỤC 4: KỊCH BẢN DỰ ÁN / HOẠT ĐỘNG TRẢI NGHIỆM
+              ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+              - Mô tả chi tiết dự án học sinh có thể thực hiện (theo GIẢI PHÁP 2)
+              - Gồm: Tên dự án, Mục tiêu, Thời lượng, Các giai đoạn thực hiện
+              - Có Rubric đánh giá sản phẩm học sinh
+
+              ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+              📋 PHỤ LỤC 5: BÀI TẬP MẪU / CÂU HỎI TRÒ CHƠI
+              ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+              - 5-7 bài tập mẫu hoặc câu hỏi trò chơi (theo GIẢI PHÁP 3)
+              - Có đáp án và hướng dẫn chấm điểm
+              - Nếu môn Toán: Sử dụng LaTeX cho công thức ($...$, $$...$$)
+
+              ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+              📋 PHỤ LỤC 6: BẢNG TỔNG HỢP Ý KIẾN PHẢN HỒI
+              ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+              - Mẫu bảng tổng hợp ý kiến từ HỌC SINH (10-15 ý kiến mẫu)
+              - Mẫu bảng tổng hợp ý kiến từ ĐỒNG NGHIỆP (5-8 ý kiến mẫu)
+              - Format: Bảng Markdown
+
+              ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+              ⚠️ YÊU CẦU FORMAT (BẮT BUỘC):
+              ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+              - Markdown chuẩn, bảng dùng |---|
+              - Bảng phải bắt đầu từ đầu dòng (không thụt lề)
+              - Xuống dòng sau mỗi câu
+              - Tách đoạn rõ ràng
+              - Đánh số phụ lục rõ ràng: PHỤ LỤC 1, PHỤ LỤC 2...
+              
+              📍 KẾT THÚC bằng dòng:
+              ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+              ✅ HOÀN THÀNH TẠO TÀI LIỆU PHỤ LỤC
+              ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`,
           nextStep: GenerationStep.COMPLETED
         }
       };
@@ -676,7 +770,7 @@ QUAN TRỌNG:
       });
 
       // If we just finished the last part, move to completed
-      if (nextStepEnum === GenerationStep.PART_V_VI) {
+      if (nextStepEnum === GenerationStep.APPENDIX) {
         setState(prev => ({ ...prev, step: GenerationStep.COMPLETED, isStreaming: false }));
       } else {
         setState(prev => ({ ...prev, isStreaming: false }));

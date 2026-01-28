@@ -33,7 +33,8 @@ export enum GenerationStep {
   PART_IV_SOL1 = 4,
   PART_IV_SOL2_3 = 5,
   PART_V_VI = 6,
-  COMPLETED = 7
+  APPENDIX = 7,
+  COMPLETED = 8
 }
 
 export interface ChatMessage {
