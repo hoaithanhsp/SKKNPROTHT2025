@@ -222,30 +222,19 @@ VIẾT PHẦN IV: GIẢI PHÁP THỰC HIỆN (10-15 trang) cho một đề tài 
    ✅ TRƯỚC MỖI TIÊU ĐỀ MỚI: Xuống 3 dòng.
    ❌ TUYỆT ĐỐI KHÔNG để các câu dính vào nhau trên cùng 1 dòng.
 
-2. QUY TẮC SỬ DỤNG KÝ HIỆU (BẮT BUỘC):
-   ✅ Mục lớn/tiêu đề nhỏ: Dùng dấu gạch ngang "-"
-   ✅ Mục con/chi tiết bên trong: Dùng dấu "+)"
-   ✅ Ví dụ đúng:
-      - Đặc điểm địa phương:
-      +) Là một thành phố cảng lớn...
-      +) Có định hướng phát triển mạnh...
-   ❌ KHÔNG dùng: Dấu chấm tròn (• ◦), dấu sao (*), hoặc ký hiệu phức tạp (▪ ○ ■)
+2. QUY TẮC SỬ DỤNG KÝ HIỆU:
+   ✅ Sử dụng:
+   - Số thứ tự: 1. 2. 3. hoặc Bước 1: Bước 2:
+   - Gạch đầu dòng đơn giản: - hoặc →
+   - Tiêu đề: ### hoặc **TÊN TIÊU ĐỀ**
+   ❌ TRÁNH dùng: Ký hiệu phức tạp (• ▪ ◦ ○ ■), nhiều cấp độ lồng nhau.
 
 3. QUY TẮC BẢNG BIỂU (NẾU CÓ):
    ✅ Dùng Markdown chuẩn với dấu | và dòng phân cách |---|
    ❌ KHÔNG dùng bảng ASCII (+--+) hay HTML.
    ✅ Bảng bắt đầu từ đầu dòng.
 
-4. TIÊU ĐỀ MỤC (BẮT BUỘC IN ĐẬM):
-   ✅ Các tiêu đề mục như "1.1.", "3.2.", "5.3." phải được in đậm: **1.1. Tên mục**
-   ✅ Ví dụ: **3.1. Mục tiêu của giải pháp**, **3.2. Nội dung và cách thực hiện**
-   ❌ KHÔNG dùng *** (3 dấu sao), chỉ dùng ** (2 dấu sao).
-
-5. CÁC BƯỚC THỰC HIỆN (IN NGHIÊNG):
-   ✅ Các chỗ như "Bước 1:", "Bước 2:"... dùng dấu gạch dưới: _Bước 1:_, _Bước 2:_
-   ✅ Ví dụ: _Bước 1: Chuẩn bị_, _Bước 2: Triển khai_, _Bước 3: Đánh giá_
-
-6. CẤU TRÚC XUẤT RA MỖI GIẢI PHÁP:
+4. CẤU TRÚC XUẤT RA MỖI GIẢI PHÁP:
    Mỗi khi viết xong 1 GIẢI PHÁP, phải xuất ra theo format:
 
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
