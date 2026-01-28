@@ -9,28 +9,34 @@ import { Button } from './Button';
 /**
  * Format content để đảm bảo xuống dòng đúng cách
  * Xử lý các pattern thường gặp trong văn bản AI output
+ * BẢO VỆ: Bảng markdown và các cú pháp in đậm/nghiêng
  */
 function formatContent(text: string): string {
   if (!text) return text;
 
-  let formatted = text;
+  // Bước 1: Tách và bảo vệ các bảng markdown
+  const tableRegex = /(\|[^\n]+\|[\s\S]*?\|[^\n]+\|)/g;
+  const tables: string[] = [];
+  let formatted = text.replace(tableRegex, (match) => {
+    tables.push(match);
+    return `__TABLE_PLACEHOLDER_${tables.length - 1}__`;
+  });
+
+  // Bước 2: Xử lý xuống dòng cho các pattern thường gặp
 
   // Pattern 1: Xuống dòng trước "Bước X:" nếu không ở đầu dòng
   formatted = formatted.replace(/([^\n])(\s*Bước\s+\d+\s*:)/gi, '$1\n\n$2');
 
   // Pattern 2: Xuống dòng trước các mục số lớn "1.", "2.", "3." etc nếu không ở đầu dòng
-  // Chỉ áp dụng khi theo sau là chữ in hoa (tiêu đề mới)
   formatted = formatted.replace(/([^\n\d])(\s*\d+\.\s+[A-ZĐÀÁẢÃẠ])/g, '$1\n\n$2');
 
   // Pattern 3: Xuống dòng trước các tiêu đề có số như "1.1.", "1.2.", "2.1." etc
   formatted = formatted.replace(/([^\n])(\s*\d+\.\d+\.?\s+[A-ZĐ])/g, '$1\n\n$2');
 
   // Pattern 4: Xuống dòng trước dấu gạch ngang "-" khi là mục lớn (theo sau là chữ in hoa)
-  // KHÔNG thêm xuống dòng nếu đã ở đầu dòng
   formatted = formatted.replace(/([^\n-])(\s*-\s+[A-ZĐÀÁẢÃẠ])/g, '$1\n\n$2');
 
   // Pattern 5: Xuống dòng trước "+)" khi là mục con
-  // KHÔNG thêm xuống dòng nếu đã ở đầu dòng
   formatted = formatted.replace(/([^\n+])(\s*\+\)\s+)/g, '$1\n$2');
 
   // Pattern 6: Xuống dòng trước các keyword quan trọng
@@ -41,11 +47,6 @@ function formatContent(text: string): string {
     'Kiểm tra:',
     'Ví dụ:',
     'Lưu ý:',
-    'Ghi nhận kết quả:',
-    'Báo cáo:',
-    'Công cụ/tài liệu hỗ trợ:',
-    'Phần mềm:',
-    'Prompt mẫu cho Gemini:',
   ];
 
   keywords.forEach(keyword => {
@@ -53,12 +54,16 @@ function formatContent(text: string): string {
     formatted = formatted.replace(regex, '$1\n\n$2');
   });
 
-  // Pattern 7: Đảm bảo sau dấu "." có xuống dòng nếu tiếp theo là chữ in hoa (câu mới)
-  // Chỉ áp dụng khi có nhiều spaces liên tiếp (dấu hiệu của đoạn văn bị dính)
-  formatted = formatted.replace(/\.(\s{2,})([A-ZĐÀÁẢÃẠĂẮẰẲẴẶÂẤẦẨẪẬÈÉẺẼẸÊẾỀỂỄỆÌÍỈĨỊÒÓỎÕỌÔỐỒỔỖỘƠỚỜỞỠỢÙÚỦŨỤƯỨỪỬỮỰỲÝỶỸỴ])/g, '.\n\n$2');
+  // Pattern 7: Đảm bảo sau dấu "." có xuống dòng nếu tiếp theo là chữ in hoa
+  formatted = formatted.replace(/\.(\s{2,})([A-ZĐÀÁẢÃẠ])/g, '.\n\n$2');
 
   // Dọn dẹp: Loại bỏ quá nhiều dòng trống liên tiếp (giữ tối đa 2)
   formatted = formatted.replace(/\n{4,}/g, '\n\n\n');
+
+  // Bước 3: Khôi phục lại các bảng
+  tables.forEach((table, index) => {
+    formatted = formatted.replace(`__TABLE_PLACEHOLDER_${index}__`, table);
+  });
 
   return formatted;
 }
