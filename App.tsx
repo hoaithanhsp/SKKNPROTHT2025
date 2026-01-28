@@ -592,43 +592,66 @@ QUAN TRỌNG:
                  - Xuống 2 dòng sau mỗi đoạn.
                  - Có khung "KẾT THÚC GIẢI PHÁP" ở cuối mỗi giải pháp.
               `,
-          nextStep: GenerationStep.PART_IV_SOL2
+          nextStep: GenerationStep.PART_IV_SOL2_3
         },
-        [GenerationStep.PART_IV_SOL2]: {
-          // ULTRA MODE CONTINUATION
+        [GenerationStep.PART_IV_SOL2_3]: {
+          // ULTRA MODE - Viết Giải pháp 2 và 3
           prompt: `
-              BẮT ĐẦU phản hồi bằng MENU NAVIGATION trạng thái Bước 5 (Viết Phần IV - Đang thực hiện).
+              BẮT ĐẦU phản hồi bằng MENU NAVIGATION trạng thái Bước 5 (Viết Giải pháp 2-3 - Đang thực hiện).
 
               Tiếp tục giữ vững vai trò CHUYÊN GIA GIÁO DỤC (ULTRA MODE).
               
-              Nhiệm vụ: Viết tiếp GIẢI PHÁP 4 và GIẢI PHÁP 5 cho đề tài: "${userInfo.topic}".
-              Nếu đã đủ ý ở các giải pháp trước, có thể viết các biện pháp bổ trợ hoặc mở rộng nâng cao.
+              Nhiệm vụ: Viết GIẢI PHÁP 2 và GIẢI PHÁP 3 cho đề tài: "${userInfo.topic}".
+              
+              ⚠️ LƯU Ý QUAN TRỌNG: Chỉ có 3 GIẢI PHÁP trọng tâm. Đây là 2 giải pháp cuối cùng.
+              Hãy làm HOÀN THIỆN, CHỈN CHU từng giải pháp.
               
               Yêu cầu:
-              1. Nội dung độc đáo, không trùng lặp.
-              2. BẮT BUỘC TUÂN THỦ FORMAT "YÊU CẦU ĐỊNH DẠNG OUTPUT":
+              1. Nội dung độc đáo, không trùng lặp với Giải pháp 1.
+              2. Tận dụng tối đa CSVC: ${userInfo.facilities}.
+              3. Mỗi giải pháp phải có:
+                 - Mục tiêu rõ ràng
+                 - Nội dung và cách thực hiện chi tiết
+                 - Quy trình 5-7 bước cụ thể
+                 - Ví dụ minh họa từ SGK ${userInfo.textbook || "hiện hành"}
+                 - Điều kiện thực hiện & lưu ý
+              4. BẮT BUỘC TUÂN THỦ FORMAT:
                  - Xuống dòng sau mỗi câu.
                  - Xuống 2 dòng sau mỗi đoạn.
                  - Có khung "KẾT THÚC GIẢI PHÁP" ở cuối mỗi giải pháp.
+              5. Kết thúc bằng MỐI LIÊN HỆ GIỮA CÁC GIẢI PHÁP (tính hệ thống, logic).
               `,
-          nextStep: GenerationStep.PART_IV_SOL3
+          nextStep: GenerationStep.PART_V_VI
         },
-        [GenerationStep.PART_IV_SOL3]: {
+        [GenerationStep.PART_V_VI]: {
           prompt: `
               BẮT ĐẦU phản hồi bằng MENU NAVIGATION trạng thái Bước 6 (Kết luận & Khuyến nghị - Đang thực hiện).
 
-              Tiếp tục viết PHẦN V (Hiệu quả), PHẦN VI (Kết luận & Khuyến nghị) và PHỤ LỤC (Tài liệu tham khảo, mẫu phiếu). 
-              Đảm bảo số liệu phần Hiệu quả phải logic và chứng minh được sự tiến bộ so với phần Thực trạng.
+              Tiếp tục viết:
+              
+              5. KẾT QUẢ ĐẠT ĐƯỢC (4-5 trang):
+                 - 5.1. Mục đích thực nghiệm
+                 - 5.2. Nội dung thực nghiệm  
+                 - 5.3. Tổ chức thực nghiệm (Bảng so sánh TRƯỚC-SAU với số liệu lẻ)
+              
+              6. ĐIỀU KIỆN ĐỂ SÁNG KIẾN ĐƯỢC NHÂN RỘNG (1-2 trang)
+              
+              KẾT LUẬN VÀ KHUYẾN NGHỊ (2-3 trang):
+                 - Kết luận
+                 - Khuyến nghị
+              
+              TÀI LIỆU THAM KHẢO (8-12 tài liệu)
+              
+              PHỤ LỤC (Phiếu khảo sát, Giáo án, Hình ảnh)
+              
+              Đảm bảo số liệu phần Kết quả phải LOGIC và chứng minh được sự tiến bộ so với phần Thực trạng.
+              Sử dụng số liệu lẻ (42.3%, 67.8%) không dùng số tròn.
               
               ⚠️ LƯU Ý FORMAT: 
               - Viết từng câu xuống dòng riêng.
               - Tách đoạn rõ ràng.
               - Không viết dính chữ.
-              - Menu Navigation: Đánh dấu Bước 5 đã xong (✅), Bước 6 đang làm (🔵).`,
-          nextStep: GenerationStep.PART_V_VI
-        },
-        [GenerationStep.PART_V_VI]: {
-          prompt: "", // Should not happen
+              - Menu Navigation: Đánh dấu các bước đã xong (✅), Bước 6 đang làm (🔵).`,
           nextStep: GenerationStep.COMPLETED
         }
       };
