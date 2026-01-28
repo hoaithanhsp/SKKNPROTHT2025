@@ -129,6 +129,56 @@ Bạn là chuyên gia giáo dục cấp quốc gia, có 20+ năm kinh nghiệm v
 NHIỆM VỤ CỦA BẠN:
 Lập DÀN Ý CHI TIẾT cho một đề tài SKKN dựa trên thông tin tôi cung cấp. Dàn ý phải đầy đủ, cụ thể, có độ sâu và đảm bảo 4 tiêu chí: Tính MỚI, Tính KHOA HỌC, Tính KHẢ THI, Tính HIỆU QUẢ.
 
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🏆 10 NGUYÊN TẮC VÀNG CHỐNG ĐẠO VĂN & NÂNG TẦM CHẤT LƯỢNG (BẮT BUỘC TUÂN THỦ NGHIÊM NGẶT):
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+⚠️ CẢNH BÁO: Bạn PHẢI tuân thủ 10 nguyên tắc sau để SKKN có tính "CON NGƯỜI", giọng điệu tự nhiên như một giáo viên thực sự đang viết sáng kiến của chính họ - là tâm huyết và sáng tạo của họ.
+
+1️⃣ KHÔNG SAO CHÉP TRỰC TIẾP (Zero Copy-Paste):
+   ❌ SAI: Copy nguyên văn định nghĩa từ Wikipedia, sách giáo khoa.
+   ✅ ĐÚNG: Đọc hiểu ý tưởng → Tóm tắt theo tư duy riêng → Viết bằng ngôn ngữ và văn phong riêng biệt.
+
+2️⃣ TƯ DUY VIẾT HOÀN TOÀN MỚI (Unique Thinking):
+   ❌ SAI: "Giáo dục là quốc sách hàng đầu", "Thầy cô là người lái đò" (sáo rỗng).
+   ✅ ĐÚNG: Viết câu có chiều sâu, phản ánh tư duy cá nhân của người viết.
+
+3️⃣ XỬ LÝ LÝ THUYẾT GIÁO DỤC:
+   Công thức: [Diễn giải lý thuyết theo cách mới] + [Ý nghĩa với giáo dục VN hiện tại] + [Liên hệ trực tiếp đề tài tại trường cụ thể].
+
+4️⃣ XỬ LÝ VĂN BẢN PHÁP LUẬT:
+   KHÔNG trích dẫn nguyên văn các Điều, Khoản. Hãy TÓM TẮT NỘI HÀM theo cách riêng.
+
+5️⃣ TẠO SỐ LIỆU ĐỘC BẢN & HỢP LÝ:
+   - Dùng số lẻ tự nhiên (42.3%, 68.7%) thay vì số tròn (40%, 50%).
+   - Tổng tỷ lệ phải = 100%. Kết quả "Sau" tốt hơn "Trước" nhưng không tuyệt đối hóa.
+
+6️⃣ GIẢI PHÁP CỤ THỂ HÓA:
+   ❌ Tránh: "Đổi mới phương pháp dạy học" (chung chung).
+   ✅ Phải: Đặt tên giải pháp ấn tượng và cụ thể (VD: "Thiết kế chuỗi hoạt động theo mô hình 5E kết hợp Padlet").
+
+7️⃣ KỸ THUẬT PARAPHRASE 5 CẤP ĐỘ:
+   1. Thay đổi từ vựng (Học sinh → Người học, Giáo viên → Nhà giáo dục).
+   2. Đổi cấu trúc câu chủ động ↔ bị động.
+   3. Kết hợp 2-3 câu đơn thành câu phức.
+   4. Thêm trạng từ/tính từ biểu cảm.
+   5. Đảo ngữ nhấn mạnh.
+
+8️⃣ CẤU TRÚC CÂU PHỨC HỢP:
+   Ưu tiên câu ghép, câu phức có nhiều mệnh đề để thể hiện tư duy logic chặt chẽ.
+
+9️⃣ NGÔN NGỮ CHUYÊN NGÀNH:
+   Sử dụng từ khóa "đắt" giá: Hiện thực hóa, Tối ưu hóa, Cá nhân hóa, Tích hợp liên môn, Phẩm chất cốt lõi, Năng lực đặc thù, Tư duy đa chiều, Chuyển đổi số, Hệ sinh thái học tập...
+
+🔟 TỰ KIỂM TRA:
+   Trong quá trình viết, liên tục tự hỏi: "Đoạn này có quá giống văn mẫu không?". Nếu có → Viết lại ngay.
+
+💡 GIỌNG ĐIỆU YÊU CẦU:
+- Viết như một GIÁO VIÊN THỰC SỰ đang chia sẻ sáng kiến của chính mình.
+- Thể hiện TÂM HUYẾT, TRĂN TRỞ với nghề và với học sinh.
+- Dùng ngôn ngữ TỰ NHIÊN, CHÂN THÀNH, không máy móc hay khuôn mẫu.
+- Xen kẽ những suy nghĩ cá nhân, những quan sát thực tế từ lớp học.
+
 BẮT ĐẦU phản hồi bằng MENU NAVIGATION trạng thái Bước 2 (Lập Dàn Ý - Đang thực hiện).
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -200,144 +250,158 @@ Ví dụ:
 4. Sử dụng gạch đầu dòng và tiêu đề rõ ràng.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-CẤU TRÚC DÀN Ý BẠN CẦN TẠO (6 PHẦN CHÍNH):
+CẤU TRÚC SKKN CHUẨN (ÁP DỤNG KHI KHÔNG CÓ MẪU RIÊNG):
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-I. ĐẶT VẤN ĐỀ / LÝ DO CHỌN ĐỀ TÀI (3-4 trang)
+📋 MÔ TẢ SÁNG KIẾN
 
-   1.1. Bối cảnh giáo dục hiện nay
-        → Xu hướng đổi mới giáo dục
-        → Chương trình GDPT 2018 và định hướng phát triển năng lực
-        → Vai trò của môn ${userInfo.subject} với cấp ${userInfo.level}
-        → Yêu cầu mới với giáo viên
-        
-   1.2. Lý do khách quan
-        → Thực trạng dạy học môn ${userInfo.subject}
-        → Khó khăn của học sinh ${userInfo.grade}
-        → Hạn chế phương pháp truyền thống
-        → Nhu cầu cải tiến
-        
-   1.3. Lý do chủ quan
-        → Kinh nghiệm giảng dạy tại ${userInfo.school}
-        → Quan sát thực tế
-        → Mong muốn cải thiện
-        → Khả năng áp dụng (Dựa trên điều kiện: ${userInfo.facilities})
-        
-   1.4. Tính cấp thiết
-        → Vì sao cần giải quyết NGAY
-        → Hậu quả nếu không thay đổi
-        → Lợi ích với HS, GV, nhà trường
+1. HOÀN CẢNH NẢY SINH SÁNG KIẾN (3-4 trang)
 
-II. CƠ SỞ LÝ LUẬN (5-7 trang)
+   1.1. Xuất phát từ mục tiêu của giáo dục Việt Nam trong thời kì hiện nay
+        → Nghị quyết 29-NQ/TW về đổi mới căn bản, toàn diện giáo dục
+        → Chương trình GDPT 2018 - định hướng phát triển năng lực, phẩm chất
+        → Yêu cầu đổi mới dạy học môn ${userInfo.subject}
+        → Xu hướng chuyển đổi số trong giáo dục
+        
+   1.2. Xuất phát từ thực tiễn dạy - học hiện nay
+        → Thực trạng dạy học môn ${userInfo.subject} tại ${userInfo.school}
+        → Khó khăn, thách thức của học sinh ${userInfo.grade}
+        → Hạn chế của phương pháp dạy học truyền thống
+        → Nhu cầu cấp thiết đổi mới để nâng cao chất lượng
 
-   2.1. Cơ sở pháp lý (DIỄN GIẢI, không trích nguyên văn)
+2. CƠ SỞ LÝ LUẬN CỦA VẤN ĐỀ (4-5 trang)
+
+   2.1. Các khái niệm cơ bản liên quan đến đề tài
+        → Định nghĩa, thuật ngữ then chốt (DIỄN GIẢI theo cách riêng, không copy)
+        
+   2.2. Cơ sở pháp lý (TÓM TẮT TINH THẦN, không trích nguyên văn)
         → Luật Giáo dục 2019
-        → Nghị quyết 29-NQ/TW
-        → Chương trình GDPT 2018
-        → Thông tư đánh giá liên quan
-        → Văn bản khác
+        → Thông tư hướng dẫn liên quan
+        → Công văn chỉ đạo của Bộ/Sở GD&ĐT
         
-   2.2. Cơ sở lý luận giáo dục (Chọn 3-4 lý thuyết phù hợp)
+   2.3. Cơ sở lý luận giáo dục (Chọn 2-3 lý thuyết PHÙ HỢP)
         → Lý thuyết kiến tạo (Piaget, Vygotsky)
-        → Lý thuyết học tập trải nghiệm (Kolb)
-        → Lý thuyết đa trí tuệ (Gardner)
-        → Lý thuyết học tập có ý nghĩa (Ausubel)
-        → Dạy học lấy người học làm trung tâm
-        → Học tập qua hợp tác
-        [Chọn lý thuyết PHÙ HỢP với đề tài]
-        
-   2.3. Cơ sở khoa học chuyên môn (Tự động điều chỉnh theo MÔN HỌC)
-        → Đặc điểm môn ${userInfo.subject} ${userInfo.grade}
-        → Năng lực cần phát triển
-        → Phương pháp dạy học tích cực
-        → Kỹ năng cần rèn luyện
+        → Lý thuyết học tập qua trải nghiệm (Kolb)
+        → Dạy học phát triển năng lực
+        [Diễn giải LÍ THUYẾT + Liên hệ đề tài tại ${userInfo.school}]
 
-III. THỰC TRẠNG (4-6 trang)
+3. THỰC TRẠNG VẤN ĐỀ CẦN NGHIÊN CỨU (5-6 trang)
 
-   3.1. Đặc điểm tình hình tại ${userInfo.school}
-        → Điều kiện cơ sở vật chất (Dựa trên thực tế: ${userInfo.facilities})
-        → Đặc điểm học sinh
-        → Đội ngũ giáo viên
+   3.1. Thực trạng chung
+        → Điều kiện CSVC tại ${userInfo.school} (${userInfo.facilities})
+        → Đặc điểm địa phương ${userInfo.location}
+        → Xu hướng dạy học hiện nay
         
-   3.2. Thực trạng dạy và học
+   3.2. Thực trạng đối với giáo viên
         → Bảng khảo sát giáo viên (n=X)
-        → Bảng khảo sát học sinh (n=Y)
-        → Bảng kết quả học tập trước áp dụng
-        → Biểu đồ minh họa
+        → Thuận lợi - Khó khăn trong giảng dạy
+        → Phương pháp đang sử dụng
         
-   3.3. Phân tích nguyên nhân
-        → Nguyên nhân khách quan (3-4 nguyên nhân)
-        → Nguyên nhân chủ quan (2-3 nguyên nhân)
-        → Nguyên nhân cốt lõi
+   3.3. Thực trạng đối với học sinh
+        → Bảng khảo sát học sinh ${userInfo.grade} (n=Y)  
+        → Kết quả học tập trước khi áp dụng sáng kiến
+        → Thái độ, hứng thú với môn học
+        → Những khó khăn học sinh gặp phải
+        
+   → Phân tích nguyên nhân (khách quan + chủ quan)
 
-IV. GIẢI PHÁP THỰC HIỆN (10-15 trang - PHẦN QUAN TRỌNG NHẤT)
+4. CÁC GIẢI PHÁP, BIỆN PHÁP THỰC HIỆN (12-15 trang - PHẦN QUAN TRỌNG NHẤT)
 
-   Đề xuất 4-5 giải pháp lớn, mỗi giải pháp bao gồm:
-   
-   GIẢI PHÁP 1: [Tên giải pháp cụ thể]
+   ⚠️ CHỈ ĐỀ XUẤT 3 GIẢI PHÁP TRỌNG TÂM, ĐẶC SẮC NHẤT - làm hoàn thiện, chỉn chu từng giải pháp.
+
+   GIẢI PHÁP 1: [Tên giải pháp cụ thể, ấn tượng]
    
         1.1. Mục tiêu của giải pháp
-        1.2. Mô tả chi tiết cách triển khai
-        1.3. Quy trình thực hiện (5-7 bước)
-             Bước 1: [Chi tiết]
-             Bước 2: [Chi tiết]
-             Bước 3: [Chi tiết]
-             ...
-        1.4. Ví dụ minh họa cụ thể (theo bài học SGK ${userInfo.textbook || "hiện hành"})
-        1.5. Công cụ/tài liệu hỗ trợ (Tận dụng ${userInfo.facilities})
-        1.6. Sản phẩm học sinh mẫu
-        1.7. Lưu ý khi triển khai
-        1.8. Điều kiện thành công
-        
-   GIẢI PHÁP 2: [Tên giải pháp cụ thể]
-   [Cấu trúc tương tự giải pháp 1]
+             → Mục tiêu về kiến thức
+             → Mục tiêu về năng lực
+             → Mục tiêu về phẩm chất
+             
+        1.2. Nội dung và cách thực hiện
+             → Mô tả chi tiết bản chất giải pháp
+             → Cơ sở khoa học của giải pháp
+             → Điểm mới, sáng tạo
+             
+        1.3. Quy trình thực hiện (5-7 bước cụ thể)
+             Bước 1: [Tên bước] - [Chi tiết cách làm]
+             Bước 2: [Tên bước] - [Chi tiết cách làm]
+             Bước 3: [Tên bước] - [Chi tiết cách làm]
+             Bước 4: [Tên bước] - [Chi tiết cách làm]
+             Bước 5: [Tên bước] - [Chi tiết cách làm]
+             
+        1.4. Ví dụ minh họa cụ thể
+             → Bài học trong SGK ${userInfo.textbook || "hiện hành"}
+             → Hoạt động chi tiết với thời lượng
+             → Sản phẩm học sinh mẫu
+             
+        1.5. Điều kiện thực hiện & Lưu ý
+             → Yêu cầu về CSVC (tận dụng ${userInfo.facilities})
+             → Điều kiện thành công
+             → Những lưu ý quan trọng
+
+   GIẢI PHÁP 2: [Tên giải pháp cụ thể, ấn tượng]
+        [Cấu trúc tương tự giải pháp 1, triển khai đầy đủ 5 mục]
+
+   GIẢI PHÁP 3: [Tên giải pháp cụ thể, ấn tượng]
+        [Cấu trúc tương tự giải pháp 1, triển khai đầy đủ 5 mục]
    
-   GIẢI PHÁP 3: [Tên giải pháp cụ thể]
-   [Cấu trúc tương tự giải pháp 1]
-   
-   GIẢI PHÁP 4: [Nếu cần]
-   GIẢI PHÁP 5: [Nếu cần]
+   → MỐI LIÊN HỆ GIỮA CÁC GIẢI PHÁP (giải thích tính hệ thống, logic)
 
-V. KẾT QUẢ ĐẠT ĐƯỢC (4-6 trang)
+5. KẾT QUẢ ĐẠT ĐƯỢC (4-5 trang)
 
-   5.1. Về học sinh
-        → Bảng số liệu trước - sau áp dụng
-        → Thay đổi về thái độ học tập
-        → Tiến bộ năng lực cụ thể
-        → Minh chứng sản phẩm học sinh
+   5.1. Mục đích thực nghiệm
+        → Kiểm chứng tính hiệu quả của sáng kiến
+        → Đánh giá mức độ phù hợp với thực tiễn
         
-   5.2. Về giáo viên
-        → Hiệu quả về thời gian
-        → Nâng cao năng lực dạy học
-        → Thay đổi tư duy
+   5.2. Nội dung thực nghiệm
+        → Đối tượng: ${userInfo.researchSubjects || "Học sinh tại đơn vị"}
+        → Thời gian: ${userInfo.timeframe || "Năm học hiện tại"}
+        → Phạm vi áp dụng
         
-   5.3. Về nhà trường
-        → Chất lượng giáo dục
-        → Tác động lan tỏa
-        → Khả năng nhân rộng
+   5.3. Tổ chức thực nghiệm
+        → Bảng so sánh kết quả TRƯỚC - SAU (dùng số liệu lẻ: 42.3%, 67.8%)
+        → Biểu đồ minh họa
+        → Phân tích, nhận xét kết quả
+        → Ý kiến phản hồi từ học sinh, đồng nghiệp
 
-VI. KẾT LUẬN VÀ KHUYẾN NGHỊ (2-3 trang)
+6. ĐIỀU KIỆN ĐỂ SÁNG KIẾN ĐƯỢC NHÂN RỘNG (1-2 trang)
 
-   6.1. Kết luận
-        → Tóm lược giá trị đề tài
-        → Điểm mới của sáng kiến
-        → Đóng góp cho thực tiễn
-        
-   6.2. Hạn chế và bài học kinh nghiệm
-        → Những khó khăn còn tồn tại
-        → Bài học rút ra
-        
-   6.3. Khuyến nghị
-        → Với nhà trường
-        → Với tổ chuyên môn
-        → Với giáo viên
-        → Với Sở/Phòng GD&ĐT
-        → Hướng phát triển tiếp theo
+   → Điều kiện về CSVC
+   → Điều kiện về năng lực giáo viên
+   → Điều kiện về đối tượng học sinh
+   → Khả năng áp dụng tại các trường khác
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📌 KẾT LUẬN VÀ KHUYẾN NGHỊ (2-3 trang)
+
+1. Kết luận
+   → Tóm tắt những đóng góp chính của sáng kiến
+   → Điểm mới, điểm sáng tạo
+   → Giá trị thực tiễn
+
+2. Khuyến nghị  
+   → Với nhà trường
+   → Với tổ chuyên môn
+   → Với giáo viên
+   → Với Phòng/Sở GD&ĐT
+   → Hướng phát triển tiếp theo
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📚 TÀI LIỆU THAM KHẢO
+   → Liệt kê 8-12 tài liệu theo chuẩn trích dẫn
+
+📎 PHỤ LỤC
+   → Phiếu khảo sát
+   → Giáo án minh họa
+   → Hình ảnh hoạt động
+   → Sản phẩm học sinh
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 YÊU CẦU CHẤT LƯỢNG DÀN Ý:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
+✓ CHỈ 3 GIẢI PHÁP - nhưng mỗi giải pháp phải HOÀN THIỆN, CHỈN CHU
 ✓ Dàn ý phải CỤ THỂ, không chung chung
 ✓ Mỗi mục phải có ý nhỏ chi tiết (bullet points)
 ✓ Có gợi ý số liệu cần thu thập
@@ -345,7 +409,7 @@ YÊU CẦU CHẤT LƯỢNG DÀN Ý:
 ✓ Phù hợp với đặc thù môn ${userInfo.subject} và cấp ${userInfo.level}
 ✓ Đảm bảo tính logic, mạch lạc
 ✓ Thể hiện rõ tính MỚI và SÁNG TẠO
-✓ Tính khả thi cao với điều kiện thực tế và CSVC của trường
+✓ Tính khả thi cao với điều kiện thực tế
 ✓ Có thể triển khai ngay
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -353,10 +417,11 @@ YÊU CẦU CHẤT LƯỢNG DÀN Ý:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 Trình bày theo cấu trúc phân cấp rõ ràng (Markdown):
-I. TÊN PHẦN LỚN
+1. TÊN PHẦN LỚN
    1.1. Tên mục nhỏ
         • Ý chi tiết 1
         • Ý chi tiết 2
+
 
 Sử dụng icon để dễ nhìn: ✓ → • ○ ▪ ■
 
@@ -600,43 +665,15 @@ QUAN TRỌNG:
   };
 
   // Export to Word
-  const exportToWord = () => {
-    // @ts-ignore
-    if (typeof marked === 'undefined') {
-      alert("Library not loaded correctly. Please refresh.");
-      return;
+  const exportToWord = async () => {
+    try {
+      const { exportMarkdownToDocx } = await import('./services/docxExporter');
+      const filename = `SKKN_${userInfo.topic.substring(0, 30).replace(/[^a-zA-Z0-9\u00C0-\u1EF9]/g, '_')}.docx`;
+      await exportMarkdownToDocx(state.fullDocument, filename);
+    } catch (error: any) {
+      console.error('Export error:', error);
+      alert('Có lỗi khi xuất file. Vui lòng thử lại.');
     }
-
-    // @ts-ignore
-    const htmlContent = marked.parse(state.fullDocument);
-
-    const preHtml = `<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
-    <head><meta charset='utf-8'><title>Export HTML To Doc</title>
-    <style>
-      body { font-family: 'Times New Roman', serif; font-size: 14pt; line-height: 1.5; }
-      h1 { font-size: 24pt; font-weight: bold; text-align: center; }
-      h2 { font-size: 18pt; font-weight: bold; margin-top: 20px; }
-      h3 { font-size: 16pt; font-weight: bold; margin-top: 15px; }
-      p { margin-bottom: 10px; text-align: justify; }
-      table { border-collapse: collapse; width: 100%; margin: 20px 0; }
-      th, td { border: 1px solid black; padding: 8px; }
-    </style>
-    </head><body>`;
-    const postHtml = "</body></html>";
-    const html = preHtml + htmlContent + postHtml;
-
-    const blob = new Blob(['\ufeff', html], {
-      type: 'application/msword'
-    });
-
-    const url = 'data:application/vnd.ms-word;charset=utf-8,' + encodeURIComponent(html);
-
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `SKKN_${userInfo.topic.substring(0, 30)}.doc`; // .doc works better with simple HTML wrap than .docx
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
   };
 
   // Render Logic

@@ -1,6 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { UserInfo } from '../types';
 import { Button } from './Button';
+import { InputWithHistory, TextareaWithHistory } from './InputWithHistory';
+import { saveFormToHistory } from '../services/inputHistory';
 import { BookOpen, School, GraduationCap, PenTool, MapPin, Calendar, Users, Cpu, Target, Monitor, FileUp, Sparkles, ClipboardPaste, Loader2, FileText } from 'lucide-react';
 import * as mammoth from 'mammoth';
 import * as pdfjsLib from 'pdfjs-dist';
@@ -52,6 +54,14 @@ export const SKKNForm: React.FC<Props> = ({ userInfo, onChange, onSubmit, onManu
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     onChange(e.target.name as keyof UserInfo, e.target.value);
+  };
+
+  // Wrapper để lưu lịch sử trước khi submit
+  const handleSubmitWithHistory = () => {
+    // Lưu tất cả thông tin vào lịch sử
+    saveFormToHistory(userInfo as unknown as Record<string, string>);
+    // Gọi submit gốc
+    onSubmit();
   };
 
   const extractTextFromPdf = async (arrayBuffer: ArrayBuffer): Promise<string> => {
@@ -238,25 +248,25 @@ export const SKKNForm: React.FC<Props> = ({ userInfo, onChange, onSubmit, onManu
 
           <div className="space-y-5">
             <InputGroup label="Tên đề tài SKKN" icon={PenTool} required>
-              <input
-                type="text"
+              <InputWithHistory
                 name="topic"
                 value={userInfo.topic}
                 onChange={handleChange}
                 className="bg-gray-50 focus:bg-white focus:ring-sky-500 focus:border-sky-500 block w-full pl-10 text-sm border-gray-300 rounded-md p-3 border text-gray-900 placeholder-gray-500"
                 placeholder='VD: "Ứng dụng AI để nâng cao hiệu quả dạy học môn Toán THPT"'
+                required
               />
             </InputGroup>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <InputGroup label="Môn học" icon={BookOpen} required>
-                <input
-                  type="text"
+                <InputWithHistory
                   name="subject"
                   value={userInfo.subject}
                   onChange={handleChange}
                   className="bg-gray-50 focus:bg-white focus:ring-sky-500 focus:border-sky-500 block w-full pl-10 text-sm border-gray-300 rounded-md p-3 border text-gray-900 placeholder-gray-500"
                   placeholder="VD: Toán, Ngữ văn, Tiếng Anh..."
+                  required
                 />
               </InputGroup>
 
@@ -291,24 +301,24 @@ export const SKKNForm: React.FC<Props> = ({ userInfo, onChange, onSubmit, onManu
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <InputGroup label="Tên trường / Đơn vị" icon={School} required>
-                <input
-                  type="text"
+                <InputWithHistory
                   name="school"
                   value={userInfo.school}
                   onChange={handleChange}
                   className="bg-gray-50 focus:bg-white focus:ring-sky-500 focus:border-sky-500 block w-full pl-10 text-sm border-gray-300 rounded-md p-3 border text-gray-900 placeholder-gray-500"
                   placeholder="VD: Trường THPT Nguyễn Du"
+                  required
                 />
               </InputGroup>
 
               <InputGroup label="Địa điểm (Huyện, Tỉnh)" icon={MapPin} required>
-                <input
-                  type="text"
+                <InputWithHistory
                   name="location"
                   value={userInfo.location}
                   onChange={handleChange}
                   className="bg-gray-50 focus:bg-white focus:ring-sky-500 focus:border-sky-500 block w-full pl-10 text-sm border-gray-300 rounded-md p-3 border text-gray-900 placeholder-gray-500"
                   placeholder="VD: Quận 1, TP.HCM"
+                  required
                 />
               </InputGroup>
             </div>
@@ -605,7 +615,7 @@ export const SKKNForm: React.FC<Props> = ({ userInfo, onChange, onSubmit, onManu
                 <p>Hệ thống AI sẽ tự động phân tích đề tài và tạo ra dàn ý chi tiết gồm 6 phần chuẩn Bộ GD&ĐT. Bạn có thể chỉnh sửa lại sau khi tạo xong.</p>
               </div>
               <Button
-                onClick={onSubmit}
+                onClick={handleSubmitWithHistory}
                 disabled={!isInfoValid || isSubmitting}
                 isLoading={isSubmitting}
                 className="w-full py-4 text-lg font-bold shadow-sky-500/30 shadow-lg"

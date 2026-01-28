@@ -9,14 +9,17 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "react-markdown": "^10.1.0",
-    "remark-gfm": "^4.0.1",
     "@google/genai": "^1.31.0",
+    "docx": "^9.5.1",
     "lucide-react": "^0.555.0",
-    "react-dom": "^19.2.1",
-    "react": "^19.2.1",
     "mammoth": "^1.6.0",
-    "pdfjs-dist": "^3.11.174"
+    "pdfjs-dist": "^3.11.174",
+    "react": "^19.2.1",
+    "react-dom": "^19.2.1",
+    "react-markdown": "^10.1.0",
+    "rehype-katex": "^7.0.1",
+    "remark-gfm": "^4.0.1",
+    "remark-math": "^6.0.0"
   },
   "devDependencies": {
     "@types/node": "^22.14.0",

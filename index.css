@@ -194,3 +194,176 @@ html, body, #root {
 #root > * {
   animation: fadeIn 0.3s ease-out;
 }
+
+/* ====== PROSE STYLING FOR DOCUMENT PREVIEW ====== */
+/* Sửa lỗi dính câu dính chữ */
+.prose {
+  line-height: 1.8;
+  font-size: 16px;
+}
+
+.prose p {
+  margin-bottom: 1em;
+  line-height: 1.8;
+  text-align: justify;
+}
+
+.prose h1, .prose h2, .prose h3, .prose h4, .prose h5, .prose h6 {
+  margin-top: 1.5em;
+  margin-bottom: 0.75em;
+  line-height: 1.4;
+}
+
+.prose h1 {
+  font-size: 1.75em;
+}
+
+.prose h2 {
+  font-size: 1.5em;
+}
+
+.prose h3 {
+  font-size: 1.25em;
+}
+
+.prose ul, .prose ol {
+  margin-top: 0.75em;
+  margin-bottom: 1em;
+  padding-left: 1.5em;
+}
+
+.prose li {
+  margin-bottom: 0.5em;
+  line-height: 1.7;
+}
+
+.prose li > p {
+  margin-bottom: 0.5em;
+}
+
+/* Sửa lỗi bullet list dính liền */
+.prose ul > li {
+  position: relative;
+  padding-left: 0.5em;
+}
+
+.prose ol > li {
+  padding-left: 0.5em;
+}
+
+/* Khoảng cách giữa các mục con */
+.prose li > ul, .prose li > ol {
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+}
+
+/* Tables */
+.prose table {
+  margin-top: 1em;
+  margin-bottom: 1em;
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.prose th, .prose td {
+  border: 1px solid #d1d5db;
+  padding: 0.75em;
+  text-align: left;
+}
+
+.prose th {
+  background-color: #f3f4f6;
+  font-weight: 600;
+}
+
+/* Code blocks */
+.prose pre {
+  margin-top: 1em;
+  margin-bottom: 1em;
+  padding: 1em;
+  background-color: #f5f5f5;
+  border-radius: 0.375em;
+  overflow-x: auto;
+}
+
+.prose code {
+  font-family: 'Consolas', 'Monaco', monospace;
+  font-size: 0.9em;
+}
+
+/* Inline code */
+.prose :not(pre) > code {
+  background-color: #e5e7eb;
+  padding: 0.125em 0.25em;
+  border-radius: 0.25em;
+}
+
+/* Blockquotes */
+.prose blockquote {
+  margin-top: 1em;
+  margin-bottom: 1em;
+  padding-left: 1em;
+  border-left: 4px solid #0ea5e9;
+  font-style: italic;
+  color: #4b5563;
+}
+
+/* Horizontal rule */
+.prose hr {
+  margin-top: 2em;
+  margin-bottom: 2em;
+  border: none;
+  border-top: 1px solid #e5e7eb;
+}
+
+/* Strong and emphasis */
+.prose strong {
+  font-weight: 700;
+}
+
+.prose em {
+  font-style: italic;
+}
+
+/* Links */
+.prose a {
+  color: #0ea5e9;
+  text-decoration: underline;
+}
+
+.prose a:hover {
+  color: #0284c7;
+}
+
+/* ====== KATEX STYLING ====== */
+/* Đảm bảo công thức toán hiển thị đẹp */
+.katex {
+  font-size: 1.1em;
+}
+
+.katex-display {
+  margin: 1em 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 0.5em 0;
+}
+
+.katex-display > .katex {
+  max-width: 100%;
+}
+
+/* Inline math */
+.prose .katex {
+  font-size: 1em;
+}
+
+/* Block math */
+.prose .katex-display {
+  margin: 1.5em 0;
+  text-align: center;
+}
+
+/* Đảm bảo công thức không bị cắt */
+.katex-html {
+  white-space: normal;
+}
