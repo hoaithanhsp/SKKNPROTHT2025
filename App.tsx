@@ -625,7 +625,7 @@ QUAN TRỌNG:
         },
         [GenerationStep.PART_V_VI]: {
           prompt: `
-              BẮT ĐẦU phản hồi bằng MENU NAVIGATION trạng thái Bước 6 (Kết luận & Khuyến nghị - Đang thực hiện).
+              BẮT ĐẦU phản hồi bằng MENU NAVIGATION trạng thái Bước 7 (Kết luận & Khuyến nghị - Đang thực hiện).
 
               Tiếp tục viết:
               
@@ -642,8 +642,6 @@ QUAN TRỌNG:
               
               TÀI LIỆU THAM KHẢO (8-12 tài liệu)
               
-              PHỤ LỤC (Phiếu khảo sát, Giáo án, Hình ảnh)
-              
               Đảm bảo số liệu phần Kết quả phải LOGIC và chứng minh được sự tiến bộ so với phần Thực trạng.
               Sử dụng số liệu lẻ (42.3%, 67.8%) không dùng số tròn.
               
@@ -651,7 +649,86 @@ QUAN TRỌNG:
               - Viết từng câu xuống dòng riêng.
               - Tách đoạn rõ ràng.
               - Không viết dính chữ.
-              - Menu Navigation: Đánh dấu các bước đã xong (✅), Bước 6 đang làm (🔵).`,
+              - Menu Navigation: Đánh dấu các bước đã xong (✅), Bước 7 đang làm (🔵).
+              
+              📌 LƯU Ý: Chưa viết phần PHỤ LỤC chi tiết, chỉ gợi ý danh sách phụ lục.
+              Phụ lục chi tiết sẽ được tạo ở bước tiếp theo.`,
+          nextStep: GenerationStep.APPENDIX
+        },
+        [GenerationStep.APPENDIX]: {
+          prompt: `
+              BẮT ĐẦU phản hồi bằng MENU NAVIGATION trạng thái Bước 8 (Tạo Phụ lục chi tiết - Đang thực hiện).
+
+              ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+              📎 NHIỆM VỤ: TẠO ĐẦY ĐỦ CÁC TÀI LIỆU PHỤ LỤC
+              ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+              
+              Dựa trên NỘI DUNG DÀN Ý SKKN đã lập (đặc biệt là phần gợi ý Phụ lục), 
+              hãy viết ĐẦY ĐỦ, CHI TIẾT từng tài liệu phụ lục sau:
+
+              ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+              📋 PHỤ LỤC 1: PHIẾU KHẢO SÁT GIÁO VIÊN TRƯỚC KHI THỰC HIỆN SÁNG KIẾN
+              ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+              - Viết phiếu khảo sát HOÀN CHỈNH với 10-15 câu hỏi
+              - Dạng câu hỏi: Trắc nghiệm mức độ (Rất thường xuyên / Thường xuyên / Thỉnh thoảng / Hiếm khi / Không bao giờ)
+              - Nội dung: Khảo sát thực trạng sử dụng phương pháp/công nghệ trong đề tài "${userInfo.topic}"
+              - Format: Bảng Markdown chuẩn (|---|)
+
+              ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+              📋 PHỤ LỤC 2: PHIẾU KHẢO SÁT HỌC SINH TRƯỚC VÀ SAU KHI THỰC HIỆN SÁNG KIẾN
+              ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+              - PHẦN A: Phiếu khảo sát TRƯỚC khi áp dụng sáng kiến (10-12 câu)
+              - PHẦN B: Phiếu khảo sát SAU khi áp dụng sáng kiến (12-15 câu)
+              - Dạng: Likert 5 mức độ (Rất đồng ý → Rất không đồng ý)
+              - Nội dung: Đánh giá mức độ hứng thú, khó khăn, hiệu quả với môn ${userInfo.subject}
+              - Đối tượng: ${userInfo.researchSubjects || "Học sinh tại đơn vị"}
+
+              ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+              📋 PHỤ LỤC 3: GIÁO ÁN MINH HỌA 
+              ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+              - Theo format giáo án chuẩn Thông tư 32 (nếu THPT) / Thông tư 27 (nếu tiểu học)
+              - Bài học cụ thể từ SGK ${userInfo.textbook || "hiện hành"}
+              - Phải có đầy đủ:
+                + I. Mục tiêu (Kiến thức, Năng lực, Phẩm chất)
+                + II. Thiết bị dạy học và học liệu
+                + III. Tiến trình dạy học (5 hoạt động: Mở đầu, Hình thành kiến thức, Luyện tập, Vận dụng, Mở rộng)
+                + IV. Phương án đánh giá
+              - Tích hợp công cụ/phương pháp của GIẢI PHÁP 1 vào giáo án
+
+              ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+              📋 PHỤ LỤC 4: KỊCH BẢN DỰ ÁN / HOẠT ĐỘNG TRẢI NGHIỆM
+              ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+              - Mô tả chi tiết dự án học sinh có thể thực hiện (theo GIẢI PHÁP 2)
+              - Gồm: Tên dự án, Mục tiêu, Thời lượng, Các giai đoạn thực hiện
+              - Có Rubric đánh giá sản phẩm học sinh
+
+              ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+              📋 PHỤ LỤC 5: BÀI TẬP MẪU / CÂU HỎI TRÒ CHƠI
+              ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+              - 5-7 bài tập mẫu hoặc câu hỏi trò chơi (theo GIẢI PHÁP 3)
+              - Có đáp án và hướng dẫn chấm điểm
+              - Nếu môn Toán: Sử dụng LaTeX cho công thức ($...$, $$...$$)
+
+              ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+              📋 PHỤ LỤC 6: BẢNG TỔNG HỢP Ý KIẾN PHẢN HỒI
+              ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+              - Mẫu bảng tổng hợp ý kiến từ HỌC SINH (10-15 ý kiến mẫu)
+              - Mẫu bảng tổng hợp ý kiến từ ĐỒNG NGHIỆP (5-8 ý kiến mẫu)
+              - Format: Bảng Markdown
+
+              ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+              ⚠️ YÊU CẦU FORMAT (BẮT BUỘC):
+              ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+              - Markdown chuẩn, bảng dùng |---|
+              - Bảng phải bắt đầu từ đầu dòng (không thụt lề)
+              - Xuống dòng sau mỗi câu
+              - Tách đoạn rõ ràng
+              - Đánh số phụ lục rõ ràng: PHỤ LỤC 1, PHỤ LỤC 2...
+              
+              📍 KẾT THÚC bằng dòng:
+              ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+              ✅ HOÀN THÀNH TẠO TÀI LIỆU PHỤ LỤC
+              ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`,
           nextStep: GenerationStep.COMPLETED
         }
       };
@@ -676,7 +753,7 @@ QUAN TRỌNG:
       });
 
       // If we just finished the last part, move to completed
-      if (nextStepEnum === GenerationStep.PART_V_VI) {
+      if (nextStepEnum === GenerationStep.APPENDIX) {
         setState(prev => ({ ...prev, step: GenerationStep.COMPLETED, isStreaming: false }));
       } else {
         setState(prev => ({ ...prev, isStreaming: false }));
