@@ -737,59 +737,142 @@ QUAN TRỌNG:
         Dựa trên NỘI DUNG SKKN đã viết, hãy tạo ĐẦY ĐỦ, CHI TIẾT từng tài liệu phụ lục sau:
 
         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        📋 PHỤ LỤC 1: PHIẾU KHẢO SÁT GIÁO VIÊN TRƯỚC KHI THỰC HIỆN SÁNG KIẾN
+        📋 PHỤ LỤC 1: PHIẾU KHẢO SÁT ĐÁNH GIÁ MỨC ĐỘ HỨNG THÚ VÀ HIỆU QUẢ HỌC TẬP CỦA HỌC SINH
+        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        
+        **PHẦN A: PHIẾU KHẢO SÁT TRƯỚC KHI ÁP DỤNG SÁNG KIẾN**
+        
+        Tạo bảng khảo sát với format:
+        | STT | Nội dung khảo sát | 1 | 2 | 3 | 4 | 5 |
+        |-----|-------------------|---|---|---|---|---|
+        | 1 | [Nội dung câu hỏi về mức độ hứng thú với môn ${userInfo.subject}] | | | | | |
+        | 2 | [Nội dung câu hỏi về khó khăn khi học] | | | | | |
+        ...
+        
+        Ghi chú: 1 = Rất không đồng ý, 2 = Không đồng ý, 3 = Bình thường, 4 = Đồng ý, 5 = Rất đồng ý
+        
+        Nội dung câu hỏi (10-12 câu):
+        - Mức độ hứng thú với môn học
+        - Cảm nhận về phương pháp dạy học hiện tại
+        - Mức độ tham gia hoạt động học tập
+        - Khả năng tự học, tự nghiên cứu
+        - Mức độ khó khăn khi tiếp thu kiến thức
+        - Hiệu quả ghi nhớ kiến thức
+        - Kỹ năng vận dụng kiến thức vào thực tế
+        
+        **PHẦN B: PHIẾU KHẢO SÁT SAU KHI ÁP DỤNG SÁNG KIẾN**
+        
+        Tạo bảng khảo sát tương tự với 12-15 câu hỏi về:
+        - Mức độ hứng thú sau khi áp dụng sáng kiến
+        - Hiệu quả của phương pháp mới
+        - Khả năng tiếp thu kiến thức
+        - Sự cải thiện kết quả học tập
+        - Mong muốn tiếp tục học theo phương pháp mới
+
+        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        📋 PHỤ LỤC 2: PHIẾU KHẢO SÁT GIÁO VIÊN VỀ THỰC TRẠNG DẠY HỌC
         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         - Viết phiếu khảo sát HOÀN CHỈNH với 10-15 câu hỏi
         - Dạng câu hỏi: Trắc nghiệm mức độ (Rất thường xuyên / Thường xuyên / Thỉnh thoảng / Hiếm khi / Không bao giờ)
-        - Nội dung: Khảo sát thực trạng sử dụng phương pháp/công nghệ trong đề tài "${userInfo.topic}"
-        - Format: Bảng Markdown chuẩn (|---|)
+        - Nội dung: Khảo sát thực trạng sử dụng phương pháp/công nghệ liên quan đến "${userInfo.topic}"
+        - Format: Bảng Markdown chuẩn với đầy đủ các cột
+        | STT | Nội dung | Rất thường xuyên | Thường xuyên | Thỉnh thoảng | Hiếm khi | Không bao giờ |
+        |-----|----------|------------------|--------------|--------------|----------|---------------|
+        
+        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        📋 PHỤ LỤC 3: GIÁO ÁN MINH HỌA (Theo Công văn 5512/BGDĐT ngày 18/12/2020)
+        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        
+        **KHUNG KẾ HOẠCH BÀI DẠY**
+        (Kèm theo Công văn số 5512/BGDĐT-GDTrH ngày 18 tháng 12 năm 2020 của Bộ GDĐT)
+        
+        Trường: ${userInfo.school}
+        Tổ: [Tổ chuyên môn]
+        Họ và tên giáo viên: ……………………
+        
+        **TÊN BÀI DẠY: [Chọn một bài cụ thể từ SGK ${userInfo.textbook || "hiện hành"} phù hợp với đề tài]**
+        Môn học: ${userInfo.subject}; Lớp: ${userInfo.grade}
+        Thời gian thực hiện: [Số tiết]
+        
+        **I. MỤC TIÊU**
+        
+        1. Về kiến thức: 
+           - Nêu cụ thể nội dung kiến thức học sinh cần học
+           
+        2. Về năng lực:
+           - Năng lực chung: [Tự chủ và tự học, giao tiếp và hợp tác, giải quyết vấn đề]
+           - Năng lực đặc thù: [Năng lực đặc thù môn ${userInfo.subject}]
+           
+        3. Về phẩm chất:
+           - Trách nhiệm, chăm chỉ, trung thực trong học tập
+        
+        **II. THIẾT BỊ DẠY HỌC VÀ HỌC LIỆU**
+        - Giáo viên: [Liệt kê thiết bị, tài liệu GV chuẩn bị]
+        - Học sinh: [Liệt kê những gì HS cần chuẩn bị]
+        - Điều kiện CSVC: ${userInfo.facilities}
+        
+        **III. TIẾN TRÌNH DẠY HỌC**
+        
+        **1. Hoạt động 1: Mở đầu/Khởi động (... phút)**
+        a) Mục tiêu: Tạo hứng thú, xác định vấn đề/nhiệm vụ học tập
+        b) Nội dung: [Mô tả cụ thể hoạt động]
+        c) Sản phẩm: [Kết quả học sinh đạt được]
+        d) Tổ chức thực hiện:
+           - Giao nhiệm vụ: [GV giao nhiệm vụ cụ thể]
+           - Thực hiện: [HS thực hiện, GV theo dõi hỗ trợ]
+           - Báo cáo, thảo luận: [HS báo cáo, GV tổ chức thảo luận]
+           - Kết luận, nhận định: [GV kết luận, chuyển tiếp]
+        
+        **2. Hoạt động 2: Hình thành kiến thức mới (... phút)**
+        a) Mục tiêu: Giúp HS chiếm lĩnh kiến thức mới
+        b) Nội dung: [Mô tả cụ thể các nhiệm vụ học tập]
+        c) Sản phẩm: [Kiến thức, kỹ năng HS cần đạt được]
+        d) Tổ chức thực hiện:
+           - Giao nhiệm vụ: [Chi tiết]
+           - Thực hiện: [Chi tiết - TÍCH HỢP CÔNG CỤ/PHƯƠNG PHÁP CỦA GIẢI PHÁP 1]
+           - Báo cáo, thảo luận: [Chi tiết]
+           - Kết luận, nhận định: [Chi tiết]
+        
+        **3. Hoạt động 3: Luyện tập (... phút)**
+        a) Mục tiêu: Củng cố, vận dụng kiến thức đã học
+        b) Nội dung: [Hệ thống câu hỏi, bài tập]
+        c) Sản phẩm: [Đáp án, lời giải của HS]
+        d) Tổ chức thực hiện: [Chi tiết các bước]
+        
+        **4. Hoạt động 4: Vận dụng (... phút)**
+        a) Mục tiêu: Phát triển năng lực vận dụng vào thực tiễn
+        b) Nội dung: [Nhiệm vụ/tình huống thực tiễn]
+        c) Sản phẩm: [Báo cáo, sản phẩm của HS]
+        d) Tổ chức thực hiện: [Giao về nhà hoặc thực hiện trên lớp]
 
         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        📋 PHỤ LỤC 2: PHIẾU KHẢO SÁT HỌC SINH TRƯỚC VÀ SAU KHI THỰC HIỆN SÁNG KIẾN
+        📋 PHỤ LỤC 4: PHIẾU HỌC TẬP / RUBRIC ĐÁNH GIÁ
         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        - PHẦN A: Phiếu khảo sát TRƯỚC khi áp dụng sáng kiến (10-12 câu)
-        - PHẦN B: Phiếu khảo sát SAU khi áp dụng sáng kiến (12-15 câu)
-        - Dạng: Likert 5 mức độ (Rất đồng ý → Rất không đồng ý)
-        - Nội dung: Đánh giá mức độ hứng thú, khó khăn, hiệu quả với môn ${userInfo.subject}
-        - Đối tượng: ${userInfo.researchSubjects || "Học sinh tại đơn vị"}
+        - Phiếu học tập mẫu cho hoạt động nhóm
+        - Rubric đánh giá sản phẩm học sinh (theo 4 mức: Tốt, Khá, Đạt, Chưa đạt)
+        - Bảng tiêu chí đánh giá với các mức độ rõ ràng
 
         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        📋 PHỤ LỤC 3: GIÁO ÁN MINH HỌA 
+        📋 PHỤ LỤC 5: BÀI TẬP MẪU / CÂU HỎI ÔN TẬP
         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        - Theo format giáo án chuẩn Thông tư 32 (nếu THPT) / Thông tư 27 (nếu tiểu học)
-        - Bài học cụ thể từ SGK ${userInfo.textbook || "hiện hành"}
-        - Phải có đầy đủ:
-          + I. Mục tiêu (Kiến thức, Năng lực, Phẩm chất)
-          + II. Thiết bị dạy học và học liệu
-          + III. Tiến trình dạy học (5 hoạt động: Mở đầu, Hình thành kiến thức, Luyện tập, Vận dụng, Mở rộng)
-          + IV. Phương án đánh giá
-        - Tích hợp công cụ/phương pháp của GIẢI PHÁP 1 vào giáo án
-
-        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        📋 PHỤ LỤC 4: KỊCH BẢN DỰ ÁN / HOẠT ĐỘNG TRẢI NGHIỆM
-        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        - Mô tả chi tiết dự án học sinh có thể thực hiện (theo GIẢI PHÁP 2)
-        - Gồm: Tên dự án, Mục tiêu, Thời lượng, Các giai đoạn thực hiện
-        - Có Rubric đánh giá sản phẩm học sinh
-
-        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        📋 PHỤ LỤC 5: BÀI TẬP MẪU / CÂU HỎI TRÒ CHƠI
-        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        - 5-7 bài tập mẫu hoặc câu hỏi trò chơi (theo GIẢI PHÁP 3)
+        - 5-7 bài tập mẫu/câu hỏi ôn tập
         - Có đáp án và hướng dẫn chấm điểm
-        - Nếu môn Toán: Sử dụng LaTeX cho công thức ($...$, $$...$$)
+        - Nếu môn Toán: Sử dụng LaTeX cho công thức
 
         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        📋 PHỤ LỤC 6: BẢNG TỔNG HỢP Ý KIẾN PHẢN HỒI
+        📋 PHỤ LỤC 6: BẢNG TỔNG HỢP KẾT QUẢ KHẢO SÁT (MINH CHỨNG CHO BẢNG DỮ LIỆU SKKN)
         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        - Mẫu bảng tổng hợp ý kiến từ HỌC SINH (10-15 ý kiến mẫu)
-        - Mẫu bảng tổng hợp ý kiến từ ĐỒNG NGHIỆP (5-8 ý kiến mẫu)
-        - Format: Bảng Markdown
+        - Bảng tổng hợp kết quả khảo sát TRƯỚC thực nghiệm (số lượng, tỷ lệ %)
+        - Bảng tổng hợp kết quả khảo sát SAU thực nghiệm
+        - Bảng so sánh kết quả TRƯỚC-SAU để minh chứng cho các bảng số liệu trong SKKN
+        - Số liệu phải LOGIC và KHỚP với các bảng trong phần Kết quả của SKKN
 
         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         ⚠️ YÊU CẦU FORMAT (BẮT BUỘC):
         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         - Markdown chuẩn, bảng dùng |---|
+        - BẢNG PHẢI CÓ ĐẦY ĐỦ TẤT CẢ CÁC CỘT, không được bỏ sót cột nào
+        - Mỗi hàng trong bảng phải có đủ số ô tương ứng với số cột ở header
         - Bảng phải bắt đầu từ đầu dòng (không thụt lề)
         - Xuống dòng sau mỗi câu
         - Tách đoạn rõ ràng
