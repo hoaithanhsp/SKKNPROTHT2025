@@ -36,8 +36,8 @@ function formatContent(text: string): string {
   // Pattern 4: Xuống dòng trước dấu gạch ngang "-" khi là mục lớn (theo sau là chữ in hoa)
   formatted = formatted.replace(/([^\n-])(\s*-\s+[A-ZĐÀÁẢÃẠ])/g, '$1\n\n$2');
 
-  // Pattern 5: Xuống dòng trước "+)" khi là mục con
-  formatted = formatted.replace(/([^\n+])(\s*\+\)\s+)/g, '$1\n$2');
+  // Pattern 5: Xuống dòng trước "+" khi là mục con (nhưng không phải ở đầu dòng)
+  formatted = formatted.replace(/([^\n+])(\s*\+\s+[A-ZĐÀÁẢÃẠa-zđàáảãạ])/g, '$1\n$2');
 
   // Pattern 6: Xuống dòng trước các keyword quan trọng
   const keywords = [
