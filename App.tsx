@@ -82,6 +82,10 @@ const App: React.FC = () => {
 
   const [outlineFeedback, setOutlineFeedback] = useState("");
 
+  // Phụ lục riêng biệt
+  const [appendixDocument, setAppendixDocument] = useState('');
+  const [isAppendixLoading, setIsAppendixLoading] = useState(false);
+
   // Handle Input Changes
   const handleUserChange = (field: keyof UserInfo, value: string) => {
     setUserInfo(prev => ({ ...prev, [field]: value }));
@@ -669,83 +673,7 @@ QUAN TRỌNG:
               - Menu Navigation: Đánh dấu các bước đã xong (✅), Bước 7 đang làm (🔵).
               
               📌 LƯU Ý: Chưa viết phần PHỤ LỤC chi tiết, chỉ gợi ý danh sách phụ lục.
-              Phụ lục chi tiết sẽ được tạo ở bước tiếp theo.`,
-          nextStep: GenerationStep.APPENDIX
-        },
-        [GenerationStep.APPENDIX]: {
-          prompt: `
-              BẮT ĐẦU phản hồi bằng MENU NAVIGATION trạng thái Bước 8 (Tạo Phụ lục chi tiết - Đang thực hiện).
-
-              ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-              📎 NHIỆM VỤ: TẠO ĐẦY ĐỦ CÁC TÀI LIỆU PHỤ LỤC
-              ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-              
-              Dựa trên NỘI DUNG DÀN Ý SKKN đã lập (đặc biệt là phần gợi ý Phụ lục), 
-              hãy viết ĐẦY ĐỦ, CHI TIẾT từng tài liệu phụ lục sau:
-
-              ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-              📋 PHỤ LỤC 1: PHIẾU KHẢO SÁT GIÁO VIÊN TRƯỚC KHI THỰC HIỆN SÁNG KIẾN
-              ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-              - Viết phiếu khảo sát HOÀN CHỈNH với 10-15 câu hỏi
-              - Dạng câu hỏi: Trắc nghiệm mức độ (Rất thường xuyên / Thường xuyên / Thỉnh thoảng / Hiếm khi / Không bao giờ)
-              - Nội dung: Khảo sát thực trạng sử dụng phương pháp/công nghệ trong đề tài "${userInfo.topic}"
-              - Format: Bảng Markdown chuẩn (|---|)
-
-              ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-              📋 PHỤ LỤC 2: PHIẾU KHẢO SÁT HỌC SINH TRƯỚC VÀ SAU KHI THỰC HIỆN SÁNG KIẾN
-              ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-              - PHẦN A: Phiếu khảo sát TRƯỚC khi áp dụng sáng kiến (10-12 câu)
-              - PHẦN B: Phiếu khảo sát SAU khi áp dụng sáng kiến (12-15 câu)
-              - Dạng: Likert 5 mức độ (Rất đồng ý → Rất không đồng ý)
-              - Nội dung: Đánh giá mức độ hứng thú, khó khăn, hiệu quả với môn ${userInfo.subject}
-              - Đối tượng: ${userInfo.researchSubjects || "Học sinh tại đơn vị"}
-
-              ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-              📋 PHỤ LỤC 3: GIÁO ÁN MINH HỌA 
-              ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-              - Theo format giáo án chuẩn Thông tư 32 (nếu THPT) / Thông tư 27 (nếu tiểu học)
-              - Bài học cụ thể từ SGK ${userInfo.textbook || "hiện hành"}
-              - Phải có đầy đủ:
-                + I. Mục tiêu (Kiến thức, Năng lực, Phẩm chất)
-                + II. Thiết bị dạy học và học liệu
-                + III. Tiến trình dạy học (5 hoạt động: Mở đầu, Hình thành kiến thức, Luyện tập, Vận dụng, Mở rộng)
-                + IV. Phương án đánh giá
-              - Tích hợp công cụ/phương pháp của GIẢI PHÁP 1 vào giáo án
-
-              ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-              📋 PHỤ LỤC 4: KỊCH BẢN DỰ ÁN / HOẠT ĐỘNG TRẢI NGHIỆM
-              ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-              - Mô tả chi tiết dự án học sinh có thể thực hiện (theo GIẢI PHÁP 2)
-              - Gồm: Tên dự án, Mục tiêu, Thời lượng, Các giai đoạn thực hiện
-              - Có Rubric đánh giá sản phẩm học sinh
-
-              ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-              📋 PHỤ LỤC 5: BÀI TẬP MẪU / CÂU HỎI TRÒ CHƠI
-              ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-              - 5-7 bài tập mẫu hoặc câu hỏi trò chơi (theo GIẢI PHÁP 3)
-              - Có đáp án và hướng dẫn chấm điểm
-              - Nếu môn Toán: Sử dụng LaTeX cho công thức ($...$, $$...$$)
-
-              ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-              📋 PHỤ LỤC 6: BẢNG TỔNG HỢP Ý KIẾN PHẢN HỒI
-              ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-              - Mẫu bảng tổng hợp ý kiến từ HỌC SINH (10-15 ý kiến mẫu)
-              - Mẫu bảng tổng hợp ý kiến từ ĐỒNG NGHIỆP (5-8 ý kiến mẫu)
-              - Format: Bảng Markdown
-
-              ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-              ⚠️ YÊU CẦU FORMAT (BẮT BUỘC):
-              ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-              - Markdown chuẩn, bảng dùng |---|
-              - Bảng phải bắt đầu từ đầu dòng (không thụt lề)
-              - Xuống dòng sau mỗi câu
-              - Tách đoạn rõ ràng
-              - Đánh số phụ lục rõ ràng: PHỤ LỤC 1, PHỤ LỤC 2...
-              
-              📍 KẾT THÚC bằng dòng:
-              ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-              ✅ HOÀN THÀNH TẠO TÀI LIỆU PHỤ LỤC
-              ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`,
+              Phụ lục chi tiết sẽ được tạo riêng bằng nút "TẠO PHỤ LỤC".`,
           nextStep: GenerationStep.COMPLETED
         }
       };
@@ -769,12 +697,8 @@ QUAN TRỌNG:
         }));
       });
 
-      // If we just finished the last part, move to completed
-      if (nextStepEnum === GenerationStep.APPENDIX) {
-        setState(prev => ({ ...prev, step: GenerationStep.COMPLETED, isStreaming: false }));
-      } else {
-        setState(prev => ({ ...prev, isStreaming: false }));
-      }
+      // Just set streaming to false, step was already set
+      setState(prev => ({ ...prev, isStreaming: false }));
 
     } catch (error: any) {
       setState(prev => ({ ...prev, isStreaming: false, error: error.message }));
@@ -790,6 +714,115 @@ QUAN TRỌNG:
     } catch (error: any) {
       console.error('Export error:', error);
       alert('Có lỗi khi xuất file. Vui lòng thử lại.');
+    }
+  };
+
+  // Generate Appendix - Function riêng để tạo phụ lục
+  const generateAppendix = async () => {
+    if (!apiKey) {
+      setShowApiModal(true);
+      return;
+    }
+
+    setIsAppendixLoading(true);
+
+    try {
+      const appendixPrompt = `
+        BẮT ĐẦU phản hồi bằng MENU NAVIGATION trạng thái Bước 8 (Tạo Phụ lục chi tiết - Đang thực hiện).
+
+        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        📎 NHIỆM VỤ: TẠO ĐẦY ĐỦ CÁC TÀI LIỆU PHỤ LỤC
+        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        
+        Dựa trên NỘI DUNG SKKN đã viết, hãy tạo ĐẦY ĐỦ, CHI TIẾT từng tài liệu phụ lục sau:
+
+        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        📋 PHỤ LỤC 1: PHIẾU KHẢO SÁT GIÁO VIÊN TRƯỚC KHI THỰC HIỆN SÁNG KIẾN
+        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        - Viết phiếu khảo sát HOÀN CHỈNH với 10-15 câu hỏi
+        - Dạng câu hỏi: Trắc nghiệm mức độ (Rất thường xuyên / Thường xuyên / Thỉnh thoảng / Hiếm khi / Không bao giờ)
+        - Nội dung: Khảo sát thực trạng sử dụng phương pháp/công nghệ trong đề tài "${userInfo.topic}"
+        - Format: Bảng Markdown chuẩn (|---|)
+
+        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        📋 PHỤ LỤC 2: PHIẾU KHẢO SÁT HỌC SINH TRƯỚC VÀ SAU KHI THỰC HIỆN SÁNG KIẾN
+        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        - PHẦN A: Phiếu khảo sát TRƯỚC khi áp dụng sáng kiến (10-12 câu)
+        - PHẦN B: Phiếu khảo sát SAU khi áp dụng sáng kiến (12-15 câu)
+        - Dạng: Likert 5 mức độ (Rất đồng ý → Rất không đồng ý)
+        - Nội dung: Đánh giá mức độ hứng thú, khó khăn, hiệu quả với môn ${userInfo.subject}
+        - Đối tượng: ${userInfo.researchSubjects || "Học sinh tại đơn vị"}
+
+        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        📋 PHỤ LỤC 3: GIÁO ÁN MINH HỌA 
+        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        - Theo format giáo án chuẩn Thông tư 32 (nếu THPT) / Thông tư 27 (nếu tiểu học)
+        - Bài học cụ thể từ SGK ${userInfo.textbook || "hiện hành"}
+        - Phải có đầy đủ:
+          + I. Mục tiêu (Kiến thức, Năng lực, Phẩm chất)
+          + II. Thiết bị dạy học và học liệu
+          + III. Tiến trình dạy học (5 hoạt động: Mở đầu, Hình thành kiến thức, Luyện tập, Vận dụng, Mở rộng)
+          + IV. Phương án đánh giá
+        - Tích hợp công cụ/phương pháp của GIẢI PHÁP 1 vào giáo án
+
+        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        📋 PHỤ LỤC 4: KỊCH BẢN DỰ ÁN / HOẠT ĐỘNG TRẢI NGHIỆM
+        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        - Mô tả chi tiết dự án học sinh có thể thực hiện (theo GIẢI PHÁP 2)
+        - Gồm: Tên dự án, Mục tiêu, Thời lượng, Các giai đoạn thực hiện
+        - Có Rubric đánh giá sản phẩm học sinh
+
+        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        📋 PHỤ LỤC 5: BÀI TẬP MẪU / CÂU HỎI TRÒ CHƠI
+        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        - 5-7 bài tập mẫu hoặc câu hỏi trò chơi (theo GIẢI PHÁP 3)
+        - Có đáp án và hướng dẫn chấm điểm
+        - Nếu môn Toán: Sử dụng LaTeX cho công thức ($...$, $$...$$)
+
+        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        📋 PHỤ LỤC 6: BẢNG TỔNG HỢP Ý KIẾN PHẢN HỒI
+        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        - Mẫu bảng tổng hợp ý kiến từ HỌC SINH (10-15 ý kiến mẫu)
+        - Mẫu bảng tổng hợp ý kiến từ ĐỒNG NGHIỆP (5-8 ý kiến mẫu)
+        - Format: Bảng Markdown
+
+        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        ⚠️ YÊU CẦU FORMAT (BẮT BUỘC):
+        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        - Markdown chuẩn, bảng dùng |---|
+        - Bảng phải bắt đầu từ đầu dòng (không thụt lề)
+        - Xuống dòng sau mỗi câu
+        - Tách đoạn rõ ràng
+        - Đánh số phụ lục rõ ràng: PHỤ LỤC 1, PHỤ LỤC 2...
+        
+        📍 KẾT THÚC bằng dòng:
+        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        ✅ HOÀN THÀNH TẠO TÀI LIỆU PHỤ LỤC
+        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`;
+
+      let generatedAppendix = "";
+      await sendMessageStream(appendixPrompt, (chunk) => {
+        generatedAppendix += chunk;
+        setAppendixDocument(generatedAppendix);
+      });
+
+      setIsAppendixLoading(false);
+    } catch (error: any) {
+      console.error('Generate Appendix error:', error);
+      alert('Có lỗi khi tạo phụ lục. Vui lòng thử lại.');
+      setIsAppendixLoading(false);
+    }
+  };
+
+  // Export Appendix to Word - Xuất phụ lục thành file Word riêng
+  const exportAppendixToWord = async () => {
+    try {
+      const { exportMarkdownToDocx } = await import('./services/docxExporter');
+      const filename = `SKKN_Phuluc_${userInfo.topic.substring(0, 30).replace(/[^a-zA-Z0-9\u00C0-\u1EF9]/g, '_')}.docx`;
+      await exportMarkdownToDocx(appendixDocument, filename);
+    } catch (error: any) {
+      console.error('Export Appendix error:', error);
+      alert('Có lỗi khi xuất file phụ lục. Vui lòng thử lại.');
     }
   };
 
@@ -895,10 +928,36 @@ QUAN TRỌNG:
                 )
               )}
 
+              {/* Nút xuất Word SKKN (luôn hiển thị khi đã có nội dung) */}
               {(state.step >= GenerationStep.OUTLINE) && (
                 <Button variant="secondary" onClick={exportToWord} className="w-full" icon={<Download size={16} />}>
-                  Xuất file Word
+                  Xuất file Word SKKN
                 </Button>
+              )}
+
+              {/* Sau khi hoàn thành SKKN: hiển thị các nút phụ lục */}
+              {state.step >= GenerationStep.COMPLETED && (
+                <>
+                  {!appendixDocument ? (
+                    <Button
+                      onClick={generateAppendix}
+                      isLoading={isAppendixLoading}
+                      className="w-full bg-emerald-600 hover:bg-emerald-700"
+                      icon={<FileText size={16} />}
+                    >
+                      {isAppendixLoading ? 'Đang tạo phụ lục...' : 'TẠO PHỤ LỤC'}
+                    </Button>
+                  ) : (
+                    <Button
+                      variant="secondary"
+                      onClick={exportAppendixToWord}
+                      className="w-full border-emerald-500 text-emerald-700 hover:bg-emerald-50"
+                      icon={<Download size={16} />}
+                    >
+                      Xuất Word Phụ lục
+                    </Button>
+                  )}
+                </>
               )}
             </div>
           )}
