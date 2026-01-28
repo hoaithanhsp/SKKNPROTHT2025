@@ -9,56 +9,150 @@ import { Button } from './Button';
 /**
  * Format content để đảm bảo xuống dòng đúng cách
  * Xử lý các pattern thường gặp trong văn bản AI output
+ * BẢO TOÀN các bảng markdown (|...|)
  */
 function formatContent(text: string): string {
   if (!text) return text;
 
-  let formatted = text;
+  // Tách văn bản thành các đoạn, xác định đoạn nào là bảng
+  const lines = text.split('\n');
+  const processedLines: string[] = [];
+  let inTable = false;
+  let tableBuffer: string[] = [];
 
-  // Pattern 1: Xuống dòng trước "• Bước X:" hoặc "Bước X:" 
-  formatted = formatted.replace(/([^\n])\s*(•\s*Bước\s+\d+)/gi, '$1\n\n$2');
-  formatted = formatted.replace(/([^\n])\s*(Bước\s+\d+\s*:)/gi, '$1\n\n$2');
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    const trimmedLine = line.trim();
 
-  // Pattern 2: Xuống dòng trước bullet points "•" nếu không ở đầu dòng
-  formatted = formatted.replace(/([^\n•])\s*•\s+/g, '$1\n\n• ');
+    // Kiểm tra xem dòng có phải là phần của bảng markdown không
+    // Bảng markdown có dạng: | cell | cell | hoặc |---|---|
+    const isTableLine = /^\|.*\|$/.test(trimmedLine) || /^\|[\s\-:]+\|/.test(trimmedLine);
 
-  // Pattern 3: Xuống dòng trước các mục số "1.", "2.", "3." etc nếu không ở đầu dòng
-  formatted = formatted.replace(/([^\n\d])\s+(\d+\.\s+[A-ZĐ])/g, '$1\n\n$2');
+    if (isTableLine) {
+      if (!inTable) {
+        // Bắt đầu bảng mới - xử lý buffer trước đó
+        if (processedLines.length > 0) {
+          // Thêm dòng trống trước bảng nếu cần
+          const lastLine = processedLines[processedLines.length - 1];
+          if (lastLine && lastLine.trim() !== '') {
+            processedLines.push('');
+          }
+        }
+        inTable = true;
+      }
+      // Thêm dòng bảng trực tiếp, không xử lý
+      processedLines.push(line);
+    } else {
+      if (inTable) {
+        // Kết thúc bảng
+        inTable = false;
+        // Thêm dòng trống sau bảng
+        if (trimmedLine !== '') {
+          processedLines.push('');
+        }
+      }
+      // Xử lý dòng thường
+      processedLines.push(line);
+    }
+  }
 
-  // Pattern 4: Xuống dòng trước "Trạm X:" patterns
-  formatted = formatted.replace(/([^\n])\s*(Trạm\s+\d+\s*:)/gi, '$1\n\n$2');
+  // Ghép lại thành văn bản và xử lý các pattern (chỉ cho phần không phải bảng)
+  let formatted = processedLines.join('\n');
 
-  // Pattern 5: Xuống dòng trước các tiêu đề có số như "1.1.", "1.2.", "2.1." etc
-  formatted = formatted.replace(/([^\n])\s+(\d+\.\d+\.?\s+[A-ZĐ])/g, '$1\n\n$2');
+  // Tách lại để xử lý, nhưng bảo toàn bảng
+  const segments: { isTable: boolean; content: string }[] = [];
+  const tableRegex = /((?:^\|.*\|$\n?)+)/gm;
+  let lastIndex = 0;
+  let match;
 
-  // Pattern 6: Xuống dòng trước các keyword quan trọng
-  const keywords = [
-    'Nhiệm vụ:',
-    'Hoạt động nhóm:',
-    'Công thức minh họa:',
-    'Kiểm tra:',
-    'Ví dụ:',
-    'Lưu ý:',
-    'Ghi nhận kết quả:',
-    'Báo cáo:',
-    'Công cụ/tài liệu hỗ trợ:',
-    'Phần mềm:',
-    'Prompt mẫu cho Gemini:',
-  ];
+  // Reset regex
+  const tablePattern = /((?:^[ \t]*\|.*\|[ \t]*$[\r\n]*)+)/gm;
 
-  keywords.forEach(keyword => {
-    const regex = new RegExp(`([^\\n])\\s*(${keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'g');
-    formatted = formatted.replace(regex, '$1\n\n$2');
-  });
+  while ((match = tablePattern.exec(formatted)) !== null) {
+    // Thêm phần text trước bảng
+    if (match.index > lastIndex) {
+      segments.push({
+        isTable: false,
+        content: formatted.slice(lastIndex, match.index)
+      });
+    }
+    // Thêm bảng
+    segments.push({
+      isTable: true,
+      content: match[1]
+    });
+    lastIndex = match.index + match[0].length;
+  }
 
-  // Pattern 7: Đảm bảo sau dấu "." có xuống dòng nếu tiếp theo là chữ in hoa (câu mới)
-  // Chỉ áp dụng khi có nhiều spaces liên tiếp (dấu hiệu của đoạn văn bị dính)
-  formatted = formatted.replace(/\.(\s{2,})([A-ZĐÀÁẢÃẠĂẮẰẲẴẶÂẤẦẨẪẬÈÉẺẼẸÊẾỀỂỄỆÌÍỈĨỊÒÓỎÕỌÔỐỒỔỖỘƠỚỜỞỠỢÙÚỦŨỤƯỨỪỬỮỰỲÝỶỸỴ])/g, '.\n\n$2');
+  // Thêm phần còn lại sau bảng cuối
+  if (lastIndex < formatted.length) {
+    segments.push({
+      isTable: false,
+      content: formatted.slice(lastIndex)
+    });
+  }
 
-  // Dọn dẹp: Loại bỏ quá nhiều dòng trống liên tiếp (giữ tối đa 2)
-  formatted = formatted.replace(/\n{4,}/g, '\n\n\n');
+  // Nếu không tìm thấy bảng, xử lý toàn bộ như text thường
+  if (segments.length === 0) {
+    segments.push({ isTable: false, content: formatted });
+  }
 
-  return formatted;
+  // Xử lý từng segment
+  const result = segments.map(segment => {
+    if (segment.isTable) {
+      // Giữ nguyên bảng
+      return segment.content;
+    }
+
+    let content = segment.content;
+
+    // Pattern 1: Xuống dòng trước "• Bước X:" hoặc "Bước X:" 
+    content = content.replace(/([^\n])\s*(•\s*Bước\s+\d+)/gi, '$1\n\n$2');
+    content = content.replace(/([^\n])\s*(Bước\s+\d+\s*:)/gi, '$1\n\n$2');
+
+    // Pattern 2: Xuống dòng trước bullet points "•" nếu không ở đầu dòng
+    content = content.replace(/([^\n•])\s*•\s+/g, '$1\n\n• ');
+
+    // Pattern 3: Xuống dòng trước các mục số "1.", "2.", "3." etc nếu không ở đầu dòng
+    content = content.replace(/([^\n\d])\s+(\d+\.\s+[A-ZĐ])/g, '$1\n\n$2');
+
+    // Pattern 4: Xuống dòng trước "Trạm X:" patterns
+    content = content.replace(/([^\n])\s*(Trạm\s+\d+\s*:)/gi, '$1\n\n$2');
+
+    // Pattern 5: Xuống dòng trước các tiêu đề có số như "1.1.", "1.2.", "2.1." etc
+    content = content.replace(/([^\n])\s+(\d+\.\d+\.?\s+[A-ZĐ])/g, '$1\n\n$2');
+
+    // Pattern 6: Xuống dòng trước các keyword quan trọng
+    const keywords = [
+      'Nhiệm vụ:',
+      'Hoạt động nhóm:',
+      'Công thức minh họa:',
+      'Kiểm tra:',
+      'Ví dụ:',
+      'Lưu ý:',
+      'Ghi nhận kết quả:',
+      'Báo cáo:',
+      'Công cụ/tài liệu hỗ trợ:',
+      'Phần mềm:',
+      'Prompt mẫu cho Gemini:',
+    ];
+
+    keywords.forEach(keyword => {
+      const regex = new RegExp(`([^\\n])\\s*(${keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'g');
+      content = content.replace(regex, '$1\n\n$2');
+    });
+
+    // Pattern 7: Đảm bảo sau dấu "." có xuống dòng nếu tiếp theo là chữ in hoa (câu mới)
+    // Chỉ áp dụng khi có nhiều spaces liên tiếp (dấu hiệu của đoạn văn bị dính)
+    content = content.replace(/\.(\s{2,})([A-ZĐÀÁẢÃẠĂẮẰẲẴẶÂẤẦẨẪẬÈÉẺẼẸÊẾỀỂỄỆÌÍỈĨỊÒÓỎÕỌÔỐỒỔỖỘƠỚỜỞỠỢÙÚỦŨỤƯỨỪỬỮỰỲÝỶỸỴ])/g, '.\n\n$2');
+
+    // Dọn dẹp: Loại bỏ quá nhiều dòng trống liên tiếp (giữ tối đa 2)
+    content = content.replace(/\n{4,}/g, '\n\n\n');
+
+    return content;
+  }).join('');
+
+  return result;
 }
 
 interface Props {
