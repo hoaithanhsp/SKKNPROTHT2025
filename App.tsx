@@ -86,6 +86,50 @@ const App: React.FC = () => {
   const [appendixDocument, setAppendixDocument] = useState('');
   const [isAppendixLoading, setIsAppendixLoading] = useState(false);
 
+  // Helper function để tạo prompt nhắc lại giới hạn trang
+  const getPageLimitPrompt = useCallback(() => {
+    if (!userInfo.specialRequirements) return '';
+    
+    // Parse số trang từ yêu cầu (ví dụ: "giới hạn 25-30 trang" → 25-30)
+    const pageLimitMatch = userInfo.specialRequirements.match(/giới hạn.*?(\d+)[-–]?(\d+)?\s*trang/i);
+    
+    if (pageLimitMatch) {
+      const minPages = parseInt(pageLimitMatch[1]);
+      const maxPages = pageLimitMatch[2] ? parseInt(pageLimitMatch[2]) : minPages;
+      
+      return `
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+⚠️ GIỚI HẠN SỐ TRANG (BẮT BUỘC TUÂN THỦ NGHIÊM NGẶT):
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+TỔNG NỘI DUNG CHÍNH: ${minPages}-${maxPages} trang (KHÔNG tính Dàn ý và Phụ lục)
+
+PHÂN BỔ CHO MỖI PHẦN:
+- Phần I & II: TỐI ĐA 4 trang (viết ngắn gọn, súc tích)
+- Phần III: TỐI ĐA 3 trang
+- Phần IV (Giải pháp): ${Math.round(minPages * 0.55)}-${Math.round(maxPages * 0.65)} trang (chia đều cho 3 giải pháp)
+- Phần V, VI & Kết luận: ${Math.round(minPages * 0.15)}-${Math.round(maxPages * 0.2)} trang
+
+🚨 CẢNH BÁO: VIẾT NGẮN GỌN, SÚC TÍCH! 
+- Mỗi ý chính không quá 2-3 câu
+- Tránh lặp lại ý
+- Ưu tiên bảng biểu thay vì đoạn văn dài
+- KHÔNG viết dài hơn số trang quy định!
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+`;
+    }
+    
+    // Nếu có yêu cầu khác (không phải giới hạn trang cụ thể)
+    return `
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+⚠️ YÊU CẦU ĐẶC BIỆT TỪ NGƯỜI DÙNG (NHẮC LẠI - BẮT BUỘC TUÂN THỦ):
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+${userInfo.specialRequirements}
+
+Hãy áp dụng CHÍNH XÁC các yêu cầu trên vào phần đang viết!
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+`;
+  }, [userInfo.specialRequirements]);
+
   // Handle Input Changes
   const handleUserChange = (field: keyof UserInfo, value: string) => {
     setUserInfo(prev => ({ ...prev, [field]: value }));
@@ -545,7 +589,9 @@ QUAN TRỌNG:
         - Không viết dính chữ.
         - Menu Navigation: Đánh dấu Bước 2 đã xong (✅), Bước 3 đang làm (🔵).
         
-        Viết sâu sắc, học thuật, đúng cấu trúc đã đề ra. Lưu ý bám sát thông tin về trường và địa phương đã cung cấp.`;
+        Viết sâu sắc, học thuật, đúng cấu trúc đã đề ra. Lưu ý bám sát thông tin về trường và địa phương đã cung cấp.
+        
+        ${getPageLimitPrompt()}`;
 
       nextStepEnum = GenerationStep.PART_I_II;
     } else {
@@ -562,7 +608,9 @@ QUAN TRỌNG:
               ⚠️ LƯU Ý FORMAT: 
               - Viết từng câu xuống dòng riêng.
               - Tách đoạn rõ ràng.
-              - Bảng số liệu phải tuân thủ format Markdown chuẩn: | Tiêu đề | Số liệu |.`,
+              - Bảng số liệu phải tuân thủ format Markdown chuẩn: | Tiêu đề | Số liệu |.
+              
+              ${getPageLimitPrompt()}`,
           nextStep: GenerationStep.PART_III
         },
         [GenerationStep.PART_III]: {
@@ -593,7 +641,9 @@ QUAN TRỌNG:
               3. Sử dụng Format "KẾT THÚC GIẢI PHÁP" ở cuối.
               
               Lưu ý đặc biệt: Phải có VÍ DỤ MINH HỌA (Giáo án/Hoạt động) cụ thể theo SGK ${userInfo.textbook}.
-              Menu Navigation: Đánh dấu Bước 5 đang làm (🔵).`,
+              Menu Navigation: Đánh dấu Bước 5 đang làm (🔵).
+              
+              ${getPageLimitPrompt()}`,
           nextStep: GenerationStep.PART_IV_SOL1
         },
         [GenerationStep.PART_IV_SOL1]: {
@@ -612,7 +662,8 @@ QUAN TRỌNG:
                  - Xuống dòng sau mỗi câu.
                  - Xuống 2 dòng sau mỗi đoạn.
                  - Có khung "KẾT THÚC GIẢI PHÁP" ở cuối mỗi giải pháp.
-              `,
+              
+              ${getPageLimitPrompt()}`,
           nextStep: GenerationStep.PART_IV_SOL2_3
         },
         [GenerationStep.PART_IV_SOL2_3]: {
@@ -641,7 +692,8 @@ QUAN TRỌNG:
                  - Xuống 2 dòng sau mỗi đoạn.
                  - Có khung "KẾT THÚC GIẢI PHÁP" ở cuối mỗi giải pháp.
               5. Kết thúc bằng MỐI LIÊN HỆ GIỮA CÁC GIẢI PHÁP (tính hệ thống, logic).
-              `,
+              
+              ${getPageLimitPrompt()}`,
           nextStep: GenerationStep.PART_V_VI
         },
         [GenerationStep.PART_V_VI]: {
@@ -673,7 +725,9 @@ QUAN TRỌNG:
               - Menu Navigation: Đánh dấu các bước đã xong (✅), Bước 7 đang làm (🔵).
               
               📌 LƯU Ý: Chưa viết phần PHỤ LỤC chi tiết, chỉ gợi ý danh sách phụ lục.
-              Phụ lục chi tiết sẽ được tạo riêng bằng nút "TẠO PHỤ LỤC".`,
+              Phụ lục chi tiết sẽ được tạo riêng bằng nút "TẠO PHỤ LỤC".
+              
+              ${getPageLimitPrompt()}`,
           nextStep: GenerationStep.COMPLETED
         }
       };
