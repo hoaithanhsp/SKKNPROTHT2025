@@ -448,7 +448,13 @@ CẤU TRÚC SKKN CHUẨN (ÁP DỤNG KHI KHÔNG CÓ MẪU RIÊNG):
 
    GIẢI PHÁP 3: [Tên giải pháp cụ thể, ấn tượng]
         [Cấu trúc tương tự giải pháp 1, triển khai đầy đủ 5 mục]
-   
+   ${userInfo.includeSolution4_5 ? `
+   GIẢI PHÁP 4: [Tên giải pháp mở rộng/nâng cao]
+        [Giải pháp bổ trợ, ứng dụng công nghệ nâng cao]
+
+   GIẢI PHÁP 5: [Tên giải pháp mở rộng/nâng cao]
+        [Giải pháp phát triển, mở rộng đối tượng áp dụng]
+   ` : ''}
    → MỐI LIÊN HỆ GIỮA CÁC GIẢI PHÁP (giải thích tính hệ thống, logic)
 
 5. KẾT QUẢ ĐẠT ĐƯỢC (4-5 trang)
@@ -509,7 +515,7 @@ YÊU CẦU DÀN Ý (NGẮN GỌN - CHỈ ĐẦU MỤC):
 ⚠️ QUAN TRỌNG: Dàn ý phải NGẮN GỌN, chỉ liệt kê CÁC ĐẦU MỤC CHÍNH.
 Nội dung chi tiết sẽ được triển khai ở các bước viết sau.
 
-✓ CHỈ 3 GIẢI PHÁP - liệt kê TÊN giải pháp, không triển khai chi tiết
+✓ ${userInfo.includeSolution4_5 ? '5 GIẢI PHÁP (bao gồm 2 giải pháp mở rộng/nâng cao)' : 'CHỈ 3 GIẢI PHÁP'} - liệt kê TÊN giải pháp, không triển khai chi tiết
 ✓ Mỗi phần chỉ ghi tiêu đề mục và các ý chính (1-2 dòng mỗi ý)
 ✓ KHÔNG viết đoạn văn dài trong dàn ý
 ✓ KHÔNG triển khai chi tiết nội dung - chỉ gợi ý hướng đi
