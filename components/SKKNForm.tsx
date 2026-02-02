@@ -1,9 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { UserInfo } from '../types';
+import { UserInfo, SKKNTemplate, SKKNSection } from '../types';
 import { Button } from './Button';
 import { InputWithHistory, TextareaWithHistory } from './InputWithHistory';
 import { saveFormToHistory } from '../services/inputHistory';
-import { BookOpen, School, GraduationCap, PenTool, MapPin, Calendar, Users, Cpu, Target, Monitor, FileUp, Sparkles, ClipboardPaste, Loader2, FileText } from 'lucide-react';
+import { analyzeDocumentForSKKN, extractSKKNStructure } from '../services/geminiService';
+import { BookOpen, School, GraduationCap, PenTool, MapPin, Calendar, Users, Cpu, Target, Monitor, FileUp, Sparkles, ClipboardPaste, Loader2, FileText, Search, X, CheckCircle, List } from 'lucide-react';
 import * as mammoth from 'mammoth';
 import * as pdfjsLib from 'pdfjs-dist';
 
@@ -17,6 +18,8 @@ interface Props {
   onSubmit: () => void;
   onManualSubmit: (content: string) => void;
   isSubmitting: boolean;
+  apiKey?: string;  // Thêm API key để gọi AI phân tích
+  selectedModel?: string;  // Model đang sử dụng
 }
 
 interface InputGroupProps {
@@ -40,7 +43,7 @@ const InputGroup: React.FC<InputGroupProps> = ({ label, icon: Icon, required, ch
   </div>
 );
 
-export const SKKNForm: React.FC<Props> = ({ userInfo, onChange, onSubmit, onManualSubmit, isSubmitting }) => {
+export const SKKNForm: React.FC<Props> = ({ userInfo, onChange, onSubmit, onManualSubmit, isSubmitting, apiKey, selectedModel }) => {
   const [mode, setMode] = useState<'ai' | 'manual'>('ai');
   const [manualContent, setManualContent] = useState('');
   const [isProcessingFile, setIsProcessingFile] = useState(false);
@@ -48,6 +51,12 @@ export const SKKNForm: React.FC<Props> = ({ userInfo, onChange, onSubmit, onManu
   const [isProcessingTemplateFile, setIsProcessingTemplateFile] = useState(false);
   const [refFileNames, setRefFileNames] = useState<string[]>([]); // Danh sách tên file đã tải
   const [templateFileName, setTemplateFileName] = useState<string>(''); // Tên file mẫu SKKN
+  // State cho phân tích tài liệu
+  const [isAnalyzingRef, setIsAnalyzingRef] = useState(false);
+  const [isAnalyzingTemplate, setIsAnalyzingTemplate] = useState(false);
+  const [refAnalysisResult, setRefAnalysisResult] = useState('');
+  const [templateAnalysisResult, setTemplateAnalysisResult] = useState('');
+  const [showAnalysisModal, setShowAnalysisModal] = useState<'ref' | 'template' | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const refFileInputRef = useRef<HTMLInputElement>(null);
   const templateFileInputRef = useRef<HTMLInputElement>(null);
@@ -172,12 +181,16 @@ export const SKKNForm: React.FC<Props> = ({ userInfo, onChange, onSubmit, onManu
     }
   };
 
-  // Handle SKKN Template Upload
+  // Handle SKKN Template Upload - Tự động trích xuất cấu trúc
+  const [isExtractingStructure, setIsExtractingStructure] = useState(false);
+  const [parsedTemplate, setParsedTemplate] = useState<SKKNTemplate | null>(null);
+
   const handleTemplateUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     setIsProcessingTemplateFile(true);
+    setParsedTemplate(null); // Reset template khi upload file mới
     try {
       const arrayBuffer = await file.arrayBuffer();
       let extractedText = '';
@@ -202,6 +215,32 @@ export const SKKNForm: React.FC<Props> = ({ userInfo, onChange, onSubmit, onManu
       if (extractedText.trim()) {
         onChange('skknTemplate', extractedText);
         setTemplateFileName(file.name);
+
+        // TỰ ĐỘNG TRÍCH XUẤT CẤU TRÚC NếU CÓ API KEY
+        if (apiKey) {
+          setIsExtractingStructure(true);
+          try {
+            const sections = await extractSKKNStructure(apiKey, extractedText, selectedModel);
+
+            if (sections.length > 0) {
+              const customTemplate: SKKNTemplate = {
+                name: file.name,
+                sections,
+                rawContent: extractedText
+              };
+              onChange('customTemplate', JSON.stringify(customTemplate) as any);
+              setParsedTemplate(customTemplate);
+              console.log(`✅ Đã trích xuất ${sections.length} mục từ mẫu SKKN`);
+            } else {
+              console.log('⚠️ Không trích xuất được cấu trúc - sẽ dùng mẫu chuẩn');
+            }
+          } catch (structureError) {
+            console.error('Lỗi trích xuất cấu trúc:', structureError);
+            // Không hiển thị lỗi cho user - fallback về mẫu chuẩn
+          } finally {
+            setIsExtractingStructure(false);
+          }
+        }
       }
     } catch (error) {
       console.error("Error reading template file:", error);
@@ -226,9 +265,58 @@ export const SKKNForm: React.FC<Props> = ({ userInfo, onChange, onSubmit, onManu
     setTemplateFileName('');
   };
 
-  // Check valid based on mode
+  // Hàm phân tích tài liệu tham khảo bằng AI
+  const handleAnalyzeRefDocs = async () => {
+    if (!userInfo.referenceDocuments || !apiKey) {
+      alert('Vui lòng tải lên tài liệu và đảm bảo đã nhập API Key.');
+      return;
+    }
+    setIsAnalyzingRef(true);
+    try {
+      const result = await analyzeDocumentForSKKN(
+        apiKey,
+        userInfo.referenceDocuments,
+        'reference',
+        selectedModel
+      );
+      setRefAnalysisResult(result);
+      setShowAnalysisModal('ref');
+    } catch (error: any) {
+      alert('Lỗi khi phân tích tài liệu: ' + (error.message || 'Vui lòng thử lại.'));
+    } finally {
+      setIsAnalyzingRef(false);
+    }
+  };
+
+  // Hàm phân tích mẫu SKKN bằng AI
+  const handleAnalyzeTemplate = async () => {
+    if (!userInfo.skknTemplate || !apiKey) {
+      alert('Vui lòng tải lên mẫu SKKN và đảm bảo đã nhập API Key.');
+      return;
+    }
+    setIsAnalyzingTemplate(true);
+    try {
+      const result = await analyzeDocumentForSKKN(
+        apiKey,
+        userInfo.skknTemplate,
+        'template',
+        selectedModel
+      );
+      setTemplateAnalysisResult(result);
+      setShowAnalysisModal('template');
+    } catch (error: any) {
+      alert('Lỗi khi phân tích mẫu: ' + (error.message || 'Vui lòng thử lại.'));
+    } finally {
+      setIsAnalyzingTemplate(false);
+    }
+  };
+
+  // Check valid based on mode - chỉ check các field là string
   const requiredFields: (keyof UserInfo)[] = ['topic', 'subject', 'level', 'grade', 'school', 'location', 'facilities'];
-  const isInfoValid = requiredFields.every(key => userInfo[key].trim() !== '');
+  const isInfoValid = requiredFields.every(key => {
+    const value = userInfo[key];
+    return typeof value === 'string' && value.trim() !== '';
+  });
   const isManualValid = manualContent.trim().length > 50; // Minimum length check
 
   return (
@@ -467,6 +555,24 @@ export const SKKNForm: React.FC<Props> = ({ userInfo, onChange, onSubmit, onManu
                       </span>
                     ))}
                   </div>
+                  {/* Nút Phân tích sơ bộ */}
+                  <button
+                    onClick={handleAnalyzeRefDocs}
+                    disabled={isAnalyzingRef || !apiKey}
+                    className="mt-3 w-full text-xs font-semibold text-emerald-700 bg-emerald-50 px-3 py-2 rounded-lg hover:bg-emerald-100 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 border border-emerald-200 transition-colors"
+                  >
+                    {isAnalyzingRef ? (
+                      <>
+                        <Loader2 size={14} className="animate-spin" />
+                        Đang phân tích...
+                      </>
+                    ) : (
+                      <>
+                        <Search size={14} />
+                        🔍 Phân tích sơ bộ bằng AI
+                      </>
+                    )}
+                  </button>
                 </div>
               ) : (
                 <div className="text-center py-3 text-gray-500">
@@ -533,6 +639,63 @@ export const SKKNForm: React.FC<Props> = ({ userInfo, onChange, onSubmit, onManu
                     <span className="text-sm font-medium truncate">{templateFileName}</span>
                   </div>
                   <p className="text-xs text-green-600 font-medium">✓ AI sẽ bám sát cấu trúc mẫu này</p>
+                  {/* Nút Phân tích sơ bộ mẫu SKKN */}
+                  <button
+                    onClick={handleAnalyzeTemplate}
+                    disabled={isAnalyzingTemplate || !apiKey}
+                    className="mt-2 w-full text-xs font-semibold text-emerald-700 bg-emerald-50 px-3 py-2 rounded-lg hover:bg-emerald-100 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 border border-emerald-200 transition-colors"
+                  >
+                    {isAnalyzingTemplate ? (
+                      <>
+                        <Loader2 size={14} className="animate-spin" />
+                        Đang phân tích...
+                      </>
+                    ) : (
+                      <>
+                        <Search size={14} />
+                        🔍 Phân tích sơ bộ bằng AI
+                      </>
+                    )}
+                  </button>
+
+                  {/* Hiển thị trạng thái trích xuất cấu trúc */}
+                  {isExtractingStructure && (
+                    <div className="mt-3 p-3 bg-blue-50 rounded-lg border border-blue-200 flex items-center gap-2">
+                      <Loader2 size={16} className="animate-spin text-blue-600" />
+                      <span className="text-xs text-blue-700">Đang trích xuất cấu trúc mẫu...</span>
+                    </div>
+                  )}
+
+                  {/* Hiển thị cấu trúc đã trích xuất */}
+                  {parsedTemplate && parsedTemplate.sections.length > 0 && !isExtractingStructure && (
+                    <div className="mt-3 p-3 bg-emerald-50 rounded-lg border border-emerald-200">
+                      <div className="flex items-center gap-2 mb-2">
+                        <CheckCircle size={14} className="text-emerald-600" />
+                        <span className="text-xs font-semibold text-emerald-700">
+                          ✅ Đã trích xuất {parsedTemplate.sections.length} mục từ mẫu
+                        </span>
+                      </div>
+                      <div className="text-xs text-gray-600 max-h-36 overflow-y-auto bg-white p-2 rounded border border-emerald-100">
+                        <ul className="space-y-0.5">
+                          {parsedTemplate.sections.slice(0, 8).map((s, idx) => (
+                            <li
+                              key={idx}
+                              style={{ paddingLeft: `${(s.level - 1) * 12}px` }}
+                              className={s.level === 1 ? 'font-semibold text-emerald-800' : 'text-gray-600'}
+                            >
+                              {s.level === 1 ? '📌' : s.level === 2 ? '•' : '○'} {s.title}
+                            </li>
+                          ))}
+                          {parsedTemplate.sections.length > 8 && (
+                            <li className="text-gray-400 italic">... và {parsedTemplate.sections.length - 8} mục khác</li>
+                          )}
+                        </ul>
+                      </div>
+                      <p className="text-[10px] text-emerald-600 mt-2 italic">
+                        💡 AI sẽ tạo dàn ý và nội dung theo cấu trúc này
+                      </p>
+                    </div>
+                  )}
                 </div>
               ) : (
                 <div className="text-center py-3 text-gray-500">
@@ -560,6 +723,24 @@ export const SKKNForm: React.FC<Props> = ({ userInfo, onChange, onSubmit, onManu
               (Tùy chọn - AI sẽ tuân thủ nghiêm ngặt)
             </span>
           </h3>
+
+          {/* Checkbox viết thêm Giải pháp 4-5 */}
+          <div className="flex items-center gap-3 mb-4 p-4 bg-gradient-to-r from-amber-50 to-orange-50 rounded-lg border border-amber-200">
+            <input
+              type="checkbox"
+              id="includeSolution4_5"
+              name="includeSolution4_5"
+              checked={userInfo.includeSolution4_5 || false}
+              onChange={(e) => onChange('includeSolution4_5', e.target.checked as any)}
+              className="w-5 h-5 text-amber-600 border-gray-300 rounded focus:ring-amber-500 cursor-pointer"
+            />
+            <label htmlFor="includeSolution4_5" className="text-sm font-medium text-gray-700 cursor-pointer select-none">
+              ✨ Viết thêm <strong className="text-amber-700">Giải pháp 4 và 5</strong>
+              <span className="block text-xs text-gray-500 font-normal mt-0.5">
+                (Mặc định chỉ viết 3 giải pháp. Tick nếu muốn viết 5 giải pháp)
+              </span>
+            </label>
+          </div>
 
           <div className="bg-purple-50 p-4 rounded-lg border border-purple-200">
             <textarea
@@ -678,6 +859,47 @@ export const SKKNForm: React.FC<Props> = ({ userInfo, onChange, onSubmit, onManu
           )}
         </div>
       </div>
+
+      {/* Modal hiển thị kết quả phân tích */}
+      {showAnalysisModal && (
+        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[85vh] overflow-hidden shadow-2xl animate-in fade-in zoom-in duration-200">
+            {/* Header */}
+            <div className="p-4 bg-gradient-to-r from-emerald-600 to-teal-600 text-white flex justify-between items-center">
+              <h3 className="font-bold text-lg flex items-center gap-2">
+                <Search size={20} />
+                📊 Kết quả phân tích sơ bộ
+                <span className="text-xs bg-white/20 px-2 py-0.5 rounded-full">
+                  {showAnalysisModal === 'ref' ? 'Tài liệu tham khảo' : 'Mẫu SKKN'}
+                </span>
+              </h3>
+              <button
+                onClick={() => setShowAnalysisModal(null)}
+                className="p-1 hover:bg-white/20 rounded-lg transition-colors"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            {/* Content */}
+            <div className="p-5 overflow-y-auto max-h-[65vh] prose prose-sm prose-emerald max-w-none">
+              <div className="whitespace-pre-wrap text-gray-700 leading-relaxed">
+                {showAnalysisModal === 'ref' ? refAnalysisResult : templateAnalysisResult}
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="p-4 border-t border-gray-100 bg-gray-50 flex justify-end gap-3">
+              <button
+                onClick={() => setShowAnalysisModal(null)}
+                className="px-4 py-2 text-sm font-medium text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                Đóng
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

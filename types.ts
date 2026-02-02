@@ -1,3 +1,18 @@
+// Cấu trúc một mục trong mẫu SKKN tùy chỉnh
+export interface SKKNSection {
+  id: string;           // ID duy nhất (1, 1.1, 1.1.1...)
+  level: number;        // Cấp độ (1: Phần lớn, 2: mục con, 3: mục nhỏ)
+  title: string;        // Tiêu đề gốc từ mẫu
+  suggestedContent?: string; // Gợi ý nội dung (tùy chọn)
+}
+
+// Cấu trúc mẫu SKKN đầy đủ
+export interface SKKNTemplate {
+  name: string;         // Tên mẫu (từ tên file hoặc tiêu đề)
+  sections: SKKNSection[]; // Danh sách các mục
+  rawContent: string;   // Nội dung gốc đã trích xuất
+}
+
 export interface UserInfo {
   // Bắt buộc
   topic: string;
@@ -20,9 +35,13 @@ export interface UserInfo {
 
   // Mẫu SKKN (tùy chọn)
   skknTemplate: string; // Nội dung mẫu SKKN nếu người dùng tải lên
+  customTemplate?: string; // JSON string của SKKNTemplate - cấu trúc đã trích xuất từ mẫu
 
   // Yêu cầu khác
   specialRequirements: string; // Các yêu cầu đặc biệt: giới hạn trang, viết ngắn gọn, thêm bài toán...
+
+  // Tùy chọn số lượng giải pháp
+  includeSolution4_5: boolean; // Có viết giải pháp 4 và 5 hay không (mặc định false = chỉ 3 giải pháp)
 }
 
 export enum GenerationStep {
@@ -32,9 +51,10 @@ export enum GenerationStep {
   PART_III = 3,
   PART_IV_SOL1 = 4,
   PART_IV_SOL2_3 = 5,
-  PART_V_VI = 6,
-  APPENDIX = 7,
-  COMPLETED = 8
+  PART_IV_SOL4_5 = 6, // Giải pháp 4 và 5 (tùy chọn)
+  PART_V_VI = 7,
+  APPENDIX = 8,
+  COMPLETED = 9
 }
 
 export interface ChatMessage {
