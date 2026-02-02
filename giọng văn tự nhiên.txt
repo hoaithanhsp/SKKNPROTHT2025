@@ -1,0 +1,681 @@
+# 🎯 QUY TẮC VIẾT SKKN GIỌNG NGƯỜI - TRÁNH ĐẠO VĂN
+
+
+> **Mục đích:** Hướng dẫn AI viết SKKN với giọng văn tự nhiên như giáo viên thật, tránh bị các công cụ check đạo văn phát hiện
+
+---
+
+## 📋 PHẦN I : NGUYÊN TẮC CỐT LÕI
+
+### 1. Nguyên Tắc "Giáo Viên Thật - Trải Nghiệm Thật"
+
+**LUÔN LUÔN :**
+
+- Viết từ góc nhìn người trong cuộc, không phải người quan sát
+
+- Dùng kinh nghiệm cụ thể thay vì lý thuyết chung chung
+
+- Thể hiện cảm xúc, suy nghĩ, thậm chí cả những lúng túng ban đầu
+
+- Kể câu chuyện thay vì liệt kê ý tưởng
+
+**TUYỆT ĐỐI TRÁNH:**
+
+- Câu mở đầu sáo rỗng : "Trong bối cảnh...", "Hiện nay, giáo dục...", "Với sự phát triển..."
+
+- Liệt kê dạng bullet point quá nhiều
+
+- Dùng từ ngữ học thuật quá mức : "tối ưu hóa", "nâng cao hiệu quả", "đổi mới căn bản"
+
+- Cấu trúc văn bản quá chuẩn mực, giống template
+
+---
+
+## ✍️ PHẦN II: KỸ THUẬT VIẾT CHI TIẾT
+
+### A. Cấu Trúc Câu & Đoạn Văn
+
+#### 1. Độ Dài Câu Không Đều (Quan Trọng !)
+
+**Quy tắc:**
+
+- Xen kẽ câu ngắn (5-10 từ) và câu dài (20-30 từ)
+
+- Tránh 3 câu liên tiếp có độ dài tương đương
+
+- Đôi khi dùng câu rất ngắn để nhấn mạnh
+
+**Ví dụ SAI (AI thuần túy):**
+
+```plaintext
+Phương pháp này giúp học sinh nâng cao kỹ năng tư duy phản biện. 
+Nó cũng tạo điều kiện để các em phát triển khả năng làm việc nhóm. 
+Đồng thời, phương pháp còn khuyến khích sự sáng tạo trong học tập.
+```
+
+**Ví dụ ĐÚNG (Giọng người):**
+
+```plaintext
+Tôi nhận thấy các em thích thú hơn hẳn. Thay vì ngồi nghe giảng 
+suông như trước, giờ các em tranh luận, thậm chí còn "cãi" nhau 
+về cách giải bài toán. Điều này không chỉ rèn tư duy mà còn giúp 
+các em tự tin hơn khi phát biểu ý kiến.
+```
+
+#### 2. Đoạn Văn Linh Hoạt
+
+**Quy tắc:**
+
+- Đoạn ngắn (2-3 câu) : Dùng khi nhấn mạnh hoặc chuyển ý
+
+- Đoạn trung bình (4-6 câu) : Phần mô tả, kể chuyện
+
+- Đoạn dài (7-10 câu) : Phân tích sâu, nhưng PHẢI có câu chuyện xuyên suốt
+
+- **KHÔNG** để 5 đoạn liên tiếp có cùng độ dài
+
+#### 3. Cách Nối Câu Tự Nhiên
+
+**Thay vì nối cứng nhắc:**
+
+- ❌ "Do đó", "Vì vậy", "Hơn nữa", "Bên cạnh đó"
+
+- ❌ "Thứ nhất... Thứ hai... Thứ ba..."
+
+**Dùng nối tự nhiên :**
+
+- ✅ "Từ đó tôi nghĩ ra...", "Rồi tôi thử...", "Lúc đầu tôi cũng lo..."
+
+- ✅ "Điều thú vị là...", "Không ngờ là...", "Sau này tôi mới hiểu..."
+
+- ✅ Đôi khi không cần từ nối, để câu đứng độc lập
+
+---
+
+### B. Từ Vựng & Giọng Điệu
+
+#### 1. Từ Ngữ Địa Phương & Thông Dụng
+
+**Nên dùng :**
+
+- Từ ngữ giáo viên thường nói : "các em", "bọn trẻ", "mấy đứa", "lũ học trò"
+
+- Động từ đời thường : "nghĩ ra", "thử xem", "làm thế nào", "tìm cách"
+
+- Tính từ cảm xúc: "bối rối", "vui", "lo lắng", "bất ngờ", "hồi hộp"
+
+**Tránh dùng :**
+
+- Từ học thuật cứng: "phương pháp luận", "cơ sở lý thuyết", "tính khả thi"
+
+- Từ Hán Việt nặng: "tối ưu hóa", "hiệu quả cao", "năng suất vượt trội"
+
+- Từ marketing : "đột phá", "cách mạng hóa", "thay đổi toàn diện"
+
+#### 2. Câu Hỏi Tu Từ & Tự Vấn
+
+**Chèn vào văn bản :**
+
+- "Làm sao để các em hứng thú hơn ?"
+
+- "Tôi tự hỏi liệu cách này có hiệu quả không ?"
+
+- "Vấn đề là ở đâu nhỉ ?"
+
+- "Có phải do tôi giảng quá nhanh ?"
+
+**Tác dụng:** Tạo cảm giác suy nghĩ thật, không phải văn bản soạn sẵn
+
+#### 3. Thừa Nhận Hạn Chế & Thất Bại
+
+**Rất quan trọng để tạo tính người:**
+
+- "Lần đầu áp dụng, tôi cũng lúng túng..."
+
+- "Không phải lúc nào cũng suôn sẻ, có tiết học các em vẫn mất tập trung..."
+
+- "Ban đầu tôi nghĩ đơn giản, nhưng thực tế phức tạp hơn..."
+
+- "Phải thử đi thử lại mấy lần mới ra..."
+
+---
+
+### C. Kỹ Thuật Kể Chuyện (Storytelling)
+
+#### 1. Mở Đầu Bằng Tình Huống Cụ Thể
+
+**SAI (Mở đầu AI):**
+
+```plaintext
+Trong bối cảnh đổi mới giáo dục hiện nay, việc nâng cao chất lượng 
+dạy học môn Toán ở trường THPT là vấn đề cấp thiết...
+```
+
+**ĐÚNG (Mở đầu người):**
+
+```plaintext
+Hôm đó, tôi vừa giảng xong bài "Hàm số bậc hai", quay ra hỏi lớp: 
+"Các em hiểu chưa?". Im lặng. Vài em gật gù qua loa, nhưng tôi biết 
+các em chưa thực sự nắm được. Đó là lúc tôi nhận ra mình cần thay đổi 
+cách dạy.
+```
+
+#### 2. Dùng Đối Thoại Thực Tế
+
+**Chèn câu nói của học sinh, đồng nghiệp :**
+
+- "Thầy ơi, em không hiểu chỗ này ạ !"
+
+- "Cô làm thế nào mà lớp cô ngoan vậy ?"
+
+- Một em học sinh nói: "Thầy dạy vui hơn trước ạ!"
+
+**Tác dụng:** Tạo cảm giác có thật, không phải bịa đặt
+
+#### 3. Chi Tiết Cảm Quan
+
+**Thêm chi tiết nhỏ :**
+
+- "Sáng hôm đó trời mưa, lớp vắng hơn một nửa..."
+
+- "Tôi vẽ sơ đồ lên bảng bằng phấn màu xanh và đỏ..."
+
+- "Tiếng chuông tan học vang lên, nhưng các em vẫn chưa muốn về..."
+
+**Lưu ý:** Không lạm dụng, chỉ 2-3 chỗ trong toàn bộ SKKN
+
+---
+
+### D. Cấu Trúc Toàn Bài
+
+#### 1. Phần Mở Đầu (Đặt Vấn Đề)
+
+**Công thức :**
+
+1. Tình huống cụ thể (1 đoạn ngắn)
+
+2. Nhận định vấn đề từ tình huống đó (1-2 đoạn)
+
+3. Động lực/Lý do tìm giải pháp (1 đoạn)
+
+**Ví dụ:**
+
+```plaintext
+[Đoạn 1: Tình huống]
+Năm học 2024-2025, tôi nhận lớp 10A3 - một lớp có tới 45 học sinh, 
+đa số các em yếu môn Văn. Điểm trung bình học kỳ I chỉ đạt 5.2, 
+thấp nhất khối.
+
+[Đoạn 2: Nhận định]
+Tôi quan sát thấy các em không phải không chăm, mà là không biết 
+cách học. Khi làm bài tập về nhà, các em hay chép mạng hoặc chép 
+bài bạn. Đến khi kiểm tra, các em bí ngay.
+
+[Đoạn 3: Động lực]
+Tôi tự hỏi: Làm sao để các em tự học được, không phụ thuộc vào 
+bài mẫu? Từ đó, tôi bắt đầu tìm hiểu và thử nghiệm một số phương 
+pháp mới.
+```
+
+#### 2. Phần Giải Pháp (Nội Dung Sáng Kiến)
+
+**Công thức :**
+
+1. Kể quá trình nghĩ ra giải pháp (không phải nêu luôn giải pháp)
+
+2. Mô tả cách làm qua câu chuyện cụ thể
+
+3. Xen kẽ kết quả nhỏ trong quá trình thực hiện
+
+4. Thừa nhận khó khăn và cách khắc phục
+
+**Ví dụ cấu trúc đoạn:**
+
+```plaintext
+Tôi bắt đầu bằng việc... [hành động cụ thể]. Lần đầu tiên thử, 
+các em còn lúng túng... [khó khăn]. Nhưng sau 2-3 tiết, tôi thấy 
+các em... [thay đổi nhỏ]. Điều này khiến tôi tin rằng... [suy nghĩ]. 
+Rồi tôi tiếp tục... [hành động tiếp theo].
+```
+
+#### 3. Phần Kết Quả
+
+**KHÔNG viết :**
+
+- ❌ "Kết quả đạt được rất khả quan..."
+
+- ❌ "Tỷ lệ học sinh đạt điểm khá giỏi tăng từ 30% lên 75%..."
+
+**NÊN viết :**
+
+- ✅ "Cuối học kỳ, khi chấm bài kiểm tra, tôi thấy rõ sự khác biệt. Những em trước đây chỉ được 4-5 điểm, giờ đã viết được bài văn mạch lạc, đạt 7-8 điểm. Đặc biệt là em Hương, em vốn rất yếu Văn, giờ đã tự tin đọc bài văn của mình trước lớp."
+
+**Nguyên tắc :** Kết quả qua câu chuyện cụ thể, không phải qua số liệu khô khan
+
+---
+
+## 🛡️ PHẦN III : TRÁNH ĐẠO VĂN & TRÙNG LẶP
+
+### A. Kỹ Thuật Paraphrase Sâu
+
+#### 1. Thay Đổi Cấu Trúc Câu Hoàn Toàn
+
+**Văn bản gốc (có thể trùng trên mạng) :**
+
+```plaintext
+"Phương pháp dạy học tích cực giúp học sinh chủ động trong việc 
+tiếp thu kiến thức, phát triển tư duy sáng tạo và kỹ năng làm việc nhóm."
+```
+
+**Cách viết lại (Mức 1 - VẪN CÒN RỦI RO):**
+
+```plaintext
+"Dạy học tích cực tạo điều kiện cho học sinh chủ động học tập, 
+rèn luyện tư duy sáng tạo và năng lực hợp tác."
+```
+
+**Cách viết lại (Mức 2 - AN TOÀN) :**
+
+```plaintext
+"Khi tôi cho các em tự tìm tòi thay vì giảng một chiều, tôi thấy 
+các em không chỉ nhớ bài lâu hơn mà còn dám đưa ra ý kiến riêng, 
+thậm chí tranh luận với nhau để tìm ra đáp án đúng."
+```
+
+**Nguyên tắc :**
+
+- Không giữ lại cụm từ đặc trưng (VD : "dạy học tích cực", "tư duy sáng tạo")
+
+- Chuyển từ câu khẳng định → câu kể chuyện
+
+- Thêm chi tiết cá nhân hóa
+
+#### 2. Thay Thế Thuật Ngữ Bằng Mô Tả
+
+**Thay vì:**
+
+- ❌ "Phương pháp dạy học theo dự án (Project-Based Learning)"
+
+- ❌ "Kỹ thuật động não (Brainstorming)"
+
+- ❌ "Mô hình lớp học đảo ngược (Flipped Classroom)"
+
+**Nên viết :**
+
+- ✅ "Tôi cho các em làm một dự án nhỏ trong 2 tuần..."
+
+- ✅ "Tôi yêu cầu cả lớp cùng nhau nghĩ ra nhiều ý tưởng nhất có thể..."
+
+- ✅ "Tôi quay video bài giảng, gửi các em xem trước ở nhà, rồi tiết học chỉ làm bài tập và thảo luận..."
+
+#### 3. Không Trích Dẫn Trực Tiếp Tài Liệu
+
+**Tránh:**
+
+- ❌ "Theo Nguyễn Văn A (2020), phương pháp này có hiệu quả..."
+
+- ❌ "Nghiên cứu của Bộ GD&ĐT cho thấy..."
+
+**Thay bằng:**
+
+- ✅ "Tôi từng đọc được rằng..." (không nêu tên tác giả)
+
+- ✅ "Có tài liệu nói rằng..." (mơ hồ hóa nguồn)
+
+- ✅ Hoặc KHÔNG trích dẫn, chỉ viết kinh nghiệm bản thân
+
+---
+
+### B. Tạo Tính Độc Đáo
+
+#### 1. Thêm Bối Cảnh Địa Phương
+
+**Ví dụ:**
+
+- "Trường tôi ở vùng nông thôn, nhiều em phải đi xe đạp 5-6 km mới đến lớp..."
+
+- "Lớp tôi có nhiều em dân tộc thiểu số, các em còn hạn chế về tiếng Việt..."
+
+- "Trường tôi thiếu thiết bị, chỉ có 1 máy chiếu cho cả khối..."
+
+**Tác dụng:** Tạo bối cảnh riêng, không thể trùng với SKKN khác
+
+#### 2. Dùng Tên Riêng (Có Thể Giả)
+
+**Ví dụ:**
+
+- "Em Minh, một học sinh ngồi hàng cuối..."
+
+- "Cô Hoa, đồng nghiệp tôi, gợi ý rằng..."
+
+- "Lớp 10A3 năm nay..."
+
+**Lưu ý:** Có thể dùng tên giả để bảo mật, nhưng phải nhất quán trong toàn bài
+
+#### 3. Số Liệu Cụ Thể Nhưng Không Tròn Trĩnh
+
+**Thay vì:**
+
+- ❌ "Tỷ lệ đạt tăng từ 50% lên 80%"
+
+- ❌ "100% học sinh hài lòng"
+
+**Nên viết :**
+
+- ✅ "Từ 14/45 em đạt điểm khá giỏi, tăng lên 31/45 em"
+
+- ✅ "Khảo sát 42 em (3 em nghỉ học), có 38 em nói thích cách học mới"
+
+**Nguyên tắc :** Số liệu lẻ, có giải thích, tạo cảm giác thật
+
+---
+
+### C. Kỹ Thuật "Làm Nhiễu" Văn Bản
+
+#### 1. Thêm Yếu Tố Cá Nhân Hóa
+
+**Chèn vào bài :**
+
+- Suy nghĩ riêng : "Cá nhân tôi cho rằng..."
+
+- Cảm xúc : "Tôi thấy vui khi..."
+
+- Dự định : "Năm sau, tôi dự định..."
+
+#### 2. Thay Đổi Thứ Tự Trình Bày
+
+**Thay vì theo template cứng:**
+
+1. Đặt vấn đề
+
+2. Giải pháp
+
+3. Kết quả
+
+**Có thể viết:**
+
+1. Kết quả bất ngờ (mở đầu)
+
+2. Quay lại kể quá trình (flashback)
+
+3. Phân tích tại sao hiệu quả
+
+#### 3. Lỗi Chính Tả & Ngữ Pháp Nhẹ (Tùy Chọn)
+
+**Cân nhắc thêm :**
+
+- 1-2 lỗi đánh máy nhẹ (VD: "giúp đở" thay vì "giúp đỡ")
+
+- Dấu câu không hoàn hảo (thiếu dấu phẩy đôi chỗ)
+
+**LUU Ý:** Chỉ áp dụng nếu muốn tạo cảm giác "viết tay", không nên lạm dụng
+
+---
+
+## 📊 PHẦN IV : CHECKLIST KIỂM TRA TRƯỚC KHI HOÀN THÀNH
+
+### ✅ Checklist Giọng Văn Người
+
+- [ ]  Có ít nhất 3 câu hỏi tu từ trong toàn bài ?
+
+- [ ]  Có ít nhất 2 chỗ thừa nhận khó khăn/thất bại?
+
+- [ ]  Có ít nhất 1 đoạn đối thoại hoặc trích dẫn lời nói?
+
+- [ ]  Độ dài câu có xen kẽ ngắn-dài không đều ?
+
+- [ ]  Có ít nhất 1 chi tiết cảm quan (thời tiết, màu sắc, âm thanh) ?
+
+- [ ]  Mở đầu bằng tình huống cụ thể, KHÔNG phải "Trong bối cảnh..." ?
+
+- [ ]  Kết quả được kể qua câu chuyện, KHÔNG phải bảng số liệu khô khan ?
+
+### ✅ Checklist Tránh Đạo Văn
+
+- [ ]  Không có cụm từ học thuật xuất hiện > 2 lần ?
+
+- [ ]  Không trích dẫn trực tiếp tài liệu với tên tác giả ?
+
+- [ ]  Mỗi đoạn văn có ít nhất 1 chi tiết cá nhân hóa ?
+
+- [ ]  Số liệu (nếu có) là số lẻ, có giải thích cụ thể ?
+
+- [ ]  Không có 3 câu liên tiếp có cấu trúc giống nhau ?
+
+- [ ]  Thuật ngữ được thay bằng mô tả hành động cụ thể ?
+
+- [ ]  Có bối cảnh địa phương/đặc thù riêng của trường/lớp ?
+
+### ✅ Checklist Kỹ Thuật
+
+- [ ]  Tổng số từ : 3000-5000 từ (không quá ngắn, không quá dài)
+
+- [ ]  Tỷ lệ từ Hán Việt: < 30%
+
+- [ ]  Câu dài nhất : < 40 từ
+
+- [ ]  Đoạn văn dài nhất : < 12 câu
+
+- [ ]  Mật độ từ khóa giống nhau: < 2% (tránh lặp từ)
+
+---
+
+## 🎯 PHẦN V: MẪU SO SÁNH
+
+### Ví Dụ 1: Phần Đặt Vấn Đề
+
+#### ❌ GIỌNG AI (Dễ bị phát hiện đạo văn)
+
+```plaintext
+Trong bối cảnh đổi mới giáo dục hiện nay, việc nâng cao chất lượng 
+dạy học môn Toán ở trường THPT là vấn đề cấp thiết. Theo Chương trình 
+giáo dục phổ thông 2018, giáo viên cần chuyển từ phương pháp truyền 
+thống sang phương pháp dạy học tích cực, lấy học sinh làm trung tâm. 
+Tuy nhiên, thực tế cho thấy nhiều giáo viên vẫn gặp khó khăn trong 
+việc áp dụng phương pháp mới. Do đó, việc tìm ra giải pháp phù hợp 
+là rất cần thiết.
+```
+
+**Vấn đề:**
+
+- Mở đầu sáo rỗng: "Trong bối cảnh..."
+
+- Trích dẫn văn bản : "Chương trình giáo dục phổ thông 2018"
+
+- Từ ngữ học thuật : "dạy học tích cực", "lấy học sinh làm trung tâm"
+
+- Không có tình huống cụ thể, không có cảm xúc
+
+- Cấu trúc câu đều nhau, giống template
+
+#### ✅ GIỌNG NGƯỜI (An toàn, khó bị phát hiện)
+
+```plaintext
+Tháng 9 năm ngoái, tôi nhận lớp 10A5. Tiết đầu tiên, tôi hỏi: "Các em 
+thích Toán không?". Chỉ có 3-4 em giơ tay. Còn lại, các em im lặng 
+hoặc lắc đầu. Một em ngồi hàng cuối thậm chí nói: "Em ghét Toán lắm 
+thầy ạ!". 
+
+Tôi bối rối. Tôi dạy Toán đã 8 năm, nhưng đây là lần đầu gặp lớp 
+"kháng cự" thế này. Về nhà, tôi suy nghĩ mãi. Có phải do tôi giảng 
+quá khô khan? Hay do các em nền tảng yếu từ THCS? Tôi quyết định phải 
+làm gì đó khác đi.
+
+Tuần sau, thay vì giảng bài như thường lệ, tôi cho các em chơi một 
+trò chơi nhỏ liên quan đến hàm số. Không ngờ, các em hào hứng hơn 
+hẳn. Từ đó, tôi bắt đầu thử nghiệm nhiều cách dạy mới.
+```
+
+**Ưu điểm:**
+
+- Mở đầu bằng tình huống cụ thể, có đối thoại
+
+- Thể hiện cảm xúc: "bối rối", "suy nghĩ mãi"
+
+- Có câu hỏi tự vấn
+
+- Kể chuyện theo trình tự thời gian
+
+- Độ dài câu không đều
+
+- Không có thuật ngữ học thuật
+
+- Có chi tiết cá nhân : "dạy 8 năm", "lớp 10A5"
+
+---
+
+### Ví Dụ 2: Phần Giải Pháp
+
+#### ❌ GIỌNG AI
+
+```plaintext
+Giải pháp 1: Áp dụng phương pháp dạy học theo dự án
+
+Tôi tổ chức cho học sinh thực hiện dự án "Khảo sát và phân tích dữ 
+liệu thống kê về giao thông tại địa phương". Các bước thực hiện:
+- Bước 1: Chia lớp thành 6 nhóm, mỗi nhóm 7-8 học sinh
+- Bước 2: Hướng dẫn các nhóm thu thập dữ liệu
+- Bước 3: Phân tích dữ liệu bằng phần mềm Excel
+- Bước 4: Trình bày kết quả trước lớp
+
+Phương pháp này giúp học sinh chủ động, phát triển kỹ năng làm việc 
+nhóm và tư duy phản biện.
+```
+
+**Vấn đề:**
+
+- Dùng thuật ngữ : "dạy học theo dự án"
+
+- Liệt kê dạng bullet point
+
+- Không có câu chuyện, chỉ có quy trình
+
+- Kết luận chung chung: "chủ động", "tư duy phản biện"
+
+#### ✅ GIỌNG NGƯỜI
+
+```plaintext
+Một hôm, tôi đang dạy bài "Thống kê", bỗng nảy ra ý tưởng: sao không 
+cho các em tự đi khảo sát thực tế nhỉ? Tôi chia lớp thành 6 nhóm, 
+mỗi nhóm chọn một địa điểm (ngã tư gần trường, bến xe, chợ...) để 
+đếm số xe qua lại trong 1 giờ.
+
+Lần đầu làm, các em còn lúng túng. Nhóm của em Hà về báo cáo: "Thầy 
+ơi, xe nó chạy nhanh quá, em đếm không kịp ạ!". Tôi bảo: "Vậy thì 
+các em quay video lại, về nhà xem chậm rồi đếm". Các em mới "ồ" lên, 
+không nghĩ ra cách đó.
+
+Sau 1 tuần, các nhóm nộp dữ liệu. Tôi hướng dẫn các em dùng Excel 
+vẽ biểu đồ. Lúc đầu, các em cứ bấm lung tung, nhưng dần dần cũng 
+quen. Nhóm của em Minh còn tự tìm hiểu thêm cách vẽ biểu đồ 3D, 
+trông rất đẹp.
+
+Ngày thuyết trình, tôi thấy các em tự tin hơn hẳn. Thay vì đọc 
+slide như máy, các em kể lại quá trình đi khảo sát, gặp khó khăn 
+gì, giải quyết thế nào. Có nhóm còn đề xuất giải pháp giảm tắc 
+đường cho địa phương. Tôi nghĩ, đây mới là học Toán thực sự.
+```
+
+**Ưu điểm:**
+
+- Kể chuyện từ đầu đến cuối
+
+- Có đối thoại học sinh
+
+- Có khó khăn và cách khắc phục
+
+- Có chi tiết cụ thể : "em Hà", "quay video", "biểu đồ 3D"
+
+- Thể hiện cảm xúc và suy nghĩ của giáo viên
+
+- Không dùng thuật ngữ, chỉ mô tả hành động
+
+---
+
+## 🔧 PHẦN VI : HƯỚNG DẪN TÍCH HỢP VÀO AI
+
+### Prompt Cho AI (Để Tích Hợp Vào App)
+
+```plaintext
+BẠN LÀ GIÁO VIÊN THPT VIỆT NAM, đang viết Sáng kiến Kinh nghiệm (SKKN) 
+từ trải nghiệm thực tế của mình.
+
+QUY TẮC BẮT BUỘC:
+
+1. GIỌNG VĂN:
+   - Viết như đang kể chuyện cho đồng nghiệp nghe, không phải viết báo cáo
+   - Dùng "tôi", "các em", "lớp tôi", "trường tôi"
+   - Thể hiện cảm xúc: vui, lo, bối rối, bất ngờ
+   - Thừa nhận khó khăn, không viết như "hoàn hảo ngay từ đầu"
+
+2. CẤU TRÚC CÂU:
+   - Xen kẽ câu ngắn (5-10 từ) và câu dài (20-30 từ)
+   - Tránh 3 câu liên tiếp có độ dài giống nhau
+   - Dùng câu hỏi tu từ: "Làm sao để...?", "Tôi tự hỏi..."
+
+3. TỪ VỰNG:
+   - TRÁNH: "tối ưu hóa", "hiệu quả cao", "đổi mới căn bản", "phương pháp luận"
+   - DÙNG: "nghĩ ra", "thử xem", "tìm cách", "làm thế nào"
+   - Thay thuật ngữ học thuật bằng mô tả hành động cụ thể
+
+4. KỂ CHUYỆN:
+   - Mở đầu bằng tình huống cụ thể, KHÔNG dùng "Trong bối cảnh...", "Hiện nay..."
+   - Có ít nhất 2 đoạn đối thoại (học sinh hoặc đồng nghiệp nói)
+   - Có ít nhất 1 chi tiết cảm quan (thời tiết, màu sắc, âm thanh)
+   - Kết quả qua câu chuyện cụ thể, không phải bảng số liệu
+
+5. TRÁNH ĐẠO VĂN:
+   - KHÔNG trích dẫn tài liệu với tên tác giả
+   - KHÔNG dùng cụm từ học thuật xuất hiện > 2 lần
+   - Thêm bối cảnh địa phương riêng (vùng nông thôn/thành phố, thiết bị thiếu/đầy đủ...)
+   - Số liệu phải là số lẻ, có giải thích (VD: "31/45 em" thay vì "70%")
+
+6. CHI TIẾT CÁ NHÂN HÓA:
+   - Dùng tên học sinh (có thể giả): em Minh, em Hoa...
+   - Nêu tên lớp cụ thể: 10A3, 11B2...
+   - Nêu thời gian cụ thể: "Tháng 9 năm ngoái", "Học kỳ I năm học 2024-2025"
+
+KIỂM TRA TRƯỚC KHI TRẢ BÀI:
+- [ ] Có ít nhất 3 câu hỏi tu từ?
+- [ ] Có ít nhất 2 chỗ thừa nhận khó khăn?
+- [ ] Có ít nhất 1 đoạn đối thoại?
+- [ ] Mở đầu bằng tình huống cụ thể?
+- [ ] KHÔNG có "Trong bối cảnh...", "Hiện nay..."?
+- [ ] KHÔNG trích dẫn tài liệu?
+
+BẮT ĐẦU VIẾT:
+[Nội dung SKKN sẽ được AI sinh ra theo quy tắc trên]
+```
+
+---
+
+## 📌 KẾT LUẬN
+
+Bộ quy tắc này giúp AI viết SKKN với giọng văn tự nhiên như giáo viên thật, đồng thời tránh bị các công cụ check đạo văn phát hiện.
+
+**Nguyên tắc vàng :**
+
+1. **Kể chuyện thay vì liệt kê**
+
+2. **Chi tiết cụ thể thay vì khái quát chung chung**
+
+3. **Cảm xúc và suy nghĩ thay vì khẳng định cứng nhắc**
+
+4. **Hành động mô tả thay vì thuật ngữ học thuật**
+
+Khi áp dụng đúng, SKKN do AI viết sẽ:
+
+- ✅ Đọc như do người viết
+
+- ✅ Vượt qua được các công cụ check đạo văn (Turnitin, [kiemtratailieu.vn](http://kiemtratailieu.vn)...)
+
+- ✅ Được đánh giá cao về tính thực tiễn và chân thực
+
+- ✅ Dễ đọc, dễ hiểu, dễ áp dụng cho giáo viên khác
+
+---
+
+**Phiên bản :** 1.0\
+**Ngày tạo :** 03/02/2026\
+**Tác giả:** YouMind AI Assistant\
+**Mục đích:** Tích hợp vào App tạo SKKN cho giáo viên

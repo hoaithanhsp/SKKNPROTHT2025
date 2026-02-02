@@ -726,86 +726,84 @@ QUAN TRỌNG:
               ${getPageLimitPrompt()}`,
           nextStep: GenerationStep.PART_IV_SOL2_3
         },
-        [GenerationStep.PART_IV_SOL2_3]: {
-          // ULTRA MODE - Viết Giải pháp 2 và 3
-          prompt: `
-              BẮT ĐẦU phản hồi bằng MENU NAVIGATION trạng thái Bước 5 (Viết Giải pháp 2-3 - Đang thực hiện).
+        [GenerationStep.PART_IV_SOL2_3]: userInfo.includeSolution4_5
+          ? {
+            // Nếu có chọn 5 giải pháp → prompt viết Giải pháp 4-5
+            prompt: `
+                BẮT ĐẦU phản hồi bằng MENU NAVIGATION trạng thái Bước 6 (Viết Giải pháp 4-5 - Đang thực hiện).
 
-              Tiếp tục giữ vững vai trò CHUYÊN GIA GIÁO DỤC (ULTRA MODE).
-              
-              Nhiệm vụ: Viết GIẢI PHÁP 2 và GIẢI PHÁP 3 cho đề tài: "${userInfo.topic}".
-              
-              ${userInfo.includeSolution4_5
-              ? '⚠️ LƯU Ý: Đây là Giải pháp 2 và 3. Sau đây sẽ còn Giải pháp 4 và 5 nữa.'
-              : '⚠️ LƯU Ý QUAN TRỌNG: Chỉ có 3 GIẢI PHÁP trọng tâm. Đây là 2 giải pháp cuối cùng. Hãy làm HOÀN THIỆN, CHỈN CHU từng giải pháp.'}
-              
-              Yêu cầu:
-              1. Nội dung độc đáo, không trùng lặp với Giải pháp 1.
-              2. Tận dụng tối đa CSVC: ${userInfo.facilities}.
-              3. Mỗi giải pháp phải có:
-                 - Mục tiêu rõ ràng
-                 - Nội dung và cách thực hiện chi tiết
-                 - Quy trình 5-7 bước cụ thể
-                 - Ví dụ minh họa từ SGK ${userInfo.textbook || "hiện hành"}
-                 - Điều kiện thực hiện & lưu ý
-              4. BẮT BUỘC TUÂN THỦ FORMAT:
-                 - Xuống dòng sau mỗi câu.
-                 - Xuống 2 dòng sau mỗi đoạn.
-                 - Có khung "KẾT THÚC GIẢI PHÁP" ở cuối mỗi giải pháp.
-              ${userInfo.includeSolution4_5 ? '' : '5. Kết thúc bằng MỐI LIÊN HỆ GIỮA CÁC GIẢI PHÁP (tính hệ thống, logic).'}
-              
-              🖼️ GỢI Ý HÌNH ẢNH MINH HỌA (BẮT BUỘC):
-              Trong GIẢI PHÁP 2 và 3, hãy gợi ý 1-2 vị trí nên đặt hình ảnh minh họa cho MỖI giải pháp với format:
-              **[🖼️ GỢI Ý HÌNH ẢNH: Mô tả chi tiết hình ảnh - Đặt sau phần nào]**
-              Ví dụ: 
-              **[🖼️ GỢI Ý HÌNH ẢNH: Ảnh sản phẩm học tập của học sinh (bài làm, poster, sơ đồ tư duy) - Đặt cuối Giải pháp 2]**
-              **[🖼️ GỢI Ý HÌNH ẢNH: Giao diện ứng dụng/phần mềm sử dụng (nếu có áp dụng công nghệ) - Đặt phần công cụ hỗ trợ]**
-              
-              ${getPageLimitPrompt()}`,
-          // Nếu có chọn Giải pháp 4-5 thì tiếp tục, không thì skip sang Phần V-VI
-          nextStep: userInfo.includeSolution4_5 ? GenerationStep.PART_IV_SOL4_5 : GenerationStep.PART_V_VI
-        },
-        // Step mới: Giải pháp 4 và 5 (chỉ chạy khi includeSolution4_5 = true)
+                Tiếp tục giữ vững vai trò CHUYÊN GIA GIÁO DỤC (ULTRA MODE).
+                
+                Nhiệm vụ: Viết tiếp GIẢI PHÁP 4 và GIẢI PHÁP 5 cho đề tài: "${userInfo.topic}".
+                
+                ⚠️ LƯU Ý: Đây là 2 giải pháp MỞ RỘNG và NÂNG CAO cuối cùng.
+                Các giải pháp này có thể là:
+                - Biện pháp bổ trợ, tăng cường
+                - Giải pháp ứng dụng công nghệ/AI nâng cao
+                - Giải pháp phát triển, mở rộng sang các lớp/đối tượng khác
+                
+                Yêu cầu:
+                1. Nội dung độc đáo, KHÔNG trùng lặp với Giải pháp 1, 2, 3.
+                2. Tận dụng tối đa CSVC: ${userInfo.facilities}.
+                3. Mỗi giải pháp phải có:
+                   - Mục tiêu rõ ràng
+                   - Nội dung và cách thực hiện chi tiết
+                   - Quy trình 5-7 bước cụ thể
+                   - Ví dụ minh họa từ SGK ${userInfo.textbook || "hiện hành"}
+                   - Điều kiện thực hiện & lưu ý
+                4. BẮT BUỘC TUÂN THỦ FORMAT:
+                   - Xuống dòng sau mỗi câu.
+                   - Xuống 2 dòng sau mỗi đoạn.
+                   - Có khung "KẾT THÚC GIẢI PHÁP" ở cuối mỗi giải pháp.
+                5. Kết thúc bằng MỐI LIÊN HỆ GIỮA TẤT CẢ 5 GIẢI PHÁP (tính hệ thống, logic, bổ trợ lẫn nhau).
+                
+                🖼️ GỢI Ý HÌNH ẢNH MINH HỌA (BẮT BUỘC):
+                Trong GIẢI PHÁP 4 và 5, hãy gợi ý 1-2 vị trí nên đặt hình ảnh minh họa cho MỖI giải pháp với format:
+                **[🖼️ GỢI Ý HÌNH ẢNH: Mô tả chi tiết hình ảnh - Đặt sau phần nào]**
+                
+                ${getPageLimitPrompt()}`,
+            nextStep: GenerationStep.PART_IV_SOL4_5
+          }
+          : {
+            // Nếu chỉ 3 giải pháp → prompt viết Phần V-VI
+            prompt: `
+                BẮT ĐẦU phản hồi bằng MENU NAVIGATION trạng thái Bước 7 (Kết luận & Khuyến nghị - Đang thực hiện).
+
+                Tiếp tục viết:
+                
+                5. KẾT QUẢ ĐẠT ĐƯỢC (4-5 trang):
+                   - 5.1. Mục đích thực nghiệm
+                   - 5.2. Nội dung thực nghiệm  
+                   - 5.3. Tổ chức thực nghiệm (Bảng so sánh TRƯỚC-SAU với số liệu lẻ)
+                
+                6. ĐIỀU KIỆN ĐỂ SÁNG KIẾN ĐƯỢC NHÂN RỘNG (1-2 trang)
+                
+                KẾT LUẬN VÀ KHUYẾN NGHỊ (2-3 trang):
+                   - Kết luận
+                   - Khuyến nghị
+                
+                TÀI LIỆU THAM KHẢO (8-12 tài liệu)
+                
+                Đảm bảo số liệu phần Kết quả phải LOGIC và chứng minh được sự tiến bộ so với phần Thực trạng.
+                Sử dụng số liệu lẻ (42.3%, 67.8%) không dùng số tròn.
+                
+                ⚠️ LƯU Ý FORMAT: 
+                - Viết từng câu xuống dòng riêng.
+                - Tách đoạn rõ ràng.
+                - Không viết dính chữ.
+                
+                📌 LƯU Ý: Chưa viết phần PHỤ LỤC chi tiết, chỉ gợi ý danh sách phụ lục.
+                Phụ lục chi tiết sẽ được tạo riêng bằng nút "TẠO PHỤ LỤC".
+                
+                🖼️ GỢI Ý HÌNH ẢNH MINH HỌA (BẮT BUỘC):
+                Trong phần KẾT QUẢ, hãy gợi ý 2-3 vị trí nên đặt hình ảnh minh họa với format:
+                **[🖼️ GỢI Ý HÌNH ẢNH: Mô tả chi tiết hình ảnh - Đặt sau phần nào]**
+                
+                ${getPageLimitPrompt()}`,
+            nextStep: GenerationStep.PART_V_VI
+          },
+        // Step: Giải pháp 4 và 5 → tiếp theo là Phần V-VI
         [GenerationStep.PART_IV_SOL4_5]: {
-          prompt: `
-              BẮT ĐẦU phản hồi bằng MENU NAVIGATION trạng thái Bước 6 (Viết Giải pháp 4-5 - Đang thực hiện).
-
-              Tiếp tục giữ vững vai trò CHUYÊN GIA GIÁO DỤC (ULTRA MODE).
-              
-              Nhiệm vụ: Viết tiếp GIẢI PHÁP 4 và GIẢI PHÁP 5 cho đề tài: "${userInfo.topic}".
-              
-              ⚠️ LƯU Ý: Đây là 2 giải pháp MỞ RỘNG và NÂNG CAO cuối cùng.
-              Các giải pháp này có thể là:
-              - Biện pháp bổ trợ, tăng cường
-              - Giải pháp ứng dụng công nghệ/AI nâng cao
-              - Giải pháp phát triển, mở rộng sang các lớp/đối tượng khác
-              
-              Yêu cầu:
-              1. Nội dung độc đáo, KHÔNG trùng lặp với Giải pháp 1, 2, 3.
-              2. Tận dụng tối đa CSVC: ${userInfo.facilities}.
-              3. Mỗi giải pháp phải có:
-                 - Mục tiêu rõ ràng
-                 - Nội dung và cách thực hiện chi tiết
-                 - Quy trình 5-7 bước cụ thể
-                 - Ví dụ minh họa từ SGK ${userInfo.textbook || "hiện hành"}
-                 - Điều kiện thực hiện & lưu ý
-              4. BẮT BUỘC TUÂN THỦ FORMAT:
-                 - Xuống dòng sau mỗi câu.
-                 - Xuống 2 dòng sau mỗi đoạn.
-                 - Có khung "KẾT THÚC GIẢI PHÁP" ở cuối mỗi giải pháp.
-              5. Kết thúc bằng MỐI LIÊN HỆ GIỮA TẤT CẢ 5 GIẢI PHÁP (tính hệ thống, logic, bổ trợ lẫn nhau).
-              
-              🖼️ GỢI Ý HÌNH ẢNH MINH HỌA (BắT BUỘC):
-              Trong GIẢI PHÁP 4 và 5, hãy gợi ý 1-2 vị trí nên đặt hình ảnh minh họa cho MỖI giải pháp với format:
-              **[🖼️ GỢI Ý HÌNH ẢNH: Mô tả chi tiết hình ảnh - Đặt sau phần nào]**
-              Ví dụ: 
-              **[🖼️ GỢI Ý HÌNH ẢNH: Screenshot giao diện ứng dụng AI/công nghệ sử dụng - Đặt phần Giải pháp 4]**
-              **[🖼️ GỢI Ý HÌNH ẢNH: Bảng so sánh hiệu quả trước/sau khi áp dụng dạng infographic - Đặt cuối Giải pháp 5]**
-              
-              ${getPageLimitPrompt()}`,
-          nextStep: GenerationStep.PART_V_VI
-        },
-        [GenerationStep.PART_V_VI]: {
           prompt: `
               BẮT ĐẦU phản hồi bằng MENU NAVIGATION trạng thái Bước 7 (Kết luận & Khuyến nghị - Đang thực hiện).
 
@@ -836,15 +834,30 @@ QUAN TRỌNG:
               📌 LƯU Ý: Chưa viết phần PHỤ LỤC chi tiết, chỉ gợi ý danh sách phụ lục.
               Phụ lục chi tiết sẽ được tạo riêng bằng nút "TẠO PHỤ LỤC".
               
-              🖼️ GỢI Ý HÌNH ẢNH MINH HỌA (BắT BUỘC):
-              Trong phần KếT QUẢ, hãy gợi ý 2-3 vị trí nên đặt hình ảnh minh họa với format:
+              🖼️ GỢI Ý HÌNH ẢNH MINH HỌA (BẮT BUỘC):
+              Trong phần KẾT QUẢ, hãy gợi ý 2-3 vị trí nên đặt hình ảnh minh họa với format:
               **[🖼️ GỢI Ý HÌNH ẢNH: Mô tả chi tiết hình ảnh - Đặt sau phần nào]**
               Ví dụ:
               **[🖼️ GỢI Ý HÌNH ẢNH: Biểu đồ so sánh kết quả học tập TRƯỚC và SAU khi áp dụng sáng kiến - Đặt sau bảng số liệu kết quả]**
               **[🖼️ GỢI Ý HÌNH ẢNH: Ảnh học sinh hứng thú tham gia hoạt động học tập mới - Đặt phần đánh giá định tính]**
-              **[🖼️ GỢI Ý HÌNH ẢNH: Phiếu phản hồi của học sinh/giáo viên về sáng kiến - Đặt phần ý kiến phản hồi]**
               
               ${getPageLimitPrompt()}`,
+          nextStep: GenerationStep.PART_V_VI
+        },
+        // Step cuối: PART_V_VI → Chuyển sang COMPLETED (không gửi prompt nữa)
+        [GenerationStep.PART_V_VI]: {
+          prompt: `
+              ✅ SKKN ĐÃ HOÀN THÀNH!
+              
+              Bạn đã viết xong toàn bộ nội dung chính của SKKN.
+              Bao gồm: Đặt vấn đề, Cơ sở lý luận, Thực trạng, Giải pháp, Kết quả và Kết luận.
+              
+              📌 BÂY GIỜ BẠN CÓ THỂ:
+              1. Xuất file Word để chỉnh sửa chi tiết
+              2. Tạo PHỤ LỤC chi tiết bằng nút "TẠO PHỤ LỤC"
+              3. Kiểm tra lại nội dung và định dạng
+              
+              Chúc mừng bạn đã hoàn thành bản thảo SKKN!`,
           nextStep: GenerationStep.COMPLETED
         }
       };
