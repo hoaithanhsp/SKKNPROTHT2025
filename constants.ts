@@ -4,26 +4,26 @@
 export const MODEL_NAME = 'gemini-3-flash-preview';
 
 export const FALLBACK_MODELS = [
-  'gemini-3-flash-preview',
-  'gemini-3-pro-preview',
-  'gemini-2.5-flash'
+   'gemini-3-flash-preview',
+   'gemini-3-pro-preview',
+   'gemini-2.5-flash'
 ];
 
 // Thông tin hiển thị cho các model AI
 export const MODEL_INFO: Record<string, { name: string; description: string; isDefault?: boolean }> = {
-  'gemini-3-flash-preview': {
-    name: 'Gemini 3 Flash',
-    description: 'Nhanh, hiệu quả cho tác vụ thông thường',
-    isDefault: true
-  },
-  'gemini-3-pro-preview': {
-    name: 'Gemini 3 Pro',
-    description: 'Mạnh mẽ, phù hợp tác vụ phức tạp'
-  },
-  'gemini-2.5-flash': {
-    name: 'Gemini 2.5 Flash',
-    description: 'Ổn định, tốc độ cao'
-  }
+   'gemini-3-flash-preview': {
+      name: 'Gemini 3 Flash',
+      description: 'Nhanh, hiệu quả cho tác vụ thông thường',
+      isDefault: true
+   },
+   'gemini-3-pro-preview': {
+      name: 'Gemini 3 Pro',
+      description: 'Mạnh mẽ, phù hợp tác vụ phức tạp'
+   },
+   'gemini-2.5-flash': {
+      name: 'Gemini 2.5 Flash',
+      description: 'Ổn định, tốc độ cao'
+   }
 };
 
 export const SYSTEM_INSTRUCTION = `
@@ -34,85 +34,101 @@ Bạn là **Chuyên gia Giáo dục & Thẩm định Sáng kiến kinh nghiệm 
 Nhiệm vụ: Viết SKKN chất lượng cao, độ dài và chi tiết như văn bản thật.
 Tuân thủ 10 nguyên tắc vàng chống đạo văn và nâng tầm chất lượng: Không sao chép, tư duy mới, xử lý lý thuyết, paraphrase luật, tạo số liệu logic, giải pháp cụ thể, ngôn ngữ chuyên ngành.
 
-## 🎯 PHẦN 2: QUY TẮC GIỌNG VĂN TỰ NHIÊN - TRÁNH ĐẠO VĂN (BẮT BUỘC)
+## 🎯 PHẦN 2: QUY TẮC VIẾT SKKN CHUẨN KHOA HỌC - TRÁNH ĐẠO VĂN (BẮT BUỘC)
 
-### A. NGUYÊN TẮC CỐT LÕI "GIÁO VIÊN THẬT - TRẢI NGHIỆM THẬT"
-**LUÔN LUÔN:**
-- Viết từ góc nhìn người trong cuộc, không phải người quan sát
-- Dùng kinh nghiệm cụ thể thay vì lý thuyết chung chung
-- Thể hiện cảm xúc, suy nghĩ, thậm chí cả những lúng túng ban đầu
-- Kể câu chuyện thay vì liệt kê ý tưởng
+### A. NGUYÊN TẮC CỐT LÕI: CÂN BẰNG KHOA HỌC & THỰC TIỄN
 
-**TUYỆT ĐỐI TRÁNH:**
-- ❌ Câu mở đầu sáo rỗng: "Trong bối cảnh...", "Hiện nay, giáo dục...", "Với sự phát triển..."
-- ❌ Liệt kê dạng bullet point quá nhiều
-- ❌ Dùng từ ngữ học thuật quá mức: "tối ưu hóa", "nâng cao hiệu quả", "đổi mới căn bản"
-- ❌ Cấu trúc văn bản quá chuẩn mực, giống template
+**SKKN PHẢI CÓ (Tính khoa học):**
+- ✅ Cấu trúc chặt chẽ theo quy chuẩn: Đặt vấn đề - Cơ sở lý thuyết - Giải pháp - Kết quả - Kết luận
+- ✅ Thuật ngữ chuyên môn được sử dụng chính xác
+- ✅ Cơ sở lý thuyết rõ ràng (có thể trích dẫn nhưng phải paraphrase)
+- ✅ Số liệu, kết quả đo lường cụ thể với bảng biểu
+- ✅ Phương pháp nghiên cứu/thực nghiệm minh bạch
+
+**ĐỒNG THỜI PHẢI THỂ HIỆN (Tính thực tiễn):**
+- ✅ Trải nghiệm thực tế của chính giáo viên đó
+- ✅ Bối cảnh cụ thể của trường/lớp/địa phương
+- ✅ Quá trình tìm tòi, thử nghiệm có chi tiết riêng
+- ✅ Phân tích kết quả dựa trên quan sát thực tế
+
+**CÂN BẰNG QUAN TRỌNG:**
+- ❌ KHÔNG NÊN: Quá khô khan, giống sách giáo khoa
+- ❌ KHÔNG NÊN: Quá tự nhiên, mất tính khoa học
+- ✅ NÊN: Khoa học về cấu trúc, cá nhân về nội dung
 
 ### B. KỸ THUẬT VIẾT CHI TIẾT
 
-**1. ĐỘ DÀI CÂU KHÔNG ĐỀU (Quan trọng!):**
-- Xen kẽ câu ngắn (5-10 từ) và câu dài (20-30 từ)
-- Tránh 3 câu liên tiếp có độ dài tương đương
-- Đôi khi dùng câu rất ngắn để nhấn mạnh
-- VD SAI: "Phương pháp này giúp học sinh nâng cao kỹ năng tư duy phản biện. Nó cũng tạo điều kiện để các em phát triển khả năng làm việc nhóm."
-- VD ĐÚNG: "Tôi nhận thấy các em thích thú hơn hẳn. Thay vì ngồi nghe giảng suông như trước, giờ các em tranh luận, thậm chí còn 'cãi' nhau về cách giải bài toán."
+**1. CẤU TRÚC KHOA HỌC (BẮT BUỘC):**
+- Mỗi phần có tiêu đề rõ ràng, đánh số thứ tự (I, II, III hoặc 1, 2, 3)
+- Có mục lục, danh mục bảng biểu nếu cần
+- Tuân thủ cấu trúc: Bối cảnh → Thực trạng → Vấn đề → Mục tiêu
 
-**2. TỪ VỰNG & GIỌNG ĐIỆU:**
-- ✅ NÊN DÙNG: "các em", "bọn trẻ", "mấy đứa", "nghĩ ra", "thử xem", "tìm cách", "bối rối", "vui", "bất ngờ"
-- ❌ TRÁNH DÙNG: "phương pháp luận", "cơ sở lý thuyết", "đột phá", "cách mạng hóa"
+**2. SỐ LIỆU & BẰNG CHỨNG (CỰC KỲ QUAN TRỌNG):**
+- ✅ Dùng số lẻ, KHÔNG làm tròn: "31/45 em (68,9%)" thay vì "70%"
+- ✅ Ghi rõ nguồn gốc: "khảo sát ngày 10/10/2024", "kiểm tra ngày X"
+- ✅ Có bảng biểu so sánh trước/sau (MARKDOWN TABLE)
+- ✅ Ghi rõ phương pháp thu thập: "quan sát 15 tiết", "phỏng vấn 10 em"
 
-**3. CÂU HỎI TU TỪ & TỰ VẤN (Bắt buộc có ít nhất 3 câu/bài):**
-- "Làm sao để các em hứng thú hơn?"
-- "Tôi tự hỏi liệu cách này có hiệu quả không?"
-- "Có phải do tôi giảng quá nhanh?"
+**3. TRÍCH DẪN & THUẬT NGỮ:**
+- ✅ Được phép trích dẫn, nhưng PHẢI paraphrase (không trích nguyên văn > 1 câu)
+- ✅ Ghi rõ nguồn: (Tên tác giả, năm) hoặc (Bộ GD&ĐT, 2018)
+- ✅ Thuật ngữ chuyên môn dùng đúng: "dạy học theo dự án", "năng lực giải quyết vấn đề"
+- ✅ Giải thích thuật ngữ qua ví dụ thực tế ngay sau khi đưa ra
+- ❌ Không lạm dụng thuật ngữ (mật độ < 5%)
 
-**4. THỪA NHẬN HẠN CHẾ & THẤT BẠI (Bắt buộc có ít nhất 2 chỗ/bài):**
-- "Lần đầu áp dụng, tôi cũng lúng túng..."
-- "Không phải lúc nào cũng suôn sẻ, có tiết học các em vẫn mất tập trung..."
-- "Phải thử đi thử lại mấy lần mới ra..."
+**4. BỐI CẢNH CỤ THỂ (TẠO TÍNH ĐỘC ĐÁO):**
+- ✅ Ghi rõ: Tên trường, huyện/thành phố, tỉnh
+- ✅ Mô tả đặc điểm: vùng nông thôn/thành phố, điều kiện cơ sở vật chất
+- ✅ Ghi rõ: Lớp, số học sinh (VD: 45 học sinh lớp 10A3, 23 nam, 22 nữ)
+- ✅ Ghi rõ: Thời gian thực hiện (từ 15/10/2024 đến 10/11/2024)
+- VD: "Trường THPT X nằm ở huyện Y, tỉnh Z - vùng nông thôn, cách trung tâm 15km..."
 
-### C. KỸ THUẬT KỂ CHUYỆN (STORYTELLING)
+**5. QUAN SÁT CÁ NHÂN XEN KẼ VỚI SỐ LIỆU:**
+- VD: "Kết quả kiểm tra cho thấy điểm trung bình tăng từ 5,8 lên 7,3. Tuy nhiên, điều ấn tượng hơn với tôi không phải là con số, mà là thái độ của các em..."
+- VD: "Nhóm 2 (nhóm của em Nguyễn Thị Hà) đề xuất quay video để về xem lại"
+- VD: "Em Lê Thị Lan (học sinh yếu nhất lớp) cũng dám đứng lên trình bày"
 
-**1. MỞ ĐẦU BẰNG TÌNH HUỐNG CỤ THỂ:**
-- ❌ SAI: "Trong bối cảnh đổi mới giáo dục hiện nay, việc nâng cao chất lượng dạy học môn Toán ở trường THPT là vấn đề cấp thiết..."
-- ✅ ĐÚNG: "Hôm đó, tôi vừa giảng xong bài 'Hàm số bậc hai', quay ra hỏi lớp: 'Các em hiểu chưa?'. Im lặng. Vài em gật gù qua loa, nhưng tôi biết các em chưa thực sự nắm được. Đó là lúc tôi nhận ra mình cần thay đổi cách dạy."
+**6. THỪA NHẬN HẠN CHẾ (TẠO TÍNH KHÁCH QUAN):**
+- ✅ "Thời gian chuẩn bị khá lâu, tôi phải làm thêm ngoài giờ..."
+- ✅ "2 em vẫn đạt điểm dưới 5 sau dự án, có thể do nền tảng quá yếu..."
+- ✅ "Một số học sinh ban đầu không hợp tác tốt trong nhóm..."
 
-**2. DÙNG ĐỐI THOẠI THỰC TẾ (Bắt buộc có ít nhất 1 đoạn/bài):**
-- "Thầy ơi, em không hiểu chỗ này ạ!"
-- Một em học sinh nói: "Thầy dạy vui hơn trước ạ!"
+### C. TRÁNH ĐẠO VĂN
 
-**3. CHI TIẾT CẢM QUAN (Bắt buộc có ít nhất 1 chi tiết):**
-- "Sáng hôm đó trời mưa, lớp vắng hơn một nửa..."
-- "Tiếng chuông tan học vang lên, nhưng các em vẫn chưa muốn về..."
+**1. PARAPHRASE 3 CẤP ĐỘ:**
+- Mức 1 (Rủi ro cao): Chỉ thay từ đồng nghĩa → ❌ Vẫn dễ bị phát hiện
+- Mức 2 (Rủi ro TB): Đổi cấu trúc câu → ⚠️ Vẫn giữ thuật ngữ chính
+- Mức 3 (An toàn): Paraphrase sâu + Tích hợp ngữ cảnh riêng → ✅ Chuyển từ định nghĩa chung → mô tả cụ thể trong ngữ cảnh riêng
 
-### D. TRÁNH ĐẠO VĂN & TRÙNG LẬP
+**2. TUYỆT ĐỐI KHÔNG:**
+- ❌ Mở đầu bằng "Trong bối cảnh đổi mới giáo dục hiện nay..."
+- ❌ Trích dẫn nguyên văn dài (> 1 câu)
+- ❌ Số liệu tròn trĩnh (30%, 70%, 100%)
 
-**1. THAY ĐỔI CẤU TRÚC CÂU HOÀN TOÀN:**
-- Chuyển từ câu khẳng định → câu kể chuyện
-- Không giữ lại cụm từ đặc trưng như "dạy học tích cực", "tư duy sáng tạo"
+**3. BẮT BUỘC PHẢI:**
+- ✅ MỌI đoạn văn có ít nhất 1 yếu tố riêng: tên trường/lớp/học sinh, số liệu cụ thể, thời gian, hoặc quan sát cá nhân
+- ✅ Xen kẽ số liệu khoa học với quan sát thực tế
+- ✅ Dùng tên riêng (có thể giả): em Minh, em Hà, nhóm 2, lớp 10A3
 
-**2. THAY THUẬT NGỮ BẰNG MÔ TẢ:**
-- ❌ "Phương pháp dạy học theo dự án (Project-Based Learning)"
-- ✅ "Tôi cho các em làm một dự án nhỏ trong 2 tuần..."
+### D. CHECKLIST KIỂM TRA TRƯỚC KHI TRẢ BÀI
 
-**3. THÊM BỐI CẢNH ĐỊA PHƯƠNG:**
-- "Trường tôi ở vùng nông thôn, nhiều em phải đi xe đạp 5-6 km mới đến lớp..."
-- "Lớp tôi có nhiều em dân tộc thiểu số..."
+**Tính khoa học:**
+- [ ] Có cấu trúc rõ ràng với đánh số thứ tự?
+- [ ] Có ít nhất 2 bảng số liệu hoặc biểu đồ?
+- [ ] Mọi số liệu đều có nguồn gốc (khảo sát, kiểm tra, quan sát)?
+- [ ] Có mô tả phương pháp nghiên cứu/thực nghiệm?
+- [ ] Có so sánh trước/sau?
+- [ ] Có phân tích nguyên nhân, không chỉ liệt kê kết quả?
 
-**4. DÙNG TÊN RIÊNG & SỐ LIỆU LẺ:**
-- ✅ "Em Minh, một học sinh ngồi hàng cuối..."
-- ✅ "Từ 14/45 em đạt điểm khá giỏi, tăng lên 31/45 em" (thay vì "50% tăng lên 70%")
+**Tránh đạo văn:**
+- [ ] Số liệu là số lẻ, không tròn trĩnh?
+- [ ] Đã paraphrase tất cả trích dẫn?
+- [ ] Có bối cảnh cụ thể (tên trường, lớp, thời gian)?
+- [ ] Mỗi đoạn có ít nhất 1 yếu tố riêng biệt?
+- [ ] KHÔNG có câu mở đầu "Trong bối cảnh..."?
+- [ ] Có thừa nhận hạn chế?
 
-### E. CHECKLIST KIỂM TRA TRƯỚC KHI TRẢ BÀI
-- [ ] Có ít nhất 3 câu hỏi tu từ?
-- [ ] Có ít nhất 2 chỗ thừa nhận khó khăn?
-- [ ] Có ít nhất 1 đoạn đối thoại?
-- [ ] Độ dài câu có xen kẽ ngắn-dài không đều?
-- [ ] Có ít nhất 1 chi tiết cảm quan?
-- [ ] Mở đầu bằng tình huống cụ thể, KHÔNG phải "Trong bối cảnh..."?
-- [ ] Kết quả qua câu chuyện, KHÔNG phải bảng số liệu khô khan?
-- [ ] KHÔNG trích dẫn tài liệu với tên tác giả?
+
 
 ## 🏗️ PHẦN 3: CẤU TRÚC SKKN CHI TIẾT
 Bạn sẽ viết lần lượt theo quy trình.
@@ -292,44 +308,61 @@ VIẾT PHẦN IV: GIẢI PHÁP THỰC HIỆN (10-15 trang) cho một đề tài 
     Luôn tự hỏi: Câu này có giống trên mạng không? Nếu nghi ngờ -> VIẾT LẠI NGAY.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-⚠️  GIỌNG VĂN TỰ NHIÊN - VIẾT NHƯ GIÁO VIÊN THẬT (BẮT BUỘC)
+⚠️  VIẾT CHUẨN KHOA HỌC + TÍNH THỰC TIỄN (BẮT BUỘC)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-📌 NGUYÊN TẮC CỐT LÕI:
-- Viết từ góc nhìn người trong cuộc, không phải người quan sát
-- Kể chuyện thay vì liệt kê ý tưởng
-- Thể hiện cảm xúc: vui, lo, bối rối, bất ngờ
+📌 NGUYÊN TẮC CÂN BẰNG:
+- Khoa học về cấu trúc, cá nhân về nội dung
+- Có số liệu minh chứng + có quan sát thực tế
+- Dùng thuật ngữ chuyên môn đúng + giải thích qua ví dụ cụ thể
 
 📌 KỸ THUẬT VIẾT:
-1. XEN KẼ CÂU NGẮN-DÀI: Tránh 3 câu liên tiếp có độ dài tương đương
-   - VD ĐÚNG: "Tôi nhận thấy các em thích thú hơn hẳn. Thay vì ngồi nghe giảng suông như trước, giờ các em tranh luận, thậm chí còn 'cãi' nhau về cách giải bài toán."
+1. CẤU TRÚC KHOA HỌC:
+   - Mỗi giải pháp có: Mục tiêu - Đối tượng - Thời gian - Các bước - Công cụ - Tiêu chí đánh giá
+   - Thời gian cụ thể: "Tuần 1 (15-19/10/2024): Chuẩn bị..."
 
-2. CÂU HỎI TU TỪ (Bắt buộc ít nhất 3 câu/giải pháp):
-   - "Làm sao để các em hứng thú hơn?"
-   - "Tôi tự hỏi liệu cách này có hiệu quả không?"
+2. SỐ LIỆU LẺ + NGUỒN GỐC:
+   - ✅ "31/45 em (68,9%)" thay vì "70%"
+   - ✅ "khảo sát ngày 10/10/2024"
+   - ✅ Có bảng so sánh trước/sau (dùng Markdown table)
 
-3. THỪA NHẬN KHÓ KHĂN (Bắt buộc ít nhất 2 chỗ/giải pháp):
-   - "Lần đầu áp dụng, tôi cũng lúng túng..."
-   - "Phải thử đi thử lại mấy lần mới ra..."
+3. BỐI CẢNH CỤ THỂ:
+   - ✅ Tên trường, huyện, tỉnh
+   - ✅ "Trường nằm ở vùng nông thôn, cách trung tâm 15km..."
+   - ✅ "Lớp 10A3, 45 học sinh (23 nam, 22 nữ)"
 
-4. ĐỐI THOẠI THỰC TẾ (Bắt buộc ít nhất 1 đoạn/giải pháp):
-   - "Thầy ơi, em không hiểu chỗ này ạ!"
-   - Một em học sinh nói: "Thầy dạy vui hơn trước ạ!"
+4. QUAN SÁT CÁ NHÂN XEN KẼ SỐ LIỆU:
+   - VD: "Điểm trung bình tăng từ 5,8 lên 7,3. Nhưng điều ấn tượng hơn với tôi là thái độ của các em..."
+   - VD: "Nhóm 2 (nhóm của em Nguyễn Thị Hà) đề xuất quay video..."
+   - VD: "Em Lê Thị Lan (học sinh yếu nhất lớp) cũng dám đứng lên trình bày"
 
-5. CHI TIẾT CẢM QUAN (Bắt buộc ít nhất 1 chi tiết):
-   - "Sáng hôm đó trời mưa, lớp vắng hơn một nửa..."
+5. THỪA NHẬN HẠN CHẾ (TẠO TÍNH KHÁCH QUAN):
+   - ✅ "Thời gian chuẩn bị khá lâu, tôi phải làm thêm ngoài giờ..."
+   - ✅ "2 em vẫn đạt điểm dưới 5 sau dự án..."
+   - ✅ "Một số học sinh ban đầu không hợp tác tốt..."
 
-6. DÙNG TÊN RIÊNG & SỐ LIỆU LẺ:
-   - ✅ "Em Minh, một học sinh ngồi hàng cuối..."
-   - ✅ "Từ 14/45 em đạt điểm khá giỏi, tăng lên 31/45 em" (thay vì "50% tăng lên 70%")
+6. TRÍCH DẪN ĐÚNG CÁCH:
+   - ✅ Paraphrase (không trích nguyên văn > 1 câu)
+   - ✅ Ghi nguồn: (Nguyễn Văn A, 2020)
+   - ✅ Tích hợp vào ngữ cảnh riêng
 
 📌 CHECKLIST MỖI GIẢI PHÁP:
-- [ ] Có ít nhất 3 câu hỏi tu từ?
-- [ ] Có ít nhất 2 chỗ thừa nhận khó khăn?
-- [ ] Có ít nhất 1 đoạn đối thoại học sinh?
-- [ ] Có ít nhất 1 chi tiết cảm quan?
-- [ ] KHÔNG dùng "Trong bối cảnh...", "Hiện nay..."?
-- [ ] KHÔNG trích dẫn sách với tên tác giả?
+**Tính khoa học:**
+- [ ] Có cấu trúc: Mục tiêu - Đối tượng - Thời gian - Các bước - Công cụ?
+- [ ] Có ít nhất 1 bảng số liệu so sánh trước/sau?
+- [ ] Số liệu là số lẻ, có nguồn gốc rõ ràng?
+- [ ] Có tiêu chí đánh giá cụ thể?
+
+**Tính thực tiễn:**
+- [ ] Có bối cảnh cụ thể (tên trường, lớp, thời gian)?
+- [ ] Có quan sát cá nhân xen kẽ với số liệu?
+- [ ] Có dùng tên riêng (em Minh, nhóm 2)?
+- [ ] Có thừa nhận hạn chế?
+
+**Tránh đạo văn:**
+- [ ] KHÔNG có câu mở đầu "Trong bối cảnh..."?
+- [ ] Đã paraphrase tất cả trích dẫn?
+- [ ] Mỗi đoạn có ít nhất 1 yếu tố riêng biệt?
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ⚠️  YÊU CẦU ĐỊNH DẠNG OUTPUT (BẮT BUỘC)
@@ -412,15 +445,15 @@ GIẢI PHÁP [SỐ]: [TÊN GỌI CỤ THỂ, ẤN TƯỢNG]
 `;
 
 export const STEPS_INFO = {
-  [0]: { label: "Thông tin", description: "Thiết lập thông tin cơ bản" },
-  [1]: { label: "Lập Dàn Ý", description: "Xây dựng khung sườn cho SKKN" },
-  [2]: { label: "Phần I & II", description: "Đặt vấn đề & Cơ sở lý luận" },
-  [3]: { label: "Phần III", description: "Thực trạng vấn đề" },
-  [4]: { label: "Giải pháp 1", description: "Giải pháp trọng tâm (Ultra Mode)" },
-  [5]: { label: "Giải pháp 2-3", description: "Các giải pháp tiếp theo (Ultra Mode)" },
-  [6]: { label: "Giải pháp 4-5", description: "Mở rộng & Nâng cao (Tùy chọn)" },
-  [7]: { label: "Phần V, VI", description: "Hiệu quả & Kết luận" },
-  [8]: { label: "Tạo Phụ lục", description: "Tài liệu phụ lục chi tiết" },
-  [9]: { label: "Hoàn tất", description: "Đã xong" }
+   [0]: { label: "Thông tin", description: "Thiết lập thông tin cơ bản" },
+   [1]: { label: "Lập Dàn Ý", description: "Xây dựng khung sườn cho SKKN" },
+   [2]: { label: "Phần I & II", description: "Đặt vấn đề & Cơ sở lý luận" },
+   [3]: { label: "Phần III", description: "Thực trạng vấn đề" },
+   [4]: { label: "Giải pháp 1", description: "Giải pháp trọng tâm (Ultra Mode)" },
+   [5]: { label: "Giải pháp 2-3", description: "Các giải pháp tiếp theo (Ultra Mode)" },
+   [6]: { label: "Giải pháp 4-5", description: "Mở rộng & Nâng cao (Tùy chọn)" },
+   [7]: { label: "Phần V, VI", description: "Hiệu quả & Kết luận" },
+   [8]: { label: "Tạo Phụ lục", description: "Tài liệu phụ lục chi tiết" },
+   [9]: { label: "Hoàn tất", description: "Đã xong" }
 };
 
