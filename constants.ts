@@ -1,8 +1,8 @@
 
 
-
 export const MODEL_NAME = 'gemini-3-flash-preview';
 
+// Thứ tự fallback: nếu model đang chọn lỗi, tự động thử các model khác theo thứ tự này
 export const FALLBACK_MODELS = [
    'gemini-3-flash-preview',
    'gemini-3-pro-preview',

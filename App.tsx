@@ -2,7 +2,6 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { UserInfo, GenerationStep, GenerationState, SKKNTemplate } from './types';
 import { STEPS_INFO, SOLUTION_MODE_PROMPT, FALLBACK_MODELS } from './constants';
 import { initializeGeminiChat, sendMessageStream, getFriendlyErrorMessage } from './services/geminiService';
-import { apiKeyManager } from './services/apiKeyManager';
 import { SKKNForm } from './components/SKKNForm';
 import { DocumentPreview } from './components/DocumentPreview';
 import { Button } from './components/Button';
@@ -28,39 +27,20 @@ const App: React.FC = () => {
       setIsUnlocked(true);
     }
 
-    // Load keys từ apiKeyManager
-    apiKeyManager.loadFromStorage();
-
-    // Lấy key active từ manager
-    const activeKey = apiKeyManager.getActiveKey();
+    // Load API key từ localStorage
+    const savedKey = localStorage.getItem('gemini_api_key');
     const savedModel = localStorage.getItem('selected_model');
 
-    if (activeKey) {
-      setApiKey(activeKey);
+    if (savedKey) {
+      setApiKey(savedKey);
     } else {
-      // Nếu không có key nào trong manager, kiểm tra key cũ
-      const legacyKey = localStorage.getItem('gemini_api_key');
-      if (legacyKey && apiKeyManager.getAllKeys().length === 0) {
-        // Migration: thêm key cũ vào manager
-        apiKeyManager.addKey(legacyKey, 'Key mặc định');
-        setApiKey(legacyKey);
-      } else {
-        setShowApiModal(true);
-      }
+      // Nếu chưa có key, hiển thị modal bắt buộc nhập
+      setShowApiModal(true);
     }
 
     if (savedModel && FALLBACK_MODELS.includes(savedModel)) {
       setSelectedModel(savedModel);
     }
-
-    // Đăng ký callback khi có key rotation
-    apiKeyManager.setOnKeyRotation(({ fromKey, toKey, reason }) => {
-      console.log(`🔄 Đã chuyển key từ ${fromKey} sang ${toKey} (lý do: ${reason})`);
-    });
-
-    apiKeyManager.setOnAllKeysFailed(() => {
-      console.log('⚠️ Tất cả API key đều không khả dụng');
-    });
 
     setCheckingAuth(false);
   }, []);
