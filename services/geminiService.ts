@@ -1,9 +1,10 @@
 
 import { GoogleGenAI, Chat } from "@google/genai";
 import { SYSTEM_INSTRUCTION, FALLBACK_MODELS } from "../constants";
+import { apiKeyManager } from "./apiKeyManager";
 
 // Hàm phân tích và trả về thông báo lỗi thân thiện
-const parseApiError = (error: any): string => {
+export const parseApiError = (error: any): string => {
   const errorMessage = error?.message || error?.toString() || '';
   const errorString = JSON.stringify(error);
 
@@ -154,44 +155,102 @@ const getOrderedModels = (): string[] => {
 };
 
 export const sendMessageStream = async (message: string, onChunk: (text: string) => void) => {
-  if (!currentApiKey) throw new Error("API Key not initialized");
+  // Lấy key từ apiKeyManager
+  let activeKey = apiKeyManager.getActiveKey();
 
-  let lastError: any = null;
-  const modelsToTry = getOrderedModels();
-
-  // Try through the fallback models
-  for (const model of modelsToTry) {
-    try {
-      console.log(`🤖 Đang thử model: ${model}`);
-
-      // Always recreate session with current history to ensure we use the selected model
-      // (or optimize to reuse if same model, but recreation is safer for fallback)
-      chatSession = createChatSession(model);
-
-      const responseStream = await chatSession.sendMessageStream({ message });
-
-      let fullResponse = "";
-      for await (const chunk of responseStream) {
-        if (chunk.text) {
-          onChunk(chunk.text);
-          fullResponse += chunk.text;
-        }
-      }
-
-      // If successful, update history and break
-      history.push({ role: 'user', parts: [{ text: message }] });
-      history.push({ role: 'model', parts: [{ text: fullResponse }] });
-      console.log(`✅ Model ${model} thành công!`);
-      return;
-
-    } catch (error: any) {
-      console.error(`❌ Model ${model} thất bại:`, error.message || error);
-      lastError = error;
-      // Continue to next model
+  if (!activeKey) {
+    // Fallback về currentApiKey nếu có
+    if (currentApiKey) {
+      activeKey = currentApiKey;
+    } else {
+      throw new Error("Không có API Key khả dụng. Vui lòng thêm API key trong phần Cài đặt.");
     }
   }
 
-  // If all models fail
+  let lastError: any = null;
+  const modelsToTry = getOrderedModels();
+  let keyRotationAttempts = 0;
+  const maxKeyRotations = apiKeyManager.getAllKeys().length || 1;
+
+  // Outer loop for key rotation
+  while (keyRotationAttempts < maxKeyRotations) {
+    // Inner loop for model fallback
+    for (const model of modelsToTry) {
+      try {
+        console.log(`🤖 Đang thử model: ${model} với key: ${apiKeyManager.maskKey(activeKey)}`);
+
+        // Tạo session với key hiện tại
+        const ai = new GoogleGenAI({ apiKey: activeKey });
+        chatSession = ai.chats.create({
+          model: model,
+          config: {
+            systemInstruction: SYSTEM_INSTRUCTION,
+            temperature: 0.7,
+            topK: 64,
+            topP: 0.95,
+            maxOutputTokens: 65536,
+            thinkingConfig: { thinkingBudget: 2048 },
+            tools: [{ googleSearch: {} }]
+          },
+          history: history
+        });
+
+        const responseStream = await chatSession.sendMessageStream({ message });
+
+        let fullResponse = "";
+        for await (const chunk of responseStream) {
+          if (chunk.text) {
+            onChunk(chunk.text);
+            fullResponse += chunk.text;
+          }
+        }
+
+        // If successful, update history and return
+        history.push({ role: 'user', parts: [{ text: message }] });
+        history.push({ role: 'model', parts: [{ text: fullResponse }] });
+        console.log(`✅ Model ${model} thành công với key: ${apiKeyManager.maskKey(activeKey)}`);
+        return;
+
+      } catch (error: any) {
+        console.error(`❌ Model ${model} thất bại:`, error.message || error);
+        lastError = error;
+
+        const errorType = parseApiError(error);
+
+        // Nếu là lỗi quota hoặc rate limit, thử xoay key
+        if (errorType === 'QUOTA_EXCEEDED' || errorType === 'RATE_LIMIT' || errorType === 'INVALID_API_KEY') {
+          console.log(`🔄 Đánh dấu lỗi ${errorType} cho key: ${apiKeyManager.maskKey(activeKey)}`);
+          const rotationResult = apiKeyManager.markKeyError(activeKey, errorType);
+
+          if (rotationResult.hasMoreKeys && rotationResult.newKey) {
+            activeKey = rotationResult.newKey;
+            keyRotationAttempts++;
+            console.log(`🔑 Đã chuyển sang key mới: ${apiKeyManager.maskKey(activeKey)}`);
+            break; // Break inner loop to try with new key
+          } else {
+            // Không còn key nào khả dụng
+            throw new Error('ALL_KEYS_EXHAUSTED');
+          }
+        }
+        // Với các lỗi khác (network, unknown), tiếp tục thử model tiếp theo
+        continue;
+      }
+    }
+
+    // Nếu không break (tức là đã thử hết model với key hiện tại mà không có lỗi quota)
+    // thì thoát vòng lặp
+    if (keyRotationAttempts === 0 || !apiKeyManager.hasAvailableKeys()) {
+      break;
+    }
+  }
+
+  // If all attempts fail
+  if (lastError) {
+    const errorType = parseApiError(lastError);
+    if (errorType === 'QUOTA_EXCEEDED' || errorType === 'RATE_LIMIT') {
+      throw new Error('Tất cả API key đều đã hết quota hoặc bị giới hạn. Vui lòng thêm key mới hoặc đợi một lúc rồi thử lại.');
+    }
+  }
   throw lastError || new Error("Tất cả models đều thất bại. Vui lòng kiểm tra API key hoặc thử lại sau.");
 };
 
