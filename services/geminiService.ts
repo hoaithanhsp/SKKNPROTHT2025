@@ -170,14 +170,19 @@ export const sendMessageStream = async (message: string, onChunk: (text: string)
   let lastError: any = null;
   const modelsToTry = getOrderedModels();
   let keyRotationAttempts = 0;
-  const maxKeyRotations = apiKeyManager.getAllKeys().length || 1;
+  const maxKeyRotations = Math.max(apiKeyManager.getAllKeys().length, 1);
+  let shouldRetryWithNewKey = false;
+
+  console.log(`🚀 Bắt đầu gửi tin nhắn. Có ${maxKeyRotations} key, ${modelsToTry.length} model để thử.`);
 
   // Outer loop for key rotation
-  while (keyRotationAttempts < maxKeyRotations) {
+  outerLoop: while (keyRotationAttempts < maxKeyRotations) {
+    shouldRetryWithNewKey = false;
+
     // Inner loop for model fallback
     for (const model of modelsToTry) {
       try {
-        console.log(`🤖 Đang thử model: ${model} với key: ${apiKeyManager.maskKey(activeKey)}`);
+        console.log(`🤖 Đang thử model: ${model} với key: ${apiKeyManager.maskKey(activeKey)} (Lần xoay key: ${keyRotationAttempts + 1}/${maxKeyRotations})`);
 
         // Tạo session với key hiện tại
         const ai = new GoogleGenAI({ apiKey: activeKey });
@@ -208,7 +213,7 @@ export const sendMessageStream = async (message: string, onChunk: (text: string)
         // If successful, update history and return
         history.push({ role: 'user', parts: [{ text: message }] });
         history.push({ role: 'model', parts: [{ text: fullResponse }] });
-        console.log(`✅ Model ${model} thành công với key: ${apiKeyManager.maskKey(activeKey)}`);
+        console.log(`✅ Thành công với model ${model} và key: ${apiKeyManager.maskKey(activeKey)}`);
         return;
 
       } catch (error: any) {
@@ -217,29 +222,33 @@ export const sendMessageStream = async (message: string, onChunk: (text: string)
 
         const errorType = parseApiError(error);
 
-        // Nếu là lỗi quota hoặc rate limit, thử xoay key
+        // Nếu là lỗi quota hoặc rate limit hoặc API key không hợp lệ -> thử xoay key
         if (errorType === 'QUOTA_EXCEEDED' || errorType === 'RATE_LIMIT' || errorType === 'INVALID_API_KEY') {
-          console.log(`🔄 Đánh dấu lỗi ${errorType} cho key: ${apiKeyManager.maskKey(activeKey)}`);
+          console.log(`🔄 Lỗi ${errorType} với key: ${apiKeyManager.maskKey(activeKey)}. Đang thử xoay key...`);
           const rotationResult = apiKeyManager.markKeyError(activeKey, errorType);
 
           if (rotationResult.hasMoreKeys && rotationResult.newKey) {
             activeKey = rotationResult.newKey;
             keyRotationAttempts++;
-            console.log(`🔑 Đã chuyển sang key mới: ${apiKeyManager.maskKey(activeKey)}`);
-            break; // Break inner loop to try with new key
+            shouldRetryWithNewKey = true;
+            console.log(`🔑 Đã chuyển sang key mới: ${apiKeyManager.maskKey(activeKey)} (${rotationResult.message})`);
+            continue outerLoop; // Quay lại outer loop, thử lại từ model đầu tiên với key mới
           } else {
             // Không còn key nào khả dụng
+            console.error(`💀 Tất cả ${maxKeyRotations} key đều đã hết quota hoặc lỗi.`);
             throw new Error('ALL_KEYS_EXHAUSTED');
           }
         }
         // Với các lỗi khác (network, unknown), tiếp tục thử model tiếp theo
+        console.log(`⏭️ Lỗi ${errorType}, thử model tiếp theo...`);
         continue;
       }
     }
 
-    // Nếu không break (tức là đã thử hết model với key hiện tại mà không có lỗi quota)
-    // thì thoát vòng lặp
-    if (keyRotationAttempts === 0 || !apiKeyManager.hasAvailableKeys()) {
+    // Đã thử hết tất cả models với key hiện tại
+    // Nếu chưa có yêu cầu xoay key (lỗi không phải quota), thoát vòng lặp
+    if (!shouldRetryWithNewKey) {
+      console.log(`🛑 Đã thử hết ${modelsToTry.length} models mà không có lỗi quota. Dừng lại.`);
       break;
     }
   }

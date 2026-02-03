@@ -114,6 +114,30 @@ export const ApiKeyModal: React.FC<ApiKeyModalProps> = ({ isOpen, onSave, onClos
         }
     };
 
+    // Đặt key cụ thể làm active
+    const handleSetActiveKey = (key: string) => {
+        setError('');
+        const result = apiKeyManager.setActiveKey(key);
+        if (result.success) {
+            setSuccessMessage(result.message);
+            loadKeys();
+            setTimeout(() => setSuccessMessage(''), 3000);
+        } else {
+            setError(result.message);
+        }
+    };
+
+    // Reset tất cả key về active
+    const handleResetAllKeys = () => {
+        setError('');
+        const result = apiKeyManager.resetAllKeys();
+        if (result.success) {
+            setSuccessMessage('Đã reset tất cả key về trạng thái hoạt động');
+            loadKeys();
+            setTimeout(() => setSuccessMessage(''), 3000);
+        }
+    };
+
     const handleSave = () => {
         localStorage.setItem('selected_model', selectedModel);
         const activeKey = apiKeyManager.getActiveKey();
@@ -222,6 +246,17 @@ export const ApiKeyModal: React.FC<ApiKeyModalProps> = ({ isOpen, onSave, onClos
                                 <span className="flex items-center gap-1 text-red-600">
                                     <AlertCircle className="w-3 h-3" /> {stats.error}
                                 </span>
+                                {/* Nút reset tất cả key */}
+                                {(stats.cooldown > 0 || stats.error > 0) && (
+                                    <button
+                                        onClick={handleResetAllKeys}
+                                        className="flex items-center gap-1 px-2 py-1 text-sky-600 hover:bg-sky-50 rounded transition-colors ml-2"
+                                        title="Reset tất cả key về trạng thái hoạt động"
+                                    >
+                                        <RefreshCw className="w-3 h-3" />
+                                        <span>Reset tất cả</span>
+                                    </button>
+                                )}
                             </div>
                         </div>
 
@@ -259,6 +294,16 @@ export const ApiKeyModal: React.FC<ApiKeyModalProps> = ({ isOpen, onSave, onClos
                                             )}
                                         </div>
                                         <div className="flex items-center gap-1">
+                                            {/* Nút đặt làm key chính - chỉ hiển thị nếu không phải key đang dùng */}
+                                            {!(index === apiKeyManager.getCurrentIndex() && keyInfo.status === 'active') && keyInfo.status === 'active' && (
+                                                <button
+                                                    onClick={() => handleSetActiveKey(keyInfo.key)}
+                                                    className="p-1.5 text-gray-400 hover:text-sky-600 hover:bg-sky-50 rounded transition-colors"
+                                                    title="Đặt làm key chính"
+                                                >
+                                                    <CheckCircle className="w-4 h-4" />
+                                                </button>
+                                            )}
                                             {keyInfo.status !== 'active' && (
                                                 <button
                                                     onClick={() => handleResetKey(keyInfo.key)}

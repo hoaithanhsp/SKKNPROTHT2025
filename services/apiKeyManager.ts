@@ -30,8 +30,8 @@ export type AllKeysFailedCallback = () => void;
 
 const STORAGE_KEY = 'gemini_api_keys';
 const MAX_KEYS = 10;
-const COOLDOWN_DURATION = 60 * 1000; // 1 phút cooldown
-const MAX_ERROR_COUNT = 3; // Số lần lỗi tối đa trước khi đưa vào cooldown
+const COOLDOWN_DURATION = 5 * 60 * 1000; // 5 phút cooldown cho key bị lỗi quota
+const MAX_ERROR_COUNT = 1; // Xoay key ngay lập tức khi có lỗi quota (1 lần)
 
 class ApiKeyManager {
     private keys: ApiKeyInfo[] = [];
@@ -221,13 +221,19 @@ class ApiKeyManager {
         keyInfo.lastError = errorType;
         keyInfo.errorCount++;
 
-        // Nếu vượt quá số lần lỗi tối đa, đưa vào cooldown
-        if (keyInfo.errorCount >= MAX_ERROR_COUNT) {
+        // Với lỗi QUOTA_EXCEEDED hoặc RATE_LIMIT: đưa vào cooldown NGAY LẬP TỨC và xoay key
+        if (errorType === 'QUOTA_EXCEEDED' || errorType === 'RATE_LIMIT') {
             keyInfo.status = 'cooldown';
             keyInfo.cooldownUntil = Date.now() + COOLDOWN_DURATION;
+            console.log(`⏸️ Key ${this.maskKey(key)} đã được đưa vào cooldown ${COOLDOWN_DURATION / 60000} phút do ${errorType}`);
         } else if (errorType === 'INVALID_API_KEY') {
-            // Invalid key thì đánh dấu error ngay
+            // Invalid key thì đánh dấu error ngay (không cooldown, cần xóa hoặc sửa key)
             keyInfo.status = 'error';
+            console.log(`❌ Key ${this.maskKey(key)} không hợp lệ, đã đánh dấu lỗi`);
+        } else if (keyInfo.errorCount >= MAX_ERROR_COUNT) {
+            // Các lỗi khác: đưa vào cooldown sau MAX_ERROR_COUNT lần
+            keyInfo.status = 'cooldown';
+            keyInfo.cooldownUntil = Date.now() + COOLDOWN_DURATION;
         }
 
         this.saveToStorage();
@@ -357,6 +363,73 @@ class ApiKeyManager {
      */
     getCurrentIndex(): number {
         return this.currentIndex;
+    }
+
+    /**
+     * Đặt key cụ thể làm active (theo index hoặc key string)
+     */
+    setActiveKey(keyOrIndex: string | number): { success: boolean; message: string } {
+        let index: number;
+
+        if (typeof keyOrIndex === 'number') {
+            index = keyOrIndex;
+        } else {
+            index = this.keys.findIndex(k => k.key === keyOrIndex);
+        }
+
+        if (index < 0 || index >= this.keys.length) {
+            return { success: false, message: 'Key không tồn tại' };
+        }
+
+        const keyInfo = this.keys[index];
+        if (keyInfo.status !== 'active') {
+            // Reset key về active nếu cần
+            keyInfo.status = 'active';
+            keyInfo.errorCount = 0;
+            keyInfo.cooldownUntil = undefined;
+            keyInfo.lastError = undefined;
+        }
+
+        this.currentIndex = index;
+        this.saveToStorage();
+        console.log(`✅ Đã đặt key ${keyInfo.name} (${this.maskKey(keyInfo.key)}) làm active`);
+        return { success: true, message: `Đã chuyển sang key: ${keyInfo.name}` };
+    }
+
+    /**
+     * Reset tất cả key về trạng thái active
+     */
+    resetAllKeys(): { success: boolean; message: string } {
+        let resetCount = 0;
+        this.keys.forEach(keyInfo => {
+            if (keyInfo.status !== 'active') {
+                keyInfo.status = 'active';
+                keyInfo.errorCount = 0;
+                keyInfo.cooldownUntil = undefined;
+                keyInfo.lastError = undefined;
+                resetCount++;
+            }
+        });
+
+        this.saveToStorage();
+        console.log(`🔄 Đã reset ${resetCount} key về trạng thái active`);
+        return { success: true, message: `Đã reset ${resetCount} key` };
+    }
+
+    /**
+     * Lấy key tiếp theo (không xoay, chỉ để xem trước)
+     */
+    getNextAvailableKey(): string | null {
+        this.checkAndResetCooldowns();
+
+        for (let i = 1; i <= this.keys.length; i++) {
+            const nextIndex = (this.currentIndex + i) % this.keys.length;
+            const nextKey = this.keys[nextIndex];
+            if (nextKey.status === 'active') {
+                return nextKey.key;
+            }
+        }
+        return null;
     }
 }
 
