@@ -1366,10 +1366,12 @@ QUAN TRỌNG:
         <div className="space-y-6">
           {Object.entries(STEPS_INFO).map(([key, info]) => {
             const stepNum = parseInt(key);
-            if (stepNum > 9) return null; // Don't show completed logic step
 
-            // Ẩn step "Giải pháp 4-5" nếu người dùng không chọn
-            if (stepNum === 6 && !userInfo.includeSolution4_5) return null;
+            // Luôn ẩn step Phụ lục (15) và Hoàn tất (16)
+            if (stepNum > 14) return null;
+
+            // Ẩn step Giải pháp 4,5 và Review GP4/5 (step 10-13) và Phần V-VI (step 14) nếu không chọn
+            if (stepNum >= 10 && stepNum <= 14 && !userInfo.includeSolution4_5) return null;
 
             let statusColor = "text-gray-400 border-gray-200";
             let icon = <div className="w-2 h-2 rounded-full bg-gray-300" />;
