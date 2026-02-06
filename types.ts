@@ -39,6 +39,10 @@ export interface UserInfo {
 
   // Yêu cầu khác
   specialRequirements: string; // Các yêu cầu đặc biệt: giới hạn trang, viết ngắn gọn, thêm bài toán...
+  pageLimit: number | ''; // Số trang SKKN cần giới hạn (0 = không giới hạn)
+  includePracticalExamples: boolean; // Thêm nhiều bài toán thực tế, ví dụ minh họa
+  includeStatistics: boolean; // Bổ sung bảng biểu, số liệu thống kê
+  requirementsConfirmed: boolean; // Đã xác nhận các yêu cầu chưa
 
   // Tùy chọn số lượng giải pháp
   includeSolution4_5: boolean; // Có viết giải pháp 4 và 5 hay không (mặc định false = chỉ 3 giải pháp)
@@ -49,12 +53,25 @@ export enum GenerationStep {
   OUTLINE = 1,
   PART_I_II = 2,
   PART_III = 3,
+  // Giải pháp 1
   PART_IV_SOL1 = 4,
-  PART_IV_SOL2_3 = 5,
-  PART_IV_SOL4_5 = 6, // Giải pháp 4 và 5 (tùy chọn)
-  PART_V_VI = 7,
-  APPENDIX = 8,
-  COMPLETED = 9
+  PART_IV_SOL1_REVIEW = 5,
+  // Giải pháp 2
+  PART_IV_SOL2 = 6,
+  PART_IV_SOL2_REVIEW = 7,
+  // Giải pháp 3
+  PART_IV_SOL3 = 8,
+  PART_IV_SOL3_REVIEW = 9,
+  // Giải pháp 4 (tùy chọn)
+  PART_IV_SOL4 = 10,
+  PART_IV_SOL4_REVIEW = 11,
+  // Giải pháp 5 (tùy chọn)
+  PART_IV_SOL5 = 12,
+  PART_IV_SOL5_REVIEW = 13,
+  // Phần V, VI và kết luận
+  PART_V_VI = 14,
+  APPENDIX = 15,
+  COMPLETED = 16
 }
 
 export interface ChatMessage {
@@ -68,6 +85,21 @@ export interface GenerationState {
   fullDocument: string;
   isStreaming: boolean;
   error: string | null;
+}
+
+// Nội dung từng giải pháp riêng biệt
+export interface SolutionContent {
+  content: string;           // Nội dung giải pháp
+  isApproved: boolean;       // Đã duyệt chưa
+  revisionHistory: string[]; // Lịch sử các phiên bản (tùy chọn)
+}
+
+export interface SolutionsState {
+  solution1: SolutionContent | null;
+  solution2: SolutionContent | null;
+  solution3: SolutionContent | null;
+  solution4: SolutionContent | null;
+  solution5: SolutionContent | null;
 }
 
 // Exam Types
@@ -115,3 +147,55 @@ export interface Exam {
 }
 
 export type UserAnswers = Record<string, string | Record<string, boolean>>;
+
+/**
+ * Kết quả phân tích tên đề tài SKKN
+ * Theo quy trình kiểm tra 3 lớp
+ */
+export interface TitleAnalysisResult {
+  // Cấu trúc tên đề tài
+  structure: {
+    action: string;      // Hành động (Ứng dụng, Thiết kế, Xây dựng...)
+    tool: string;        // Công cụ (AI Gemini, Kahoot, Canva...)
+    subject: string;     // Môn học/Lĩnh vực
+    scope: string;       // Phạm vi (lớp, cấp học)
+    purpose: string;     // Mục đích
+  };
+
+  // Mức độ trùng lặp
+  duplicateLevel: 'Cao' | 'Trung bình' | 'Thấp';
+  duplicateDetails: string;
+
+  // Điểm số (tổng 100)
+  scores: {
+    specificity: number;   // Độ cụ thể (max 25)
+    novelty: number;       // Tính mới (max 30)
+    feasibility: number;   // Tính khả thi (max 25)
+    clarity: number;       // Độ rõ ràng (max 20)
+    total: number;         // Tổng điểm
+  };
+
+  // Chi tiết từng tiêu chí
+  scoreDetails: Array<{
+    category: string;
+    score: number;
+    maxScore: number;
+    reason: string;
+  }>;
+
+  // Vấn đề cần khắc phục
+  problems: string[];
+
+  // Gợi ý 5 tên thay thế
+  suggestions: Array<{
+    title: string;
+    strength: string;
+    predictedScore: number;
+  }>;
+
+  // Đề tài mới nổi liên quan
+  relatedTopics: string[];
+
+  // Kết luận tổng quan
+  overallVerdict: string;
+}

@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { UserInfo, GenerationStep, GenerationState, SKKNTemplate } from './types';
+import { UserInfo, GenerationStep, GenerationState, SKKNTemplate, SolutionsState } from './types';
 import { STEPS_INFO, SOLUTION_MODE_PROMPT, FALLBACK_MODELS } from './constants';
 import { initializeGeminiChat, sendMessageStream, getFriendlyErrorMessage } from './services/geminiService';
 import { SKKNForm } from './components/SKKNForm';
 import { DocumentPreview } from './components/DocumentPreview';
 import { Button } from './components/Button';
 import { ApiKeyModal } from './components/ApiKeyModal';
+import { SolutionReviewModal } from './components/SolutionReviewModal';
 import { Download, ChevronRight, Wand2, FileText, CheckCircle, RefreshCw, Settings, AlertTriangle } from 'lucide-react';
 
 import { LockScreen } from './components/LockScreen';
@@ -74,6 +75,10 @@ const App: React.FC = () => {
     referenceDocuments: '',
     skknTemplate: '',
     specialRequirements: '',
+    pageLimit: '', // Số trang giới hạn (để trống = không giới hạn)
+    includePracticalExamples: false, // Thêm ví dụ thực tế
+    includeStatistics: false, // Bổ sung bảng biểu thống kê
+    requirementsConfirmed: false, // Đã xác nhận yêu cầu
     includeSolution4_5: false, // Mặc định chỉ viết 3 giải pháp
     customTemplate: undefined // Cấu trúc mẫu SKKN tùy chỉnh (đã trích xuất)
   });
@@ -92,49 +97,88 @@ const App: React.FC = () => {
   const [appendixDocument, setAppendixDocument] = useState('');
   const [isAppendixLoading, setIsAppendixLoading] = useState(false);
 
-  // Helper function để tạo prompt nhắc lại giới hạn trang
+  // State quản lý từng giải pháp riêng biệt
+  const [solutionsState, setSolutionsState] = useState<SolutionsState>({
+    solution1: null,
+    solution2: null,
+    solution3: null,
+    solution4: null,
+    solution5: null,
+  });
+
+  // State cho popup review giải pháp
+  const [showSolutionReview, setShowSolutionReview] = useState(false);
+  const [currentSolutionNumber, setCurrentSolutionNumber] = useState(0);
+  const [currentSolutionContent, setCurrentSolutionContent] = useState('');
+  const [isRevisingSolution, setIsRevisingSolution] = useState(false);
+
+  // Helper function để tạo prompt nhắc lại các yêu cầu đặc biệt
   const getPageLimitPrompt = useCallback(() => {
-    if (!userInfo.specialRequirements) return '';
+    // Kiểm tra xem người dùng đã xác nhận yêu cầu chưa
+    if (!userInfo.requirementsConfirmed) return '';
 
-    // Parse số trang từ yêu cầu (ví dụ: "giới hạn 25-30 trang" → 25-30)
-    const pageLimitMatch = userInfo.specialRequirements.match(/giới hạn.*?(\d+)[-–]?(\d+)?\s*trang/i);
+    const requirements: string[] = [];
 
-    if (pageLimitMatch) {
-      const minPages = parseInt(pageLimitMatch[1]);
-      const maxPages = pageLimitMatch[2] ? parseInt(pageLimitMatch[2]) : minPages;
-
-      return `
+    // 1. Giới hạn số trang
+    if (userInfo.pageLimit && typeof userInfo.pageLimit === 'number') {
+      const pages = userInfo.pageLimit;
+      requirements.push(`
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ⚠️ GIỚI HẠN SỐ TRANG (BẮT BUỘC TUÂN THỦ NGHIÊM NGẶT):
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-TỔNG NỘI DUNG CHÍNH: ${minPages}-${maxPages} trang (KHÔNG tính Dàn ý và Phụ lục)
+TỔNG NỘI DUNG CHÍNH: KHOẢNG ${pages} trang (KHÔNG tính Dàn ý và Phụ lục)
 
 PHÂN BỔ CHO MỖI PHẦN:
 - Phần I & II: TỐI ĐA 4 trang (viết ngắn gọn, súc tích)
 - Phần III: TỐI ĐA 3 trang
-- Phần IV (Giải pháp): ${Math.round(minPages * 0.55)}-${Math.round(maxPages * 0.65)} trang (chia đều cho 3 giải pháp)
-- Phần V, VI & Kết luận: ${Math.round(minPages * 0.15)}-${Math.round(maxPages * 0.2)} trang
+- Phần IV (Giải pháp): ${Math.round(pages * 0.55)}-${Math.round(pages * 0.65)} trang
+- Phần V, VI & Kết luận: ${Math.round(pages * 0.15)}-${Math.round(pages * 0.2)} trang
 
 🚨 CẢNH BÁO: VIẾT NGẮN GỌN, SÚC TÍCH! 
 - Mỗi ý chính không quá 2-3 câu
 - Tránh lặp lại ý
-- Ưu tiên bảng biểu thay vì đoạn văn dài
-- KHÔNG viết dài hơn số trang quy định!
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-`;
+- KHÔNG viết dài hơn số trang quy định!`);
     }
 
-    // Nếu có yêu cầu khác (không phải giới hạn trang cụ thể)
+    // 2. Thêm bài toán thực tế, ví dụ minh họa
+    if (userInfo.includePracticalExamples) {
+      requirements.push(`
+📊 YÊU CẦU THÊM BÀI TOÁN THỰC TẾ, VÍ DỤ MINH HỌA:
+- Mỗi giải pháp PHẢI có ít nhất 2-3 ví dụ thực tế cụ thể
+- Bài toán thực tế phải gắn với đời sống, công việc, nghề nghiệp
+- Ví dụ minh họa phải chi tiết, có thể áp dụng ngay
+- Ưu tiên các ví dụ từ SGK ${userInfo.textbook || "hiện hành"}`);
+    }
+
+    // 3. Bổ sung bảng biểu, số liệu thống kê
+    if (userInfo.includeStatistics) {
+      requirements.push(`
+📈 YÊU CẦU BỔ SUNG BẢNG BIỂU, SỐ LIỆU THỐNG KÊ:
+- Mỗi phần quan trọng PHẢI có bảng biểu hoặc số liệu minh họa
+- Sử dụng số liệu lẻ tự nhiên (42.3%, 67.8%) thay vì số tròn
+- Bảng số liệu phải rõ ràng, format Markdown chuẩn
+- Có biểu đồ gợi ý khi cần thiết
+- Số liệu phải logic và nhất quán trong toàn bài`);
+    }
+
+    // 4. Yêu cầu bổ sung khác
+    if (userInfo.specialRequirements && userInfo.specialRequirements.trim()) {
+      requirements.push(`
+✏️ YÊU CẦU BỔ SUNG TỪ NGƯỜI DÙNG:
+${userInfo.specialRequirements}
+Hãy áp dụng CHÍNH XÁC các yêu cầu trên vào phần đang viết!`);
+    }
+
+    if (requirements.length === 0) return '';
+
     return `
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-⚠️ YÊU CẦU ĐẶC BIỆT TỪ NGƯỜI DÙNG (NHẮC LẠI - BẮT BUỘC TUÂN THỦ):
+⚠️ CÁC YÊU CẦU ĐẶC BIỆT ĐÃ XÁC NHẬN (BẮT BUỘC TUÂN THỦ NGHIÊM NGẶT):
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-${userInfo.specialRequirements}
-
-Hãy áp dụng CHÍNH XÁC các yêu cầu trên vào phần đang viết!
+${requirements.join('\n')}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 `;
-  }, [userInfo.specialRequirements]);
+  }, [userInfo.requirementsConfirmed, userInfo.pageLimit, userInfo.includePracticalExamples, userInfo.includeStatistics, userInfo.specialRequirements, userInfo.textbook]);
 
   // Helper function để tạo prompt cấu trúc từ mẫu SKKN đã trích xuất
   const getCustomTemplatePrompt = useCallback(() => {
@@ -711,67 +755,91 @@ QUAN TRỌNG:
           nextStep: GenerationStep.PART_IV_SOL1
         },
         [GenerationStep.PART_IV_SOL1]: {
-          // ULTRA MODE CONTINUATION
+          // Sau khi viết xong GP1 → Chuyển sang REVIEW GP1
           prompt: `
-              BẮT ĐẦU phản hồi bằng MENU NAVIGATION trạng thái Bước 5 (Viết Phần IV - Đang thực hiện).
+              BẮT ĐẦU phản hồi bằng MENU NAVIGATION trạng thái (Viết Giải pháp 2 - Đang thực hiện).
 
               Tiếp tục giữ vững vai trò CHUYÊN GIA GIÁO DỤC (ULTRA MODE).
               
-              Nhiệm vụ: Viết tiếp GIẢI PHÁP 2 và GIẢI PHÁP 3 cho đề tài: "${userInfo.topic}".
+              Nhiệm vụ: Viết chi tiết GIẢI PHÁP 2 cho đề tài: "${userInfo.topic}".
               
               Yêu cầu:
-              1. Nội dung độc đáo, không trùng lặp.
+              1. Nội dung độc đáo, KHÔNG trùng lặp với Giải pháp 1.
               2. Tận dụng tối đa CSVC: ${userInfo.facilities}.
               3. BẮT BUỘC TUÂN THỦ FORMAT "YÊU CẦU ĐỊNH DẠNG OUTPUT":
                  - Xuống dòng sau mỗi câu.
                  - Xuống 2 dòng sau mỗi đoạn.
-                 - Có khung "KẾT THÚC GIẢI PHÁP" ở cuối mỗi giải pháp.
+                 - Có khung "KẾT THÚC GIẢI PHÁP" ở cuối.
+              4. Phải có VÍ DỤ MINH HỌA cụ thể theo SGK ${userInfo.textbook}.
+              
+              🖼️ GỢI Ý HÌNH ẢNH MINH HỌA (BẮT BUỘC):
+              Trong GIẢI PHÁP 2, hãy gợi ý 1-2 vị trí nên đặt hình ảnh minh họa với format:
+              **[🖼️ GỢI Ý HÌNH ẢNH: Mô tả chi tiết hình ảnh - Đặt sau phần nào]**
               
               ${getPageLimitPrompt()}`,
-          nextStep: GenerationStep.PART_IV_SOL2_3
+          nextStep: GenerationStep.PART_IV_SOL1_REVIEW // Chuyển sang review GP1
         },
-        [GenerationStep.PART_IV_SOL2_3]: userInfo.includeSolution4_5
+        // GP1 Review → GP2
+        [GenerationStep.PART_IV_SOL1_REVIEW]: {
+          prompt: `TIẾP TỤC VIẾT GIẢI PHÁP 2...`, // Không dùng trực tiếp, xử lý qua popup
+          nextStep: GenerationStep.PART_IV_SOL2
+        },
+        // GP2 → GP2 Review
+        [GenerationStep.PART_IV_SOL2]: {
+          prompt: `
+              BẮT ĐẦU phản hồi bằng MENU NAVIGATION trạng thái (Viết Giải pháp 3 - Đang thực hiện).
+
+              Tiếp tục giữ vững vai trò CHUYÊN GIA GIÁO DỤC (ULTRA MODE).
+              
+              Nhiệm vụ: Viết chi tiết GIẢI PHÁP 3 cho đề tài: "${userInfo.topic}".
+              
+              Yêu cầu:
+              1. Nội dung độc đáo, KHÔNG trùng lặp với Giải pháp 1 và 2.
+              2. Tận dụng tối đa CSVC: ${userInfo.facilities}.
+              3. BẮT BUỘC TUÂN THỦ FORMAT "YÊU CẦU ĐỊNH DẠNG OUTPUT":
+                 - Xuống dòng sau mỗi câu.
+                 - Xuống 2 dòng sau mỗi đoạn.
+                 - Có khung "KẾT THÚC GIẢI PHÁP" ở cuối.
+              4. Phải có VÍ DỤ MINH HỌA cụ thể theo SGK ${userInfo.textbook}.
+              
+              🖼️ GỢI Ý HÌNH ẢNH MINH HỌA (BẮT BUỘC):
+              Trong GIẢI PHÁP 3, hãy gợi ý 1-2 vị trí nên đặt hình ảnh minh họa.
+              
+              ${getPageLimitPrompt()}`,
+          nextStep: GenerationStep.PART_IV_SOL2_REVIEW
+        },
+        // GP2 Review → GP3
+        [GenerationStep.PART_IV_SOL2_REVIEW]: {
+          prompt: `TIẾP TỤC VIẾT GIẢI PHÁP 3...`,
+          nextStep: GenerationStep.PART_IV_SOL3
+        },
+        // GP3 → GP3 Review hoặc Phần V-VI (nếu chỉ 3 GP)
+        [GenerationStep.PART_IV_SOL3]: userInfo.includeSolution4_5
           ? {
-            // Nếu có chọn 5 giải pháp → prompt viết Giải pháp 4-5
+            // Có 5 giải pháp → Viết GP4
             prompt: `
-                BẮT ĐẦU phản hồi bằng MENU NAVIGATION trạng thái Bước 6 (Viết Giải pháp 4-5 - Đang thực hiện).
+                BẮT ĐẦU phản hồi bằng MENU NAVIGATION trạng thái (Viết Giải pháp 4 - Đang thực hiện).
 
                 Tiếp tục giữ vững vai trò CHUYÊN GIA GIÁO DỤC (ULTRA MODE).
                 
-                Nhiệm vụ: Viết tiếp GIẢI PHÁP 4 và GIẢI PHÁP 5 cho đề tài: "${userInfo.topic}".
+                Nhiệm vụ: Viết chi tiết GIẢI PHÁP 4 (Mở rộng/Nâng cao) cho đề tài: "${userInfo.topic}".
                 
-                ⚠️ LƯU Ý: Đây là 2 giải pháp MỞ RỘNG và NÂNG CAO cuối cùng.
-                Các giải pháp này có thể là:
-                - Biện pháp bổ trợ, tăng cường
-                - Giải pháp ứng dụng công nghệ/AI nâng cao
-                - Giải pháp phát triển, mở rộng sang các lớp/đối tượng khác
+                ⚠️ LƯU Ý: Đây là giải pháp MỞ RỘNG và NÂNG CAO.
+                Có thể là: Ứng dụng công nghệ/AI nâng cao, phát triển mở rộng đối tượng...
                 
                 Yêu cầu:
                 1. Nội dung độc đáo, KHÔNG trùng lặp với Giải pháp 1, 2, 3.
                 2. Tận dụng tối đa CSVC: ${userInfo.facilities}.
-                3. Mỗi giải pháp phải có:
-                   - Mục tiêu rõ ràng
-                   - Nội dung và cách thực hiện chi tiết
-                   - Quy trình 5-7 bước cụ thể
-                   - Ví dụ minh họa từ SGK ${userInfo.textbook || "hiện hành"}
-                   - Điều kiện thực hiện & lưu ý
-                4. BẮT BUỘC TUÂN THỦ FORMAT:
-                   - Xuống dòng sau mỗi câu.
-                   - Xuống 2 dòng sau mỗi đoạn.
-                   - Có khung "KẾT THÚC GIẢI PHÁP" ở cuối mỗi giải pháp.
-                5. Kết thúc bằng MỐI LIÊN HỆ GIỮA TẤT CẢ 5 GIẢI PHÁP (tính hệ thống, logic, bổ trợ lẫn nhau).
-                
-                🖼️ GỢI Ý HÌNH ẢNH MINH HỌA (BẮT BUỘC):
-                Trong GIẢI PHÁP 4 và 5, hãy gợi ý 1-2 vị trí nên đặt hình ảnh minh họa cho MỖI giải pháp với format:
-                **[🖼️ GỢI Ý HÌNH ẢNH: Mô tả chi tiết hình ảnh - Đặt sau phần nào]**
+                3. BẮT BUỘC TUÂN THỦ FORMAT.
+                4. Phải có VÍ DỤ MINH HỌA cụ thể.
                 
                 ${getPageLimitPrompt()}`,
-            nextStep: GenerationStep.PART_IV_SOL4_5
+            nextStep: GenerationStep.PART_IV_SOL3_REVIEW
           }
           : {
-            // Nếu chỉ 3 giải pháp → prompt viết Phần V-VI
+            // Chỉ 3 giải pháp → Chuyển sang Phần V-VI
             prompt: `
-                BẮT ĐẦU phản hồi bằng MENU NAVIGATION trạng thái Bước 7 (Kết luận & Khuyến nghị - Đang thực hiện).
+                BẮT ĐẦU phản hồi bằng MENU NAVIGATION trạng thái (Kết luận & Khuyến nghị - Đang thực hiện).
 
                 Tiếp tục viết:
                 
@@ -782,34 +850,49 @@ QUAN TRỌNG:
                 
                 6. ĐIỀU KIỆN ĐỂ SÁNG KIẾN ĐƯỢC NHÂN RỘNG (1-2 trang)
                 
-                KẾT LUẬN VÀ KHUYẾN NGHỊ (2-3 trang):
-                   - Kết luận
-                   - Khuyến nghị
+                KẾT LUẬN VÀ KHUYẾN NGHỊ (2-3 trang)
                 
                 TÀI LIỆU THAM KHẢO (8-12 tài liệu)
                 
-                Đảm bảo số liệu phần Kết quả phải LOGIC và chứng minh được sự tiến bộ so với phần Thực trạng.
-                Sử dụng số liệu lẻ (42.3%, 67.8%) không dùng số tròn.
+                Đảm bảo số liệu phần Kết quả phải LOGIC. Sử dụng số liệu lẻ (42.3%, 67.8%).
                 
-                ⚠️ LƯU Ý FORMAT: 
-                - Viết từng câu xuống dòng riêng.
-                - Tách đoạn rõ ràng.
-                - Không viết dính chữ.
-                
-                📌 LƯU Ý: Chưa viết phần PHỤ LỤC chi tiết, chỉ gợi ý danh sách phụ lục.
-                Phụ lục chi tiết sẽ được tạo riêng bằng nút "TẠO PHỤ LỤC".
-                
-                🖼️ GỢI Ý HÌNH ẢNH MINH HỌA (BẮT BUỘC):
-                Trong phần KẾT QUẢ, hãy gợi ý 2-3 vị trí nên đặt hình ảnh minh họa với format:
-                **[🖼️ GỢI Ý HÌNH ẢNH: Mô tả chi tiết hình ảnh - Đặt sau phần nào]**
+                🖼️ GỢI Ý HÌNH ẢNH MINH HỌA.
                 
                 ${getPageLimitPrompt()}`,
-            nextStep: GenerationStep.PART_V_VI
+            nextStep: GenerationStep.PART_IV_SOL3_REVIEW
           },
-        // Step: Giải pháp 4 và 5 → tiếp theo là Phần V-VI
-        [GenerationStep.PART_IV_SOL4_5]: {
+        // GP3 Review → GP4 hoặc PART_V_VI
+        [GenerationStep.PART_IV_SOL3_REVIEW]: userInfo.includeSolution4_5
+          ? { prompt: `TIẾP TỤC VIẾT GIẢI PHÁP 4...`, nextStep: GenerationStep.PART_IV_SOL4 }
+          : { prompt: `TIẾP TỤC VIẾT PHẦN V-VI...`, nextStep: GenerationStep.PART_V_VI },
+        // GP4 → GP4 Review  
+        [GenerationStep.PART_IV_SOL4]: {
           prompt: `
-              BẮT ĐẦU phản hồi bằng MENU NAVIGATION trạng thái Bước 7 (Kết luận & Khuyến nghị - Đang thực hiện).
+              BẮT ĐẦU phản hồi bằng MENU NAVIGATION trạng thái (Viết Giải pháp 5 - Đang thực hiện).
+
+              Tiếp tục giữ vững vai trò CHUYÊN GIA GIÁO DỤC (ULTRA MODE).
+              
+              Nhiệm vụ: Viết chi tiết GIẢI PHÁP 5 (Mở rộng/Nâng cao cuối cùng) cho đề tài: "${userInfo.topic}".
+              
+              ⚠️ LƯU Ý: Đây là giải pháp MỞ RỘNG cuối cùng.
+              
+              Yêu cầu:
+              1. Nội dung độc đáo, KHÔNG trùng lặp với các giải pháp trước.
+              2. Kết thúc bằng MỐI LIÊN HỆ GIỮA TẤT CẢ 5 GIẢI PHÁP (tính hệ thống, logic).
+              3. BẮT BUỘC TUÂN THỦ FORMAT.
+              
+              ${getPageLimitPrompt()}`,
+          nextStep: GenerationStep.PART_IV_SOL4_REVIEW
+        },
+        // GP4 Review → GP5
+        [GenerationStep.PART_IV_SOL4_REVIEW]: {
+          prompt: `TIẾP TỤC VIẾT GIẢI PHÁP 5...`,
+          nextStep: GenerationStep.PART_IV_SOL5
+        },
+        // GP5 → GP5 Review
+        [GenerationStep.PART_IV_SOL5]: {
+          prompt: `
+              BẮT ĐẦU phản hồi bằng MENU NAVIGATION trạng thái (Kết luận & Khuyến nghị - Đang thực hiện).
 
               Tiếp tục viết:
               
@@ -820,35 +903,23 @@ QUAN TRỌNG:
               
               6. ĐIỀU KIỆN ĐỂ SÁNG KIẾN ĐƯỢC NHÂN RỘNG (1-2 trang)
               
-              KẾT LUẬN VÀ KHUYẾN NGHỊ (2-3 trang):
-                 - Kết luận
-                 - Khuyến nghị
+              KẾT LUẬN VÀ KHUYẾN NGHỊ (2-3 trang)
               
               TÀI LIỆU THAM KHẢO (8-12 tài liệu)
               
-              Đảm bảo số liệu phần Kết quả phải LOGIC và chứng minh được sự tiến bộ so với phần Thực trạng.
-              Sử dụng số liệu lẻ (42.3%, 67.8%) không dùng số tròn.
+              Đảm bảo số liệu phần Kết quả phải LOGIC. Sử dụng số liệu lẻ.
               
-              ⚠️ LƯU Ý FORMAT: 
-              - Viết từng câu xuống dòng riêng.
-              - Tách đoạn rõ ràng.
-              - Không viết dính chữ.
-              - Menu Navigation: Đánh dấu các bước đã xong (✅), Bước 7 đang làm (🔵).
-              
-              📌 LƯU Ý: Chưa viết phần PHỤ LỤC chi tiết, chỉ gợi ý danh sách phụ lục.
-              Phụ lục chi tiết sẽ được tạo riêng bằng nút "TẠO PHỤ LỤC".
-              
-              🖼️ GỢI Ý HÌNH ẢNH MINH HỌA (BẮT BUỘC):
-              Trong phần KẾT QUẢ, hãy gợi ý 2-3 vị trí nên đặt hình ảnh minh họa với format:
-              **[🖼️ GỢI Ý HÌNH ẢNH: Mô tả chi tiết hình ảnh - Đặt sau phần nào]**
-              Ví dụ:
-              **[🖼️ GỢI Ý HÌNH ẢNH: Biểu đồ so sánh kết quả học tập TRƯỚC và SAU khi áp dụng sáng kiến - Đặt sau bảng số liệu kết quả]**
-              **[🖼️ GỢI Ý HÌNH ẢNH: Ảnh học sinh hứng thú tham gia hoạt động học tập mới - Đặt phần đánh giá định tính]**
+              🖼️ GỢI Ý HÌNH ẢNH MINH HỌA.
               
               ${getPageLimitPrompt()}`,
+          nextStep: GenerationStep.PART_IV_SOL5_REVIEW
+        },
+        // GP5 Review → PART_V_VI
+        [GenerationStep.PART_IV_SOL5_REVIEW]: {
+          prompt: `TIẾP TỤC VIẾT PHẦN V-VI...`,
           nextStep: GenerationStep.PART_V_VI
         },
-        // Step cuối: PART_V_VI → Chuyển sang COMPLETED (không gửi prompt nữa)
+        // PART_V_VI → COMPLETED
         [GenerationStep.PART_V_VI]: {
           prompt: `
               ✅ SKKN ĐÃ HOÀN THÀNH!
@@ -904,6 +975,143 @@ QUAN TRỌNG:
       alert('Có lỗi khi xuất file. Vui lòng thử lại.');
     }
   };
+
+  // ====== REVIEW SOLUTION HANDLERS ======
+
+  // Xác định số giải pháp dựa trên step hiện tại
+  const getSolutionNumberFromStep = (step: GenerationStep): number => {
+    const stepToSolution: Record<number, number> = {
+      [GenerationStep.PART_IV_SOL1_REVIEW]: 1,
+      [GenerationStep.PART_IV_SOL2_REVIEW]: 2,
+      [GenerationStep.PART_IV_SOL3_REVIEW]: 3,
+      [GenerationStep.PART_IV_SOL4_REVIEW]: 4,
+      [GenerationStep.PART_IV_SOL5_REVIEW]: 5,
+    };
+    return stepToSolution[step] || 0;
+  };
+
+  // Kiểm tra có phải step review không
+  const isReviewStep = (step: GenerationStep): boolean => {
+    return [
+      GenerationStep.PART_IV_SOL1_REVIEW,
+      GenerationStep.PART_IV_SOL2_REVIEW,
+      GenerationStep.PART_IV_SOL3_REVIEW,
+      GenerationStep.PART_IV_SOL4_REVIEW,
+      GenerationStep.PART_IV_SOL5_REVIEW,
+    ].includes(step);
+  };
+
+  // Duyệt giải pháp và tiếp tục
+  const handleApproveSolution = () => {
+    const solutionNum = getSolutionNumberFromStep(state.step);
+
+    // Lưu giải pháp đã duyệt
+    setSolutionsState(prev => ({
+      ...prev,
+      [`solution${solutionNum}`]: {
+        content: currentSolutionContent,
+        isApproved: true,
+        revisionHistory: [],
+      },
+    }));
+
+    // Đóng popup
+    setShowSolutionReview(false);
+    setCurrentSolutionContent('');
+
+    // Chuyển sang bước tiếp theo - tiếp tục viết giải pháp tiếp hoặc Phần V-VI
+    generateNextSection();
+  };
+
+  // Yêu cầu viết lại giải pháp
+  const handleReviseSolution = async (feedback: string, referenceDoc?: string) => {
+    if (!apiKey) {
+      setShowApiModal(true);
+      return;
+    }
+
+    setIsRevisingSolution(true);
+    const solutionNum = getSolutionNumberFromStep(state.step);
+
+    try {
+      const revisionPrompt = `
+        NHIỆM VỤ: VIẾT LẠI GIẢI PHÁP ${solutionNum} theo yêu cầu mới.
+        
+        ⚠️ YÊU CẦU SỬA TỪ NGƯỜI DÙNG:
+        ${feedback}
+        
+        ${referenceDoc ? `
+        📄 TÀI LIỆU THAM KHẢO MỚI:
+        Dựa vào nội dung tài liệu sau để viết lại giải pháp:
+        ---
+        ${referenceDoc.substring(0, 5000)}
+        ---
+        ` : ''}
+        
+        ⚠️ NỘI DUNG CŨ (ĐỂ THAM KHẢO):
+        ${currentSolutionContent.substring(0, 3000)}
+        
+        Hãy viết lại GIẢI PHÁP ${solutionNum} hoàn toàn mới, đảm bảo:
+        1. Tuân thủ YÊU CẦU SỬA từ người dùng
+        2. Tham khảo tài liệu mới nếu có
+        3. Giữ nguyên cấu trúc: Mục tiêu - Cơ sở - Quy trình - Ví dụ - Công cụ - Lưu ý
+        4. Format chuẩn SKKN
+        
+        ${getPageLimitPrompt()}
+      `;
+
+      let revisedContent = "";
+      await sendMessageStream(revisionPrompt, (chunk) => {
+        revisedContent += chunk;
+        setCurrentSolutionContent(revisedContent);
+      });
+
+      setIsRevisingSolution(false);
+    } catch (error: any) {
+      console.error('Revision error:', error);
+      setIsRevisingSolution(false);
+      alert('Có lỗi khi viết lại. Vui lòng thử lại.');
+    }
+  };
+
+  // Xuất Word riêng cho 1 giải pháp
+  const exportSolutionToWord = async () => {
+    try {
+      const { exportMarkdownToDocx } = await import('./services/docxExporter');
+      const solutionNum = getSolutionNumberFromStep(state.step);
+      const filename = `Giai_phap_${solutionNum}_${userInfo.topic.substring(0, 20).replace(/[^a-zA-Z0-9\u00C0-\u1EF9]/g, '_')}.docx`;
+      await exportMarkdownToDocx(currentSolutionContent, filename);
+    } catch (error: any) {
+      console.error('Export solution error:', error);
+      alert('Có lỗi khi xuất file. Vui lòng thử lại.');
+    }
+  };
+
+  // Effect để hiện popup review khi đến step review
+  useEffect(() => {
+    if (isReviewStep(state.step) && !state.isStreaming) {
+      // Lấy nội dung giải pháp vừa viết từ fullDocument
+      // Tìm phần giải pháp cuối cùng được viết
+      const solutionNum = getSolutionNumberFromStep(state.step);
+      const solutionMarker = `GIẢI PHÁP ${solutionNum}`;
+      const endMarker = `KẾT THÚC GIẢI PHÁP`;
+
+      // Tìm nội dung giải pháp trong document
+      const docContent = state.fullDocument;
+      const startIdx = docContent.lastIndexOf(solutionMarker);
+      if (startIdx !== -1) {
+        let endIdx = docContent.indexOf(endMarker, startIdx);
+        if (endIdx === -1) endIdx = docContent.length;
+        else endIdx = docContent.indexOf('\n', endIdx) + 1;
+
+        const solutionContent = docContent.substring(startIdx, endIdx);
+        setCurrentSolutionContent(solutionContent);
+      }
+
+      setCurrentSolutionNumber(solutionNum);
+      setShowSolutionReview(true);
+    }
+  }, [state.step, state.isStreaming, state.fullDocument]);
 
   // Generate Appendix - Function riêng để tạo phụ lục
   const generateAppendix = async () => {
@@ -1300,6 +1508,19 @@ QUAN TRỌNG:
         onSave={handleSaveApiKey}
         onClose={() => setShowApiModal(false)}
         isDismissible={!!apiKey}
+      />
+
+      {/* Solution Review Modal */}
+      <SolutionReviewModal
+        isOpen={showSolutionReview}
+        solutionNumber={currentSolutionNumber}
+        solutionContent={currentSolutionContent}
+        isLoading={state.isStreaming}
+        isRevising={isRevisingSolution}
+        onClose={() => setShowSolutionReview(false)}
+        onApprove={handleApproveSolution}
+        onRevise={handleReviseSolution}
+        onDownloadWord={exportSolutionToWord}
       />
 
       {/* Header Button for Settings */}

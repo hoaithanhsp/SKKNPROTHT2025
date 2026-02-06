@@ -449,11 +449,18 @@ export const STEPS_INFO = {
    [1]: { label: "Lập Dàn Ý", description: "Xây dựng khung sườn cho SKKN" },
    [2]: { label: "Phần I & II", description: "Đặt vấn đề & Cơ sở lý luận" },
    [3]: { label: "Phần III", description: "Thực trạng vấn đề" },
-   [4]: { label: "Giải pháp 1", description: "Giải pháp trọng tâm (Ultra Mode)" },
-   [5]: { label: "Giải pháp 2-3", description: "Các giải pháp tiếp theo (Ultra Mode)" },
-   [6]: { label: "Giải pháp 4-5", description: "Mở rộng & Nâng cao (Tùy chọn)" },
-   [7]: { label: "Phần V, VI", description: "Hiệu quả & Kết luận" },
-   [8]: { label: "Tạo Phụ lục", description: "Tài liệu phụ lục chi tiết" },
-   [9]: { label: "Hoàn tất", description: "Đã xong" }
+   [4]: { label: "Giải pháp 1", description: "Viết giải pháp trọng tâm" },
+   [5]: { label: "Review GP1", description: "Xem và sửa giải pháp 1" },
+   [6]: { label: "Giải pháp 2", description: "Viết giải pháp thứ hai" },
+   [7]: { label: "Review GP2", description: "Xem và sửa giải pháp 2" },
+   [8]: { label: "Giải pháp 3", description: "Viết giải pháp thứ ba" },
+   [9]: { label: "Review GP3", description: "Xem và sửa giải pháp 3" },
+   [10]: { label: "Giải pháp 4", description: "Viết giải pháp mở rộng 4" },
+   [11]: { label: "Review GP4", description: "Xem và sửa giải pháp 4" },
+   [12]: { label: "Giải pháp 5", description: "Viết giải pháp mở rộng 5" },
+   [13]: { label: "Review GP5", description: "Xem và sửa giải pháp 5" },
+   [14]: { label: "Phần V, VI", description: "Hiệu quả & Kết luận" },
+   [15]: { label: "Tạo Phụ lục", description: "Tài liệu phụ lục chi tiết" },
+   [16]: { label: "Hoàn tất", description: "Đã xong" }
 };
 

@@ -1,10 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { UserInfo, SKKNTemplate, SKKNSection } from '../types';
+import { UserInfo, SKKNTemplate, SKKNSection, TitleAnalysisResult } from '../types';
 import { Button } from './Button';
 import { InputWithHistory, TextareaWithHistory } from './InputWithHistory';
 import { saveFormToHistory } from '../services/inputHistory';
-import { analyzeDocumentForSKKN, extractSKKNStructure } from '../services/geminiService';
-import { BookOpen, School, GraduationCap, PenTool, MapPin, Calendar, Users, Cpu, Target, Monitor, FileUp, Sparkles, ClipboardPaste, Loader2, FileText, Search, X, CheckCircle, List } from 'lucide-react';
+import { analyzeDocumentForSKKN, extractSKKNStructure, analyzeTitleSKKN } from '../services/geminiService';
+import TitleAnalysisPanel from './TitleAnalysisPanel';
+import { BookOpen, School, GraduationCap, PenTool, MapPin, Calendar, Users, Cpu, Target, Monitor, FileUp, Sparkles, ClipboardPaste, Loader2, FileText, Search, X, CheckCircle, List, Save } from 'lucide-react';
 import * as mammoth from 'mammoth';
 import * as pdfjsLib from 'pdfjs-dist';
 
@@ -57,6 +58,11 @@ export const SKKNForm: React.FC<Props> = ({ userInfo, onChange, onSubmit, onManu
   const [refAnalysisResult, setRefAnalysisResult] = useState('');
   const [templateAnalysisResult, setTemplateAnalysisResult] = useState('');
   const [showAnalysisModal, setShowAnalysisModal] = useState<'ref' | 'template' | null>(null);
+
+  // State cho phân tích tên đề tài
+  const [isAnalyzingTitle, setIsAnalyzingTitle] = useState(false);
+  const [titleAnalysis, setTitleAnalysis] = useState<TitleAnalysisResult | null>(null);
+
   const fileInputRef = useRef<HTMLInputElement>(null);
   const refFileInputRef = useRef<HTMLInputElement>(null);
   const templateFileInputRef = useRef<HTMLInputElement>(null);
@@ -311,6 +317,39 @@ export const SKKNForm: React.FC<Props> = ({ userInfo, onChange, onSubmit, onManu
     }
   };
 
+  // Hàm phân tích tên đề tài bằng AI
+  const handleAnalyzeTitle = async () => {
+    if (!userInfo.topic.trim()) {
+      alert('Vui lòng nhập tên đề tài trước khi phân tích.');
+      return;
+    }
+    if (!apiKey) {
+      alert('Vui lòng cấu hình API Key trước.');
+      return;
+    }
+    setIsAnalyzingTitle(true);
+    try {
+      const result = await analyzeTitleSKKN(
+        apiKey,
+        userInfo.topic,
+        userInfo.subject,
+        userInfo.level,
+        selectedModel
+      );
+      setTitleAnalysis(result);
+    } catch (error: any) {
+      alert('Lỗi phân tích đề tài: ' + error.message);
+    } finally {
+      setIsAnalyzingTitle(false);
+    }
+  };
+
+  // Callback khi chọn gợi ý đề tài
+  const handleSelectTitle = (title: string) => {
+    onChange('topic', title);
+    setTitleAnalysis(null);
+  };
+
   // Check valid based on mode - chỉ check các field là string
   const requiredFields: (keyof UserInfo)[] = ['topic', 'subject', 'level', 'grade', 'school', 'location', 'facilities'];
   const isInfoValid = requiredFields.every(key => {
@@ -336,14 +375,32 @@ export const SKKNForm: React.FC<Props> = ({ userInfo, onChange, onSubmit, onManu
 
           <div className="space-y-5">
             <InputGroup label="Tên đề tài SKKN" icon={PenTool} required>
-              <InputWithHistory
-                name="topic"
-                value={userInfo.topic}
-                onChange={handleChange}
-                className="bg-gray-50 focus:bg-white focus:ring-sky-500 focus:border-sky-500 block w-full pl-10 text-sm border-gray-300 rounded-md p-3 border text-gray-900 placeholder-gray-500"
-                placeholder='VD: "Ứng dụng AI để nâng cao hiệu quả dạy học môn Toán THPT"'
-                required
-              />
+              <div className="flex gap-2">
+                <InputWithHistory
+                  name="topic"
+                  value={userInfo.topic}
+                  onChange={handleChange}
+                  className="bg-gray-50 focus:bg-white focus:ring-sky-500 focus:border-sky-500 block w-full pl-10 text-sm border-gray-300 rounded-md p-3 border text-gray-900 placeholder-gray-500"
+                  placeholder='VD: "Ứng dụng AI để nâng cao hiệu quả dạy học môn Toán THPT"'
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={handleAnalyzeTitle}
+                  disabled={isAnalyzingTitle || !userInfo.topic.trim()}
+                  className={`px-4 py-2 rounded-lg font-medium text-white flex items-center gap-2 transition-all flex-shrink-0 ${isAnalyzingTitle || !userInfo.topic.trim()
+                    ? 'bg-gray-400 cursor-not-allowed'
+                    : 'bg-purple-600 hover:bg-purple-700 hover:shadow-lg'
+                    }`}
+                  title="Phân tích tên đề tài"
+                >
+                  {isAnalyzingTitle ? (
+                    <><Loader2 size={18} className="animate-spin" /> Phân tích...</>
+                  ) : (
+                    <><Search size={18} /> Phân tích</>
+                  )}
+                </button>
+              </div>
             </InputGroup>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -742,23 +799,105 @@ export const SKKNForm: React.FC<Props> = ({ userInfo, onChange, onSubmit, onManu
             </label>
           </div>
 
-          <div className="bg-purple-50 p-4 rounded-lg border border-purple-200">
-            <textarea
-              name="specialRequirements"
-              value={userInfo.specialRequirements || ''}
-              onChange={handleChange}
-              placeholder="Nhập các yêu cầu đặc biệt của bạn. Ví dụ:
-• Giới hạn SKKN trong 25-30 trang
+          {/* Các tùy chọn yêu cầu chi tiết */}
+          <div className="bg-purple-50 p-4 rounded-lg border border-purple-200 space-y-4">
+            {/* 1. Số trang giới hạn */}
+            <div className="flex items-center gap-4">
+              <label className="text-sm font-medium text-gray-700 w-64 flex items-center gap-2">
+                📄 Số trang SKKN cần giới hạn:
+              </label>
+              <input
+                type="number"
+                name="pageLimit"
+                value={userInfo.pageLimit || ''}
+                onChange={(e) => onChange('pageLimit', e.target.value === '' ? '' : parseInt(e.target.value) as any)}
+                placeholder="VD: 25, 30..."
+                min={1}
+                max={200}
+                className="w-24 p-2 border border-purple-200 rounded-lg text-sm focus:ring-purple-500 focus:border-purple-500 bg-white text-center"
+              />
+              <span className="text-xs text-gray-500">(Để trống nếu không giới hạn)</span>
+            </div>
+
+            {/* 2. Thêm bài toán thực tế */}
+            <div className="flex items-center gap-3">
+              <input
+                type="checkbox"
+                id="includePracticalExamples"
+                name="includePracticalExamples"
+                checked={userInfo.includePracticalExamples || false}
+                onChange={(e) => onChange('includePracticalExamples', e.target.checked as any)}
+                className="w-5 h-5 text-purple-600 border-gray-300 rounded focus:ring-purple-500 cursor-pointer"
+              />
+              <label htmlFor="includePracticalExamples" className="text-sm font-medium text-gray-700 cursor-pointer select-none">
+                📊 Thêm nhiều <strong className="text-purple-700">bài toán thực tế, ví dụ minh họa</strong>
+              </label>
+            </div>
+
+            {/* 3. Bổ sung bảng biểu */}
+            <div className="flex items-center gap-3">
+              <input
+                type="checkbox"
+                id="includeStatistics"
+                name="includeStatistics"
+                checked={userInfo.includeStatistics || false}
+                onChange={(e) => onChange('includeStatistics', e.target.checked as any)}
+                className="w-5 h-5 text-purple-600 border-gray-300 rounded focus:ring-purple-500 cursor-pointer"
+              />
+              <label htmlFor="includeStatistics" className="text-sm font-medium text-gray-700 cursor-pointer select-none">
+                📈 Bổ sung <strong className="text-purple-700">bảng biểu, số liệu thống kê</strong>
+              </label>
+            </div>
+
+            {/* 4. Textarea cho yêu cầu bổ sung */}
+            <div>
+              <label className="text-sm font-medium text-gray-700 mb-2 block">
+                ✏️ Yêu cầu bổ sung khác (tùy ý):
+              </label>
+              <textarea
+                name="specialRequirements"
+                value={userInfo.specialRequirements || ''}
+                onChange={handleChange}
+                placeholder="Nhập các yêu cầu đặc biệt khác của bạn. Ví dụ:
 • Viết ngắn gọn phần cơ sở lý luận (khoảng 3 trang)
-• Thêm nhiều bài toán thực tế, ví dụ minh họa
 • Tập trung vào giải pháp ứng dụng AI
-• Bổ sung thêm bảng biểu, số liệu thống kê
 • Viết theo phong cách học thuật nghiêm túc..."
-              className="w-full h-32 p-3 border border-purple-200 rounded-lg text-sm focus:ring-purple-500 focus:border-purple-500 bg-white placeholder-gray-400 resize-none"
-            />
-            <p className="mt-2 text-xs text-purple-700">
-              💡 AI sẽ phân tích và thực hiện NGHIÊM NGẶT các yêu cầu bạn đưa ra trong suốt quá trình viết SKKN.
-            </p>
+                className="w-full h-24 p-3 border border-purple-200 rounded-lg text-sm focus:ring-purple-500 focus:border-purple-500 bg-white placeholder-gray-400 resize-none"
+              />
+            </div>
+
+            {/* Nút xác nhận lưu yêu cầu */}
+            <div className="pt-3 border-t border-purple-200">
+              <button
+                onClick={() => onChange('requirementsConfirmed', !userInfo.requirementsConfirmed as any)}
+                className={`w-full py-3 px-4 rounded-lg font-semibold transition-all flex items-center justify-center gap-2 ${userInfo.requirementsConfirmed
+                  ? 'bg-green-600 text-white hover:bg-green-700 shadow-md'
+                  : 'bg-purple-600 text-white hover:bg-purple-700 shadow-md'
+                  }`}
+              >
+                {userInfo.requirementsConfirmed ? (
+                  <>
+                    <CheckCircle size={20} />
+                    ✅ Đã xác nhận lưu yêu cầu - Bấm để sửa lại
+                  </>
+                ) : (
+                  <>
+                    <Save size={20} />
+                    💾 Xác nhận lưu các yêu cầu này
+                  </>
+                )}
+              </button>
+              {userInfo.requirementsConfirmed && (
+                <p className="mt-2 text-xs text-green-700 text-center font-medium">
+                  ✅ Các yêu cầu đã được lưu! AI sẽ tuân thủ NGHIÊM NGẶT khi viết SKKN.
+                </p>
+              )}
+              {!userInfo.requirementsConfirmed && (
+                <p className="mt-2 text-xs text-purple-600 text-center">
+                  💡 Hãy xác nhận để AI biết chính xác yêu cầu của bạn.
+                </p>
+              )}
+            </div>
           </div>
         </div>
 
@@ -899,6 +1038,15 @@ export const SKKNForm: React.FC<Props> = ({ userInfo, onChange, onSubmit, onManu
             </div>
           </div>
         </div>
+      )}
+
+      {/* Title Analysis Panel */}
+      {titleAnalysis && (
+        <TitleAnalysisPanel
+          result={titleAnalysis}
+          onClose={() => setTitleAnalysis(null)}
+          onSelectTitle={handleSelectTitle}
+        />
       )}
     </div>
   );

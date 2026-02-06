@@ -1,6 +1,7 @@
 
 import { GoogleGenAI, Chat } from "@google/genai";
 import { SYSTEM_INSTRUCTION, FALLBACK_MODELS } from "../constants";
+import { TitleAnalysisResult } from '../types';
 
 // Hàm phân tích và trả về thông báo lỗi thân thiện
 export const parseApiError = (error: any): string => {
@@ -391,5 +392,176 @@ BẮT ĐẦU JSON NGAY:`;
     console.error('Lỗi trích xuất cấu trúc SKKN:', error);
     // Trả về array rỗng nếu không parse được - sẽ fallback về mẫu chuẩn
     return [];
+  }
+};
+
+/**
+ * Phân tích tên đề tài SKKN
+ * Theo quy trình kiểm tra 3 lớp từ quy trinh kiem tra.txt
+ */
+export const analyzeTitleSKKN = async (
+  apiKey: string,
+  title: string,
+  subject?: string,
+  level?: string,
+  selectedModel?: string
+): Promise<TitleAnalysisResult> => {
+  const ai = new GoogleGenAI({ apiKey });
+
+  const prompt = `Bạn là chuyên gia phân tích tên đề tài Sáng kiến kinh nghiệm (SKKN) với 20 năm kinh nghiệm.
+
+## THÔNG TIN ĐỀ TÀI CẦN PHÂN TÍCH:
+- Tên đề tài: "${title}"
+${subject ? `- Môn học/Lĩnh vực: ${subject}` : ''}
+${level ? `- Cấp học: ${level}` : ''}
+
+## QUY TRÌNH KIỂM TRA 3 LỚP:
+
+### LỚP 1: DATABASE NỘI BỘ (Đề tài phổ biến)
+So sánh với database đề tài tích hợp:
+
+🔴 TRÙNG LẶP CAO (80-90%):
+- "Ứng dụng AI trong dạy học môn [X]"
+- "Sử dụng ChatGPT hỗ trợ [công việc Y]"
+- "Ứng dụng Canva thiết kế bài giảng"
+- "Sử dụng Kahoot/Quizizz tăng tính tương tác"
+- "Dạy học trực tuyến qua Google Meet/Zoom"
+- "Ứng dụng Google Classroom quản lý lớp học"
+
+🟡 TRÙNG LẶP TRUNG BÌNH (60-70%):
+- "Dạy học theo dự án (PBL) môn [X]"
+- "Phương pháp dạy học tích cực môn [X]"
+- "Dạy học theo nhóm hiệu quả"
+- "Phát triển năng lực tự học của học sinh"
+
+🟢 TRÙNG LẶP THẤP (20-40%):
+- "Kết hợp AI và PBL trong dạy STEM lớp 8"
+- Các đề tài kết hợp nhiều phương pháp
+- Đề tài có đối tượng đặc biệt (HS khuyết tật, vùng cao)
+
+### LỚP 2: TÌM KIẾM ONLINE (Mô phỏng)
+Ước tính số lượng đề tài tương tự trên:
+- Cổng SKKN Bộ GD&ĐT
+- Sở GD&ĐT các tỉnh
+- Tạp chí Giáo dục
+- Google Scholar
+
+### LỚP 3: WEBSITE CHUYÊN NGÀNH
+- violet.vn, tailieu.vn, 123doc.net
+- thuvienvatly.com, giaoducthoidai.vn
+
+## CHẤM ĐIỂM (TỔNG 100 ĐIỂM):
+
+1. **Độ cụ thể (max 25đ)**:
+   - 25: Có đầy đủ: môn học, cấp học, công cụ, phạm vi cụ thể
+   - 20: Có 3/4 yếu tố
+   - 15: Có 2/4 yếu tố
+   - 10: Chỉ có 1 yếu tố cụ thể
+   - 5: Quá chung chung
+
+2. **Tính mới (max 30đ)**:
+   - 30: Chưa ai làm, hoàn toàn mới
+   - 25: Kết hợp 2-3 yếu tố mới
+   - 20: Có 1 điểm mới rõ ràng
+   - 15: Cải tiến từ đề tài cũ
+   - 10: Đã có nhiều người làm
+   - 5: Trùng lặp hoàn toàn
+
+3. **Tính khả thi (max 25đ)**:
+   - 25: Rất dễ thực hiện, nguồn lực sẵn có
+   - 20: Khả thi, cần chuẩn bị ít
+   - 15: Khả thi nhưng cần thời gian/chi phí
+   - 10: Khó khăn, cần nhiều nguồn lực
+   - 5: Không khả thi
+
+4. **Độ rõ ràng (max 20đ)**:
+   - 20: Tên ngắn gọn, dễ hiểu, có từ khóa rõ
+   - 15: Rõ ràng nhưng hơi dài
+   - 10: Có thể hiểu nhưng chưa tối ưu
+   - 5: Khó hiểu, rườm rà
+
+## PHÁT HIỆN VẤN ĐỀ:
+- Từ ngữ chung chung: "ứng dụng công nghệ", "nâng cao chất lượng", "một số biện pháp"
+- Từ quá tham vọng: "toàn diện", "cách mạng hóa", "đột phá"
+- Công cụ lỗi thời: "băng hình", "đĩa CD", "máy chiếu overhead"
+- Công cụ quá phổ biến: "ChatGPT", "Kahoot", "Google Classroom"
+
+## ĐỀ XUẤT 5 TÊN THAY THẾ (Công thức):
+1. Cụ thể hóa: Thêm [Cấp học] + [Bối cảnh đặc biệt]
+2. Kết hợp: [Công nghệ A] + [Phương pháp B] + [Môn học C]
+3. Đối tượng đặc biệt: [Phương pháp] + [HS đặc thù] + [Mục tiêu]
+4. Bài học cụ thể: [Phương pháp] + [Bài/Chương cụ thể] + [Công cụ]
+5. Tạo công cụ mới: Thiết kế [Công cụ tự tạo] + [Mục đích]
+
+TRẢ VỀ JSON (KHÔNG có markdown code block, CHỈ JSON thuần):
+{
+  "structure": {
+    "action": "Từ khóa hành động (hoặc rỗng)",
+    "tool": "Công cụ/Phương tiện (hoặc rỗng)",
+    "subject": "Môn học/Lĩnh vực",
+    "scope": "Phạm vi (lớp, cấp học)",
+    "purpose": "Mục đích"
+  },
+  "duplicateLevel": "Cao|Trung bình|Thấp",
+  "duplicateDetails": "Giải thích chi tiết về mức độ trùng lặp",
+  "scores": {
+    "specificity": <điểm>,
+    "novelty": <điểm>,
+    "feasibility": <điểm>,
+    "clarity": <điểm>,
+    "total": <tổng điểm>
+  },
+  "scoreDetails": [
+    { "category": "Độ cụ thể", "score": <điểm>, "maxScore": 25, "reason": "lý do" },
+    { "category": "Tính mới", "score": <điểm>, "maxScore": 30, "reason": "lý do" },
+    { "category": "Tính khả thi", "score": <điểm>, "maxScore": 25, "reason": "lý do" },
+    { "category": "Độ rõ ràng", "score": <điểm>, "maxScore": 20, "reason": "lý do" }
+  ],
+  "problems": ["Vấn đề 1", "Vấn đề 2"],
+  "suggestions": [
+    { "title": "Tên đề tài thay thế 1", "strength": "Điểm mạnh", "predictedScore": <điểm dự kiến> },
+    { "title": "Tên đề tài thay thế 2", "strength": "Điểm mạnh", "predictedScore": <điểm dự kiến> },
+    { "title": "Tên đề tài thay thế 3", "strength": "Điểm mạnh", "predictedScore": <điểm dự kiến> },
+    { "title": "Tên đề tài thay thế 4", "strength": "Điểm mạnh", "predictedScore": <điểm dự kiến> },
+    { "title": "Tên đề tài thay thế 5", "strength": "Điểm mạnh", "predictedScore": <điểm dự kiến> }
+  ],
+  "relatedTopics": ["Đề tài mới nổi 1", "Đề tài mới nổi 2", "Đề tài mới nổi 3"],
+  "overallVerdict": "Kết luận tổng quan và lời khuyên"
+}
+
+BẮT ĐẦU JSON NGAY:`;
+
+  const model = selectedModel || FALLBACK_MODELS[0];
+
+  try {
+    const response = await ai.models.generateContent({
+      model: model,
+      contents: prompt
+    });
+
+    const responseText = response.text || '{}';
+
+    // Xử lý response để lấy JSON
+    let jsonText = responseText.trim();
+
+    // Remove markdown code blocks if present
+    if (jsonText.startsWith('```json')) {
+      jsonText = jsonText.replace(/^```json\s*/, '').replace(/\s*```$/, '');
+    } else if (jsonText.startsWith('```')) {
+      jsonText = jsonText.replace(/^```\s*/, '').replace(/\s*```$/, '');
+    }
+
+    // Find JSON object in response
+    const jsonMatch = jsonText.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      jsonText = jsonMatch[0];
+    }
+
+    const result: TitleAnalysisResult = JSON.parse(jsonText);
+    return result;
+
+  } catch (error: any) {
+    console.error('Lỗi phân tích đề tài:', error);
+    throw new Error(getFriendlyErrorMessage(error).message);
   }
 };
