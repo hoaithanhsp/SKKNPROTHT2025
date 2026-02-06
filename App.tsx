@@ -755,7 +755,12 @@ QUAN TRỌNG:
           nextStep: GenerationStep.PART_IV_SOL1
         },
         [GenerationStep.PART_IV_SOL1]: {
-          // Sau khi viết xong GP1 → Chuyển sang REVIEW GP1
+          // Sau khi viết xong GP1 → Chuyển sang REVIEW GP1 (KHÔNG viết GP2 ở đây)
+          prompt: `✅ HOÀN THÀNH GIẢI PHÁP 1. Vui lòng xem xét và duyệt trước khi tiếp tục.`,
+          nextStep: GenerationStep.PART_IV_SOL1_REVIEW // Chuyển sang review GP1
+        },
+        // GP1 Review → GP2
+        [GenerationStep.PART_IV_SOL1_REVIEW]: {
           prompt: `
               BẮT ĐẦU phản hồi bằng MENU NAVIGATION trạng thái (Viết Giải pháp 2 - Đang thực hiện).
 
@@ -777,15 +782,15 @@ QUAN TRỌNG:
               **[🖼️ GỢI Ý HÌNH ẢNH: Mô tả chi tiết hình ảnh - Đặt sau phần nào]**
               
               ${getPageLimitPrompt()}`,
-          nextStep: GenerationStep.PART_IV_SOL1_REVIEW // Chuyển sang review GP1
-        },
-        // GP1 Review → GP2
-        [GenerationStep.PART_IV_SOL1_REVIEW]: {
-          prompt: `TIẾP TỤC VIẾT GIẢI PHÁP 2...`, // Không dùng trực tiếp, xử lý qua popup
           nextStep: GenerationStep.PART_IV_SOL2
         },
-        // GP2 → GP2 Review
+        // GP2 → GP2 Review (KHÔNG viết GP3 ở đây)
         [GenerationStep.PART_IV_SOL2]: {
+          prompt: `✅ HOÀN THÀNH GIẢI PHÁP 2. Vui lòng xem xét và duyệt trước khi tiếp tục.`,
+          nextStep: GenerationStep.PART_IV_SOL2_REVIEW
+        },
+        // GP2 Review → GP3 (Viết GP3 sau khi approve GP2)
+        [GenerationStep.PART_IV_SOL2_REVIEW]: {
           prompt: `
               BẮT ĐẦU phản hồi bằng MENU NAVIGATION trạng thái (Viết Giải pháp 3 - Đang thực hiện).
 
@@ -806,17 +811,16 @@ QUAN TRỌNG:
               Trong GIẢI PHÁP 3, hãy gợi ý 1-2 vị trí nên đặt hình ảnh minh họa.
               
               ${getPageLimitPrompt()}`,
-          nextStep: GenerationStep.PART_IV_SOL2_REVIEW
-        },
-        // GP2 Review → GP3
-        [GenerationStep.PART_IV_SOL2_REVIEW]: {
-          prompt: `TIẾP TỤC VIẾT GIẢI PHÁP 3...`,
           nextStep: GenerationStep.PART_IV_SOL3
         },
-        // GP3 → GP3 Review hoặc Phần V-VI (nếu chỉ 3 GP)
-        [GenerationStep.PART_IV_SOL3]: userInfo.includeSolution4_5
+        // GP3 → GP3 Review (KHÔNG viết GP4 hoặc Phần V-VI ở đây)
+        [GenerationStep.PART_IV_SOL3]: {
+          prompt: `✅ HOÀN THÀNH GIẢI PHÁP 3. Vui lòng xem xét và duyệt trước khi tiếp tục.`,
+          nextStep: GenerationStep.PART_IV_SOL3_REVIEW
+        },
+        // GP3 Review → GP4 hoặc PART_V_VI (Viết sau khi approve GP3)
+        [GenerationStep.PART_IV_SOL3_REVIEW]: userInfo.includeSolution4_5
           ? {
-            // Có 5 giải pháp → Viết GP4
             prompt: `
                 BẮT ĐẦU phản hồi bằng MENU NAVIGATION trạng thái (Viết Giải pháp 4 - Đang thực hiện).
 
@@ -834,10 +838,9 @@ QUAN TRỌNG:
                 4. Phải có VÍ DỤ MINH HỌA cụ thể.
                 
                 ${getPageLimitPrompt()}`,
-            nextStep: GenerationStep.PART_IV_SOL3_REVIEW
+            nextStep: GenerationStep.PART_IV_SOL4
           }
           : {
-            // Chỉ 3 giải pháp → Chuyển sang Phần V-VI
             prompt: `
                 BẮT ĐẦU phản hồi bằng MENU NAVIGATION trạng thái (Kết luận & Khuyến nghị - Đang thực hiện).
 
@@ -859,14 +862,15 @@ QUAN TRỌNG:
                 🖼️ GỢI Ý HÌNH ẢNH MINH HỌA.
                 
                 ${getPageLimitPrompt()}`,
-            nextStep: GenerationStep.PART_IV_SOL3_REVIEW
+            nextStep: GenerationStep.PART_V_VI
           },
-        // GP3 Review → GP4 hoặc PART_V_VI
-        [GenerationStep.PART_IV_SOL3_REVIEW]: userInfo.includeSolution4_5
-          ? { prompt: `TIẾP TỤC VIẾT GIẢI PHÁP 4...`, nextStep: GenerationStep.PART_IV_SOL4 }
-          : { prompt: `TIẾP TỤC VIẾT PHẦN V-VI...`, nextStep: GenerationStep.PART_V_VI },
-        // GP4 → GP4 Review  
+        // GP4 → GP4 Review (KHÔNG viết GP5 ở đây)
         [GenerationStep.PART_IV_SOL4]: {
+          prompt: `✅ HOÀN THÀNH GIẢI PHÁP 4. Vui lòng xem xét và duyệt trước khi tiếp tục.`,
+          nextStep: GenerationStep.PART_IV_SOL4_REVIEW
+        },
+        // GP4 Review → GP5 (Viết GP5 sau khi approve GP4)
+        [GenerationStep.PART_IV_SOL4_REVIEW]: {
           prompt: `
               BẮT ĐẦU phản hồi bằng MENU NAVIGATION trạng thái (Viết Giải pháp 5 - Đang thực hiện).
 
@@ -882,15 +886,15 @@ QUAN TRỌNG:
               3. BẮT BUỘC TUÂN THỦ FORMAT.
               
               ${getPageLimitPrompt()}`,
-          nextStep: GenerationStep.PART_IV_SOL4_REVIEW
-        },
-        // GP4 Review → GP5
-        [GenerationStep.PART_IV_SOL4_REVIEW]: {
-          prompt: `TIẾP TỤC VIẾT GIẢI PHÁP 5...`,
           nextStep: GenerationStep.PART_IV_SOL5
         },
-        // GP5 → GP5 Review
+        // GP5 → GP5 Review (KHÔNG viết Phần V-VI ở đây)
         [GenerationStep.PART_IV_SOL5]: {
+          prompt: `✅ HOÀN THÀNH GIẢI PHÁP 5. Vui lòng xem xét và duyệt trước khi tiếp tục.`,
+          nextStep: GenerationStep.PART_IV_SOL5_REVIEW
+        },
+        // GP5 Review → PART_V_VI (Viết Phần V-VI sau khi approve GP5)
+        [GenerationStep.PART_IV_SOL5_REVIEW]: {
           prompt: `
               BẮT ĐẦU phản hồi bằng MENU NAVIGATION trạng thái (Kết luận & Khuyến nghị - Đang thực hiện).
 
@@ -912,11 +916,6 @@ QUAN TRỌNG:
               🖼️ GỢI Ý HÌNH ẢNH MINH HỌA.
               
               ${getPageLimitPrompt()}`,
-          nextStep: GenerationStep.PART_IV_SOL5_REVIEW
-        },
-        // GP5 Review → PART_V_VI
-        [GenerationStep.PART_IV_SOL5_REVIEW]: {
-          prompt: `TIẾP TỤC VIẾT PHẦN V-VI...`,
           nextStep: GenerationStep.PART_V_VI
         },
         // PART_V_VI → COMPLETED
