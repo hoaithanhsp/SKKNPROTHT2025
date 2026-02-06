@@ -1390,8 +1390,20 @@ QUAN TRỌNG:
               icon = <div className="w-2 h-2 rounded-full bg-sky-600" />;
             }
 
+            // Cho phép click vào các step đã hoàn thành để quay lại sửa
+            const isClickable = state.step > stepNum && !state.isStreaming;
+            const handleStepClick = () => {
+              if (isClickable) {
+                setState(prev => ({ ...prev, step: stepNum }));
+              }
+            };
+
             return (
-              <div key={key} className={`flex items-start pl-4 border-l-2 ${statusColor.includes('border-sky') ? 'border-sky-500' : statusColor.includes('border-red') ? 'border-red-500' : 'border-gray-200'} py-1 transition-all`}>
+              <div
+                key={key}
+                onClick={handleStepClick}
+                className={`flex items-start pl-4 border-l-2 ${statusColor.includes('border-sky') ? 'border-sky-500' : statusColor.includes('border-red') ? 'border-red-500' : 'border-gray-200'} py-1 transition-all ${isClickable ? 'cursor-pointer hover:bg-sky-50 rounded-r-lg' : ''}`}
+              >
                 <div className="flex-1">
                   <h4 className={`text-sm ${statusColor.includes('text-sky') ? 'text-sky-900' : statusColor.includes('text-red') ? 'text-red-700' : 'text-gray-500'} font-medium`}>
                     {state.error && state.step === stepNum ? "Đã dừng do lỗi" : info.label}

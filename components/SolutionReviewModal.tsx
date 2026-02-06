@@ -154,8 +154,8 @@ export const SolutionReviewModal: React.FC<SolutionReviewModalProps> = ({
                     <button
                         onClick={() => setActiveTab('preview')}
                         className={`flex-1 py-3 px-4 text-sm font-medium transition-colors ${activeTab === 'preview'
-                                ? 'text-sky-600 border-b-2 border-sky-600 bg-sky-50'
-                                : 'text-gray-500 hover:text-gray-700'
+                            ? 'text-sky-600 border-b-2 border-sky-600 bg-sky-50'
+                            : 'text-gray-500 hover:text-gray-700'
                             }`}
                     >
                         <Eye className="w-4 h-4 inline mr-2" />
@@ -164,8 +164,8 @@ export const SolutionReviewModal: React.FC<SolutionReviewModalProps> = ({
                     <button
                         onClick={() => setActiveTab('edit')}
                         className={`flex-1 py-3 px-4 text-sm font-medium transition-colors ${activeTab === 'edit'
-                                ? 'text-sky-600 border-b-2 border-sky-600 bg-sky-50'
-                                : 'text-gray-500 hover:text-gray-700'
+                            ? 'text-sky-600 border-b-2 border-sky-600 bg-sky-50'
+                            : 'text-gray-500 hover:text-gray-700'
                             }`}
                     >
                         <RefreshCw className="w-4 h-4 inline mr-2" />
@@ -174,7 +174,7 @@ export const SolutionReviewModal: React.FC<SolutionReviewModalProps> = ({
                 </div>
 
                 {/* Content */}
-                <div className="flex-1 overflow-hidden">
+                <div className="flex-1 overflow-y-auto">
                     {activeTab === 'preview' ? (
                         /* Preview Tab */
                         <div className="h-full overflow-y-auto p-6">
