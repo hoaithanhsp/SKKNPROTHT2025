@@ -375,30 +375,33 @@ export const SKKNForm: React.FC<Props> = ({ userInfo, onChange, onSubmit, onManu
 
           <div className="space-y-5">
             <InputGroup label="Tên đề tài SKKN" icon={PenTool} required>
-              <div className="flex gap-2">
-                <InputWithHistory
-                  name="topic"
-                  value={userInfo.topic}
-                  onChange={handleChange}
-                  className="bg-gray-50 focus:bg-white focus:ring-sky-500 focus:border-sky-500 block w-full pl-10 text-sm border-gray-300 rounded-md p-3 border text-gray-900 placeholder-gray-500"
-                  placeholder='VD: "Ứng dụng AI để nâng cao hiệu quả dạy học môn Toán THPT"'
-                  required
-                />
+              <div className="flex gap-3 items-center">
+                <div className="flex-1">
+                  <InputWithHistory
+                    name="topic"
+                    value={userInfo.topic}
+                    onChange={handleChange}
+                    className="bg-gray-50 focus:bg-white focus:ring-sky-500 focus:border-sky-500 block w-full pl-10 text-sm border-gray-300 rounded-md p-3 border text-gray-900 placeholder-gray-500"
+                    placeholder='VD: "Ứng dụng AI để nâng cao hiệu quả dạy học môn Toán THPT"'
+                    required
+                  />
+                </div>
                 <button
                   type="button"
                   onClick={handleAnalyzeTitle}
                   disabled={isAnalyzingTitle || !userInfo.topic.trim()}
-                  className={`px-4 py-2 rounded-lg font-medium text-white flex items-center gap-2 transition-all flex-shrink-0 ${isAnalyzingTitle || !userInfo.topic.trim()
+                  className={`px-3 py-3 rounded-lg font-medium text-white flex items-center gap-2 transition-all whitespace-nowrap ${isAnalyzingTitle || !userInfo.topic.trim()
                     ? 'bg-gray-400 cursor-not-allowed'
                     : 'bg-purple-600 hover:bg-purple-700 hover:shadow-lg'
                     }`}
                   title="Phân tích tên đề tài"
                 >
                   {isAnalyzingTitle ? (
-                    <><Loader2 size={18} className="animate-spin" /> Phân tích...</>
+                    <Loader2 size={18} className="animate-spin" />
                   ) : (
-                    <><Search size={18} /> Phân tích</>
+                    <Search size={18} />
                   )}
+                  <span className="hidden sm:inline">Phân tích</span>
                 </button>
               </div>
             </InputGroup>
