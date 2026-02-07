@@ -1097,23 +1097,86 @@ QUAN TRỌNG:
   useEffect(() => {
     if (isReviewStep(state.step) && !state.isStreaming) {
       // Lấy nội dung giải pháp vừa viết từ fullDocument
-      // Tìm phần giải pháp cuối cùng được viết
       const solutionNum = getSolutionNumberFromStep(state.step);
-      const solutionMarker = `GIẢI PHÁP ${solutionNum}`;
-      const endMarker = `KẾT THÚC GIẢI PHÁP`;
 
-      // Tìm nội dung giải pháp trong document
+      // Tìm nội dung giải pháp trong document - cải thiện logic tìm kiếm
       const docContent = state.fullDocument;
-      const startIdx = docContent.lastIndexOf(solutionMarker);
-      if (startIdx !== -1) {
-        let endIdx = docContent.indexOf(endMarker, startIdx);
-        if (endIdx === -1) endIdx = docContent.length;
-        else endIdx = docContent.indexOf('\n', endIdx) + 1;
 
-        const solutionContent = docContent.substring(startIdx, endIdx);
-        setCurrentSolutionContent(solutionContent);
+      // Tìm tiêu đề GIẢI PHÁP với nhiều pattern phổ biến
+      // Pattern 1: "4.1. GIẢI PHÁP 1" hoặc "4.2. GIẢI PHÁP 2"
+      // Pattern 2: "GIẢI PHÁP 1:" hoặc "GIẢI PHÁP 1 -"
+      // Pattern 3: "### GIẢI PHÁP 1" (markdown heading)
+      const patterns = [
+        new RegExp(`\\n[#*\\s]*4\\.${solutionNum}[.:]?\\s*(GIẢI PHÁP ${solutionNum})`, 'i'),
+        new RegExp(`\\n[#*\\s]*(GIẢI PHÁP ${solutionNum})[:\\s-]`, 'i'),
+        new RegExp(`---\\n+[#*\\s]*(GIẢI PHÁP ${solutionNum})`, 'i'),
+        new RegExp(`(GIẢI PHÁP ${solutionNum})[:\\s]*[-–]`, 'i'),
+      ];
+
+      let startIdx = -1;
+      let solutionContent = '';
+
+      // Thử từng pattern để tìm tiêu đề chính xác
+      for (const pattern of patterns) {
+        const match = pattern.exec(docContent);
+        if (match && match.index !== undefined) {
+          startIdx = match.index;
+          break;
+        }
       }
 
+      // Fallback: Tìm sau dấu phân cách "---" gần nhất chứa GIẢI PHÁP X
+      if (startIdx === -1) {
+        const solutionMarker = `GIẢI PHÁP ${solutionNum}`;
+        // Tìm tất cả vị trí của marker
+        let lastValidIdx = -1;
+        let searchStart = 0;
+
+        while (true) {
+          const idx = docContent.indexOf(solutionMarker, searchStart);
+          if (idx === -1) break;
+
+          // Kiểm tra xem đây có phải là tiêu đề (sau dấu xuống dòng hoặc đầu dòng)
+          const charBefore = idx > 0 ? docContent[idx - 1] : '\n';
+          const charsBefore20 = docContent.substring(Math.max(0, idx - 20), idx);
+
+          // Ưu tiên vị trí sau dấu --- hoặc sau ký tự xuống dòng + số
+          if (charBefore === '\n' || charBefore === '#' || charsBefore20.includes('---') || charsBefore20.match(/\d+\.\d+/)) {
+            lastValidIdx = idx;
+          }
+          searchStart = idx + 1;
+        }
+        startIdx = lastValidIdx;
+      }
+
+      if (startIdx !== -1) {
+        // Tìm điểm kết thúc
+        const endMarker = `KẾT THÚC GIẢI PHÁP`;
+        let endIdx = docContent.indexOf(endMarker, startIdx);
+
+        if (endIdx !== -1) {
+          // Lấy hết dòng chứa "KẾT THÚC GIẢI PHÁP"
+          const endOfLine = docContent.indexOf('\n', endIdx);
+          endIdx = endOfLine !== -1 ? endOfLine + 1 : docContent.length;
+        } else {
+          // Không tìm thấy end marker - lấy đến dấu --- tiếp theo hoặc hết document
+          const nextSeparator = docContent.indexOf('---\n', startIdx + 50);
+          endIdx = nextSeparator !== -1 ? nextSeparator : docContent.length;
+        }
+
+        solutionContent = docContent.substring(startIdx, endIdx).trim();
+      }
+
+      // Nếu vẫn không tìm được, lấy phần cuối document (fallback)
+      if (!solutionContent || solutionContent.length < 100) {
+        const separator = '---';
+        const lastSepIdx = docContent.lastIndexOf(separator);
+        if (lastSepIdx !== -1) {
+          solutionContent = docContent.substring(lastSepIdx).trim();
+        }
+      }
+
+      setCurrentSolutionContent(solutionContent);
       setCurrentSolutionNumber(solutionNum);
       setShowSolutionReview(true);
     }
