@@ -1422,13 +1422,13 @@ QUAN TRỌNG:
   // Render Logic
   const renderSidebar = () => {
     return (
-      <div className="w-full lg:w-80 bg-white border-r border-gray-200 p-6 flex-shrink-0 flex flex-col h-full overflow-y-auto shadow-[4px_0_24px_rgba(0,0,0,0.02)]">
+      <div className="w-full lg:w-80 bg-gradient-to-b from-white to-sky-50 border-r border-sky-100 p-6 flex-shrink-0 flex flex-col h-full overflow-y-auto shadow-[4px_0_24px_rgba(56,189,248,0.08)]">
         <div className="mb-8">
-          <h1 className="text-2xl font-bold text-sky-600 flex items-center gap-2">
-            <Wand2 className="h-6 w-6" />
+          <h1 className="text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-sky-500 flex items-center gap-2" style={{ fontFamily: 'Nunito, sans-serif' }}>
+            <Wand2 className="h-6 w-6 text-blue-500" />
             SKKN PRO
           </h1>
-          <p className="text-xs text-gray-900 font-semibold mt-1 tracking-wide opacity-70">Trợ lý viết SKKN được nâng cấp bởi Trần Hoài Thanh</p>
+          <p className="text-xs text-blue-800 font-medium mt-1.5 tracking-wide">✨ Trợ lý viết SKKN thông minh</p>
         </div>
 
         {/* Progress Stepper */}
@@ -1585,7 +1585,7 @@ QUAN TRỌNG:
   }
 
   return (
-    <div className="min-h-screen bg-white flex flex-col lg:flex-row font-sans text-gray-900">
+    <div className="min-h-screen bg-gradient-to-br from-sky-50 via-blue-50 to-indigo-50 flex flex-col lg:flex-row font-sans text-gray-900">
       <ApiKeyModal
         isOpen={showApiModal}
         onSave={handleSaveApiKey}
@@ -1609,11 +1609,11 @@ QUAN TRỌNG:
       {/* Header Button for Settings */}
       <button
         onClick={() => setShowApiModal(true)}
-        className="fixed top-4 right-4 z-50 flex items-center gap-2 px-3 py-2 bg-white/90 backdrop-blur rounded-lg shadow-lg border border-gray-200 hover:bg-white hover:shadow-xl transition-all"
+        className="fixed top-4 right-4 z-50 flex items-center gap-2 px-4 py-2.5 bg-white/95 backdrop-blur-md rounded-xl shadow-lg border border-blue-100 hover:bg-blue-50 hover:border-blue-200 hover:shadow-xl transition-all duration-200"
         title="Cấu hình API Key"
       >
-        <Settings size={18} className="text-gray-600" />
-        <span className="text-red-500 font-semibold text-sm hidden sm:inline">Lấy API key để sử dụng app</span>
+        <Settings size={18} className="text-blue-600" />
+        <span className="text-blue-700 font-semibold text-sm hidden sm:inline">⚙️ Cài đặt API Key</span>
       </button>
 
       {/* Sidebar (Desktop) */}
@@ -1625,14 +1625,14 @@ QUAN TRỌNG:
       <div className="flex-1 p-4 lg:p-8 flex flex-col h-screen overflow-hidden relative">
 
         {/* Mobile Header */}
-        <div className="lg:hidden mb-4 bg-white p-4 rounded-lg shadow border border-gray-100 flex flex-col gap-2">
+        <div className="lg:hidden mb-4 bg-gradient-to-r from-white to-sky-50 p-4 rounded-xl shadow-lg border border-sky-100 flex flex-col gap-2">
           <div className="flex justify-between items-center">
-            <h1 className="font-bold text-sky-600 text-xl">SKKN PRO</h1>
-            <span className="text-xs bg-sky-100 text-sky-800 px-2 py-1 rounded-full">
+            <h1 className="font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-sky-500 text-xl" style={{ fontFamily: 'Nunito, sans-serif' }}>SKKN PRO</h1>
+            <span className="text-xs bg-blue-100 text-blue-700 px-3 py-1 rounded-full font-medium">
               {STEPS_INFO[state.step < 9 ? state.step : 8].label}
             </span>
           </div>
-          <p className="text-xs text-gray-500 font-medium">Trợ lý viết SKKN được nâng cấp bởi Trần Hoài Thanh</p>
+          <p className="text-xs text-blue-700 font-medium">✨ Trợ lý viết SKKN thông minh</p>
         </div>
 
         {state.error && (() => {
