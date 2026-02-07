@@ -52,6 +52,13 @@ const App: React.FC = () => {
     setApiKey(key);
     setSelectedModel(model);
     setShowApiModal(false);
+
+    // 🆕 Nếu đang có lỗi (ví dụ: hết quota), clear error và reinitialize chat với key mới
+    if (state.error) {
+      setState(prev => ({ ...prev, error: null }));
+      // Reinitialize chat session với key mới
+      initializeGeminiChat(key, model);
+    }
   };
 
   const handleUnlock = () => {
@@ -1607,11 +1614,28 @@ QUAN TRỌNG:
                 >
                   🔑 Đổi API Key
                 </button>
+                {/* 🆕 Nút Thử lại - chỉ hiện khi đang trong quá trình tạo (không phải form input) */}
+                {state.step > GenerationStep.INPUT_FORM && (
+                  <button
+                    onClick={() => {
+                      setState(prev => ({ ...prev, error: null }));
+                      initializeGeminiChat(apiKey, selectedModel);
+                      // Gọi lại hàm generate phù hợp với bước hiện tại
+                      setTimeout(() => {
+                        generateNextSection();
+                      }, 100);
+                    }}
+                    className="px-4 py-2 bg-emerald-600 text-white rounded-lg text-sm font-medium hover:bg-emerald-700 transition-colors flex items-center gap-2"
+                  >
+                    <RefreshCw size={16} />
+                    Thử lại
+                  </button>
+                )}
                 <a
                   href="https://ai.google.dev/gemini-api/docs/api-key"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700 transition-colors"
+                  className="px-4 py-2 bg-gray-600 text-white rounded-lg text-sm font-medium hover:bg-gray-700 transition-colors"
                 >
                   📖 Hướng dẫn lấy API Key
                 </a>
