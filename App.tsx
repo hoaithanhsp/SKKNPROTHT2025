@@ -126,25 +126,61 @@ const App: React.FC = () => {
 
     const requirements: string[] = [];
 
-    // 1. Giới hạn số trang
+    // 1. Giới hạn số trang - TÍNH TOÁN CHI TIẾT
     if (userInfo.pageLimit && typeof userInfo.pageLimit === 'number') {
       const pages = userInfo.pageLimit;
+
+      // Quy đổi chuẩn: 1 trang A4 ≈ 350-400 từ (font 13pt, line spacing 1.5)
+      // Hoặc ≈ 2500-3000 ký tự (bao gồm khoảng trắng)
+      // Hoặc ≈ 25-30 dòng
+      const wordsPerPage = 350;
+      const charsPerPage = 2500;
+      const linesPerPage = 27;
+
+      const totalWords = pages * wordsPerPage;
+      const totalChars = pages * charsPerPage;
+
+      // Phân bổ số trang cho từng phần (không tính Dàn ý và Phụ lục)
+      const partI_II = Math.max(1, Math.round(pages * 0.05)); // 5% cho Phần I & II
+      const partIII = Math.max(1, Math.round(pages * 0.05));   // 5% cho Phần III
+      const partIV = Math.round(pages * 0.80);                  // 80% cho giải pháp (phần trọng tâm)
+      const partV_VI = Math.max(1, Math.round(pages * 0.10));   // 10% kết quả + kết luận
+      const numSolutions = userInfo.includeSolution4_5 ? 5 : 3;
+      const pagesPerSolution = Math.floor(partIV / numSolutions);
+      const wordsPerSolution = pagesPerSolution * wordsPerPage;
+      const charsPerSolution = pagesPerSolution * charsPerPage;
+
       requirements.push(`
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-⚠️ GIỚI HẠN SỐ TRANG (BẮT BUỘC TUÂN THỦ NGHIÊM NGẶT):
+🚨🚨🚨 GIỚI HẠN SỐ TRANG - BẮT BUỘC TUYỆT ĐỐI 🚨🚨🚨
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-TỔNG NỘI DUNG CHÍNH: KHOẢNG ${pages} trang (KHÔNG tính Dàn ý và Phụ lục)
 
-PHÂN BỔ CHO MỖI PHẦN:
-- Phần I & II: TỐI ĐA 4 trang (viết ngắn gọn, súc tích)
-- Phần III: TỐI ĐA 3 trang
-- Phần IV (Giải pháp): ${Math.round(pages * 0.55)}-${Math.round(pages * 0.65)} trang
-- Phần V, VI & Kết luận: ${Math.round(pages * 0.15)}-${Math.round(pages * 0.2)} trang
+📌 TỔNG SỐ TRANG YÊU CẦU: ${pages} TRANG (không tính Dàn ý và Phụ lục)
 
-🚨 CẢNH BÁO: VIẾT NGẮN GỌN, SÚC TÍCH! 
-- Mỗi ý chính không quá 2-3 câu
-- Tránh lặp lại ý
-- KHÔNG viết dài hơn số trang quy định!`);
+📐 QUY ĐỔI CHUẨN (Font 13pt, Line spacing 1.5):
+• 1 trang A4 ≈ ${wordsPerPage} từ ≈ ${charsPerPage} ký tự ≈ ${linesPerPage} dòng
+• TỔNG CHO ${pages} TRANG: ≈ ${totalWords.toLocaleString()} từ ≈ ${totalChars.toLocaleString()} ký tự
+
+📊 PHÂN BỔ CHI TIẾT TỪNG PHẦN:
+┌─────────────────────────────────────────────────────────────────┐
+│ PHẦN              │ SỐ TRANG │ SỐ TỪ TỐI ĐA │ SỐ KÝ TỰ TỐI ĐA │
+├─────────────────────────────────────────────────────────────────┤
+│ Phần I & II       │ ${partI_II} trang   │ ~${(partI_II * wordsPerPage).toLocaleString()} từ     │ ~${(partI_II * charsPerPage).toLocaleString()} ký tự    │
+│ Phần III          │ ${partIII} trang   │ ~${(partIII * wordsPerPage).toLocaleString()} từ     │ ~${(partIII * charsPerPage).toLocaleString()} ký tự    │
+│ Phần IV (${numSolutions} GP)   │ ${partIV} trang  │ ~${(partIV * wordsPerPage).toLocaleString()} từ    │ ~${(partIV * charsPerPage).toLocaleString()} ký tự   │
+│  → Mỗi giải pháp  │ ${pagesPerSolution} trang   │ ~${wordsPerSolution.toLocaleString()} từ     │ ~${charsPerSolution.toLocaleString()} ký tự    │
+│ Phần V & VI       │ ${partV_VI} trang   │ ~${(partV_VI * wordsPerPage).toLocaleString()} từ     │ ~${(partV_VI * charsPerPage).toLocaleString()} ký tự    │
+└─────────────────────────────────────────────────────────────────┘
+
+⚠️ QUY TẮC NGHIÊM NGẶT:
+1. MỖI ĐOẠN VĂN: Tối đa 3-4 câu (≈ 60-80 từ)
+2. MỖI MỤC NHỎ: Tối đa 5-7 đoạn văn
+3. KHÔNG lặp lại ý, KHÔNG viết dư thừa
+4. VÍ DỤ MINH HỌA: Chỉ 1-2 ví dụ ngắn gọn/giải pháp (trừ khi yêu cầu thêm)
+5. BẢNG BIỂU: Giúp tiết kiệm không gian - ưu tiên sử dụng
+
+🚫 CẢNH BÁO: NẾU VƯỢT QUÁ ${pages} TRANG → VI PHẠM YÊU CẦU!
+✅ MỤC TIÊU: Viết CÔ ĐỌNG, SÚC TÍCH nhưng vẫn ĐẦY ĐỦ NỘI DUNG.`);
     }
 
     // 2. Thêm bài toán thực tế, ví dụ minh họa
@@ -185,7 +221,7 @@ Hãy áp dụng CHÍNH XÁC các yêu cầu trên vào phần đang viết!`);
 ${requirements.join('\n')}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 `;
-  }, [userInfo.requirementsConfirmed, userInfo.pageLimit, userInfo.includePracticalExamples, userInfo.includeStatistics, userInfo.specialRequirements, userInfo.textbook]);
+  }, [userInfo.requirementsConfirmed, userInfo.pageLimit, userInfo.includePracticalExamples, userInfo.includeStatistics, userInfo.specialRequirements, userInfo.textbook, userInfo.includeSolution4_5]);
 
   // Helper function để tạo prompt cấu trúc từ mẫu SKKN đã trích xuất
   const getCustomTemplatePrompt = useCallback(() => {
