@@ -1102,22 +1102,27 @@ QUAN TRỌNG:
       // Tìm nội dung giải pháp trong document - cải thiện logic tìm kiếm
       const docContent = state.fullDocument;
 
-      // Tìm tiêu đề GIẢI PHÁP với nhiều pattern phổ biến
-      // Pattern 1: "4.1. GIẢI PHÁP 1" hoặc "4.2. GIẢI PHÁP 2"
-      // Pattern 2: "GIẢI PHÁP 1:" hoặc "GIẢI PHÁP 1 -"
-      // Pattern 3: "### GIẢI PHÁP 1" (markdown heading)
-      const patterns = [
-        new RegExp(`\\n[#*\\s]*4\\.${solutionNum}[.:]?\\s*(GIẢI PHÁP ${solutionNum})`, 'i'),
-        new RegExp(`\\n[#*\\s]*(GIẢI PHÁP ${solutionNum})[:\\s-]`, 'i'),
-        new RegExp(`---\\n+[#*\\s]*(GIẢI PHÁP ${solutionNum})`, 'i'),
-        new RegExp(`(GIẢI PHÁP ${solutionNum})[:\\s]*[-–]`, 'i'),
+      let solutionContent = '';
+
+      // QUAN TRỌNG: Tìm vị trí bắt đầu của nội dung GIẢI PHÁP chi tiết
+      // Nội dung giải pháp chi tiết nằm SAU phần III (Thực trạng), 
+      // KHÔNG phải trong phần Dàn ý
+
+      // Bước 1: Tìm vị trí "📋 GIẢI PHÁP" hoặc "━━━━ GIẢI PHÁP" (format output chuẩn)
+      const detailPatterns = [
+        // Pattern cho format chuẩn SKKN (có separator và icon)
+        new RegExp(`━+\\s*\\n?\\s*📋\\s*GIẢI PHÁP\\s*${solutionNum}\\s*[-–:]`, 'i'),
+        new RegExp(`━+\\s*\\n?\\s*GIẢI PHÁP\\s*\\[?${solutionNum}\\]?\\s*[-–:]`, 'i'),
+        // Pattern với tiêu đề có số mục (4.1, 4.2, etc.) và nội dung chi tiết đi kèm
+        new RegExp(`###?\\s*4\\.${solutionNum}[.:]?\\s*GIẢI PHÁP\\s*${solutionNum}[:\\s]*[-–]?\\s*[^\\n]*\\n+[\\s\\S]{500,}`, 'i'),
+        // Pattern cho markdown heading với nội dung chi tiết
+        new RegExp(`\\n###?\\s*GIẢI PHÁP\\s*${solutionNum}\\s*[:：]\\s*[^\\n]+\\n+(?:###?\\s*1\\.|\\*\\*1\\.)`, 'i'),
       ];
 
       let startIdx = -1;
-      let solutionContent = '';
 
-      // Thử từng pattern để tìm tiêu đề chính xác
-      for (const pattern of patterns) {
+      // Thử từng pattern chi tiết trước
+      for (const pattern of detailPatterns) {
         const match = pattern.exec(docContent);
         if (match && match.index !== undefined) {
           startIdx = match.index;
@@ -1125,55 +1130,85 @@ QUAN TRỌNG:
         }
       }
 
-      // Fallback: Tìm sau dấu phân cách "---" gần nhất chứa GIẢI PHÁP X
+      // Fallback: Tìm GIẢI PHÁP X với nội dung chi tiết (có ít nhất 1 mục con như "1. MỤC TIÊU")
       if (startIdx === -1) {
         const solutionMarker = `GIẢI PHÁP ${solutionNum}`;
-        // Tìm tất cả vị trí của marker
-        let lastValidIdx = -1;
         let searchStart = 0;
 
         while (true) {
           const idx = docContent.indexOf(solutionMarker, searchStart);
           if (idx === -1) break;
 
-          // Kiểm tra xem đây có phải là tiêu đề (sau dấu xuống dòng hoặc đầu dòng)
-          const charBefore = idx > 0 ? docContent[idx - 1] : '\n';
-          const charsBefore20 = docContent.substring(Math.max(0, idx - 20), idx);
+          // Kiểm tra 1000 ký tự tiếp theo xem có phải nội dung chi tiết không
+          const nextChars = docContent.substring(idx, idx + 1500);
 
-          // Ưu tiên vị trí sau dấu --- hoặc sau ký tự xuống dòng + số
-          if (charBefore === '\n' || charBefore === '#' || charsBefore20.includes('---') || charsBefore20.match(/\d+\.\d+/)) {
-            lastValidIdx = idx;
+          // Nội dung chi tiết thường có các pattern này:
+          // - "1. MỤC TIÊU" hoặc "1.1."
+          // - "CƠ SỞ KHOA HỌC" hoặc "NỘI DUNG"
+          // - "QUY TRÌNH THỰC HIỆN" hoặc "Bước 1:"
+          const hasDetailContent = nextChars.match(/(?:1\.\s*MỤC TIÊU|1\.1\.|CƠ SỞ KHOA HỌC|NỘI DUNG VÀ|QUY TRÌNH|Bước\s*1|VÍ DỤ MINH HỌA)/i);
+
+          // Đảm bảo không phải trong dàn ý (dàn ý thường ngắn, chỉ có tiêu đề)
+          const isNotOutline = nextChars.length > 500 && hasDetailContent;
+
+          if (isNotOutline) {
+            startIdx = idx;
+            break;
           }
           searchStart = idx + 1;
         }
-        startIdx = lastValidIdx;
       }
 
       if (startIdx !== -1) {
         // Tìm điểm kết thúc
+        // Ưu tiên tìm "KẾT THÚC GIẢI PHÁP"
         const endMarker = `KẾT THÚC GIẢI PHÁP`;
         let endIdx = docContent.indexOf(endMarker, startIdx);
 
         if (endIdx !== -1) {
-          // Lấy hết dòng chứa "KẾT THÚC GIẢI PHÁP"
-          const endOfLine = docContent.indexOf('\n', endIdx);
-          endIdx = endOfLine !== -1 ? endOfLine + 1 : docContent.length;
+          // Lấy hết dòng chứa "KẾT THÚC GIẢI PHÁP" và phần hướng dẫn copy
+          const endBlock = docContent.indexOf('━━━━━━━━━━━━━━━━━━━━━', endIdx + 20);
+          if (endBlock !== -1 && endBlock - endIdx < 500) {
+            endIdx = endBlock;
+          } else {
+            const endOfLine = docContent.indexOf('\n\n', endIdx);
+            endIdx = endOfLine !== -1 ? endOfLine + 1 : docContent.length;
+          }
         } else {
-          // Không tìm thấy end marker - lấy đến dấu --- tiếp theo hoặc hết document
-          const nextSeparator = docContent.indexOf('---\n', startIdx + 50);
-          endIdx = nextSeparator !== -1 ? nextSeparator : docContent.length;
+          // Không tìm thấy end marker - tìm GIẢI PHÁP tiếp theo hoặc "5. KẾT QUẢ" hoặc separator
+          const nextSolutionIdx = docContent.indexOf(`GIẢI PHÁP ${solutionNum + 1}`, startIdx + 100);
+          const nextPartIdx = docContent.search(/(?:5\.\s*KẾT QUẢ|Phần\s*V|PHẦN\s*V)/i);
+          const nextSeparator = docContent.indexOf('━━━━━━━━━━━', startIdx + 500);
+
+          // Lấy vị trí gần nhất
+          const possibleEnds = [nextSolutionIdx, nextPartIdx, nextSeparator, docContent.length]
+            .filter(idx => idx > startIdx + 500);
+          endIdx = Math.min(...possibleEnds);
         }
 
         solutionContent = docContent.substring(startIdx, endIdx).trim();
       }
 
-      // Nếu vẫn không tìm được, lấy phần cuối document (fallback)
-      if (!solutionContent || solutionContent.length < 100) {
-        const separator = '---';
-        const lastSepIdx = docContent.lastIndexOf(separator);
-        if (lastSepIdx !== -1) {
-          solutionContent = docContent.substring(lastSepIdx).trim();
+      // Nếu vẫn không tìm được hoặc nội dung quá ngắn (có thể là dàn ý)
+      // Không sử dụng fallback lấy phần cuối vì sẽ lấy nhầm dàn ý
+      if (!solutionContent || solutionContent.length < 500) {
+        // Thử tìm từ cuối document ngược lên, bỏ qua phần dàn ý
+        const parts = docContent.split(/(?:━{10,}|---{3,})/);
+        for (let i = parts.length - 1; i >= 0; i--) {
+          const part = parts[i].trim();
+          // Kiểm tra phần này có phải nội dung giải pháp chi tiết không
+          if (part.includes(`GIẢI PHÁP ${solutionNum}`) &&
+            part.length > 500 &&
+            (part.includes('MỤC TIÊU') || part.includes('QUY TRÌNH') || part.includes('Bước 1'))) {
+            solutionContent = part;
+            break;
+          }
         }
+      }
+
+      // Cuối cùng: nếu vẫn không có, hiển thị thông báo
+      if (!solutionContent || solutionContent.length < 100) {
+        solutionContent = `⚠️ Không tìm thấy nội dung chi tiết của GIẢI PHÁP ${solutionNum}.\n\nVui lòng kiểm tra lại hoặc yêu cầu AI viết lại giải pháp này.`;
       }
 
       setCurrentSolutionContent(solutionContent);
