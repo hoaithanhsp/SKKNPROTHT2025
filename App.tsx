@@ -1104,52 +1104,88 @@ QUAN TRỌNG:
 
       let solutionContent = '';
 
-      // QUAN TRỌNG: Tìm vị trí bắt đầu của nội dung GIẢI PHÁP chi tiết
-      // Nội dung giải pháp chi tiết nằm SAU phần III (Thực trạng), 
-      // KHÔNG phải trong phần Dàn ý
+      // QUAN TRỌNG: Nội dung giải pháp chi tiết nằm trong phần:
+      // "📋 MÔ TẢ SÁNG KIẾN" -> "4. CÁC GIẢI PHÁP, BIỆN PHÁP THỰC HIỆN"
+      // KHÔNG phải trong phần Dàn ý (ngắn, chỉ chứa tiêu đề)
 
-      // Bước 1: Tìm vị trí "📋 GIẢI PHÁP" hoặc "━━━━ GIẢI PHÁP" (format output chuẩn)
+      // Bước 1: Tìm vị trí bắt đầu của phần "4. CÁC GIẢI PHÁP" sau "📋 MÔ TẢ SÁNG KIẾN"
+      let sectionStartIdx = -1;
+
+      // Tìm vị trí "📋 MÔ TẢ SÁNG KIẾN" (đây là tiêu đề của phần nội dung chính)
+      const moTaSangKienIdx = docContent.indexOf('📋 MÔ TẢ SÁNG KIẾN');
+
+      // Tìm vị trí "4. CÁC GIẢI PHÁP" hoặc các biến thể
+      const giaiphapSectionPatterns = [
+        /4\.\s*CÁC GIẢI PHÁP/i,
+        /PHẦN\s*(IV|4)[:\s]*.*GIẢI PHÁP/i,
+        /IV\.\s*CÁC GIẢI PHÁP/i,
+        /4\.\s*GIẢI PHÁP/i,
+      ];
+
+      for (const pattern of giaiphapSectionPatterns) {
+        const match = pattern.exec(docContent);
+        if (match && match.index !== undefined) {
+          // Nếu có "📋 MÔ TẢ SÁNG KIẾN", chỉ lấy phần sau nó
+          if (moTaSangKienIdx !== -1 && match.index > moTaSangKienIdx) {
+            sectionStartIdx = match.index;
+            break;
+          } else if (moTaSangKienIdx === -1) {
+            // Không có "📋 MÔ TẢ SÁNG KIẾN", lấy vị trí đầu tiên tìm được
+            sectionStartIdx = match.index;
+            break;
+          }
+        }
+      }
+
+      let startIdx = -1;
+
+      // Bước 2: Tìm GIẢI PHÁP X trong phạm vi phần "4. CÁC GIẢI PHÁP"
+      // Ưu tiên tìm từ vị trí sectionStartIdx nếu có
+      const searchFromIdx = sectionStartIdx !== -1 ? sectionStartIdx : 0;
+      const searchContent = docContent.substring(searchFromIdx);
+
+      // Pattern tìm GIẢI PHÁP có nội dung chi tiết (separator + tiêu đề)
       const detailPatterns = [
         // Pattern cho format chuẩn SKKN (có separator và icon)
         new RegExp(`━+\\s*\\n?\\s*📋\\s*GIẢI PHÁP\\s*${solutionNum}\\s*[-–:]`, 'i'),
         new RegExp(`━+\\s*\\n?\\s*GIẢI PHÁP\\s*\\[?${solutionNum}\\]?\\s*[-–:]`, 'i'),
-        // Pattern với tiêu đề có số mục (4.1, 4.2, etc.) và nội dung chi tiết đi kèm
-        new RegExp(`###?\\s*4\\.${solutionNum}[.:]?\\s*GIẢI PHÁP\\s*${solutionNum}[:\\s]*[-–]?\\s*[^\\n]*\\n+[\\s\\S]{500,}`, 'i'),
-        // Pattern cho markdown heading với nội dung chi tiết
-        new RegExp(`\\n###?\\s*GIẢI PHÁP\\s*${solutionNum}\\s*[:：]\\s*[^\\n]+\\n+(?:###?\\s*1\\.|\\*\\*1\\.)`, 'i'),
+        // Pattern với số mục 4.1, 4.2 (trong phần IV)
+        new RegExp(`4\\.${solutionNum}[.:\\s]+GIẢI PHÁP\\s*${solutionNum}`, 'i'),
+        // Pattern GIẢI PHÁP với tên tiêu đề (có dấu : hoặc -)
+        new RegExp(`GIẢI PHÁP\\s*${solutionNum}\\s*[:–-]\\s*[^\\n]{10,}`, 'i'),
       ];
-
-      let startIdx = -1;
 
       // Thử từng pattern chi tiết trước
       for (const pattern of detailPatterns) {
-        const match = pattern.exec(docContent);
+        const match = pattern.exec(searchContent);
         if (match && match.index !== undefined) {
-          startIdx = match.index;
+          startIdx = searchFromIdx + match.index;
           break;
         }
       }
 
-      // Fallback: Tìm GIẢI PHÁP X với nội dung chi tiết (có ít nhất 1 mục con như "1. MỤC TIÊU")
+      // Fallback: Tìm GIẢI PHÁP X với nội dung chi tiết (có ít nhất 1 mục con)
       if (startIdx === -1) {
         const solutionMarker = `GIẢI PHÁP ${solutionNum}`;
-        let searchStart = 0;
+        let searchStart = searchFromIdx;
 
         while (true) {
           const idx = docContent.indexOf(solutionMarker, searchStart);
           if (idx === -1) break;
 
-          // Kiểm tra 1000 ký tự tiếp theo xem có phải nội dung chi tiết không
+          // Kiểm tra 1500 ký tự tiếp theo xem có phải nội dung chi tiết không
           const nextChars = docContent.substring(idx, idx + 1500);
 
-          // Nội dung chi tiết thường có các pattern này:
-          // - "1. MỤC TIÊU" hoặc "1.1."
+          // Nội dung chi tiết có các pattern này:
+          // - "1. MỤC TIÊU" hoặc "1.1." hoặc "**1."
           // - "CƠ SỞ KHOA HỌC" hoặc "NỘI DUNG"
           // - "QUY TRÌNH THỰC HIỆN" hoặc "Bước 1:"
-          const hasDetailContent = nextChars.match(/(?:1\.\s*MỤC TIÊU|1\.1\.|CƠ SỞ KHOA HỌC|NỘI DUNG VÀ|QUY TRÌNH|Bước\s*1|VÍ DỤ MINH HỌA)/i);
+          // - "VÍ DỤ MINH HỌA" hoặc "ĐIỀU KIỆN"
+          const hasDetailContent = nextChars.match(/(?:1\.\s*MỤC TIÊU|\*\*1\.|1\.1\.|CƠ SỞ KHOA HỌC|NỘI DUNG VÀ|QUY TRÌNH|Bước\s*1|VÍ DỤ MINH HỌA|ĐIỀU KIỆN THỰC HIỆN)/i);
 
-          // Đảm bảo không phải trong dàn ý (dàn ý thường ngắn, chỉ có tiêu đề)
-          const isNotOutline = nextChars.length > 500 && hasDetailContent;
+          // Đảm bảo không phải trong dàn ý (dàn ý thường ngắn)
+          // Nội dung chi tiết phải có >500 ký tự và có các mục con
+          const isNotOutline = hasDetailContent && nextChars.length > 500;
 
           if (isNotOutline) {
             startIdx = idx;
