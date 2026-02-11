@@ -3,6 +3,7 @@ import { UserInfo, SKKNTemplate, SKKNSection, TitleAnalysisResult } from '../typ
 import { Button } from './Button';
 import { InputWithHistory, TextareaWithHistory } from './InputWithHistory';
 import { saveFormToHistory } from '../services/inputHistory';
+import { HIGHER_ED_LEVELS, HIGHER_ED_GRADES } from '../constants';
 import { analyzeDocumentForSKKN, extractSKKNStructure, analyzeTitleSKKN } from '../services/geminiService';
 import TitleAnalysisPanel from './TitleAnalysisPanel';
 import { BookOpen, School, GraduationCap, PenTool, MapPin, Calendar, Users, Cpu, Target, Monitor, FileUp, Sparkles, ClipboardPaste, Loader2, FileText, Search, X, CheckCircle, List, Save } from 'lucide-react';
@@ -432,17 +433,34 @@ export const SKKNForm: React.FC<Props> = ({ userInfo, onChange, onSubmit, onManu
                     <option value="THCS">THCS</option>
                     <option value="THPT">THPT</option>
                     <option value="GDTX">GDTX</option>
+                    <option value="Trung cấp">Trung cấp</option>
+                    <option value="Cao đẳng">Cao đẳng</option>
+                    <option value="Đại học">Đại học</option>
                   </select>
                 </InputGroup>
                 <InputGroup label="Khối lớp" icon={GraduationCap} required>
-                  <input
-                    type="text"
-                    name="grade"
-                    value={userInfo.grade}
-                    onChange={handleChange}
-                    className="bg-gray-50 focus:bg-white focus:ring-sky-500 focus:border-sky-500 block w-full pl-10 text-sm border-gray-300 rounded-md p-3 border text-gray-900 placeholder-gray-500"
-                    placeholder="VD: Lớp 12, Khối 6-9"
-                  />
+                  {HIGHER_ED_LEVELS.includes(userInfo.level) ? (
+                    <select
+                      name="grade"
+                      value={userInfo.grade}
+                      onChange={handleChange}
+                      className="bg-gray-50 focus:bg-white focus:ring-sky-500 focus:border-sky-500 block w-full pl-10 text-sm border-gray-300 rounded-md p-3 border appearance-none text-gray-900"
+                    >
+                      <option value="">Chọn đối tượng...</option>
+                      {HIGHER_ED_GRADES.map(g => (
+                        <option key={g} value={g}>{g}</option>
+                      ))}
+                    </select>
+                  ) : (
+                    <input
+                      type="text"
+                      name="grade"
+                      value={userInfo.grade}
+                      onChange={handleChange}
+                      className="bg-gray-50 focus:bg-white focus:ring-sky-500 focus:border-sky-500 block w-full pl-10 text-sm border-gray-300 rounded-md p-3 border text-gray-900 placeholder-gray-500"
+                      placeholder="VD: Lớp 12, Khối 6-9"
+                    />
+                  )}
                 </InputGroup>
               </div>
             </div>
