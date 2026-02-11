@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { UserInfo, GenerationStep, GenerationState, SKKNTemplate, SolutionsState } from './types';
-import { STEPS_INFO, SOLUTION_MODE_PROMPT, FALLBACK_MODELS } from './constants';
+import { STEPS_INFO, SOLUTION_MODE_PROMPT, FALLBACK_MODELS, HIGHER_ED_LEVELS, HIGHER_ED_SYSTEM_INSTRUCTION } from './constants';
 import { initializeGeminiChat, sendMessageStream, getFriendlyErrorMessage } from './services/geminiService';
 import { SKKNForm } from './components/SKKNForm';
 import { DocumentPreview } from './components/DocumentPreview';
@@ -263,7 +263,18 @@ QUY TẮC BẮT BUỘC:
 
   // Handle Input Changes
   const handleUserChange = (field: keyof UserInfo, value: string) => {
-    setUserInfo(prev => ({ ...prev, [field]: value }));
+    setUserInfo(prev => {
+      const updated = { ...prev, [field]: value };
+      // Reset grade khi đổi cấp học giữa bậc phổ thông và bậc cao
+      if (field === 'level') {
+        const wasHigherEd = HIGHER_ED_LEVELS.includes(prev.level);
+        const isHigherEd = HIGHER_ED_LEVELS.includes(value as string);
+        if (wasHigherEd !== isHigherEd) {
+          updated.grade = '';
+        }
+      }
+      return updated;
+    });
   };
 
   // Handle Manual Document Edit
@@ -302,9 +313,18 @@ QUY TẮC BẮT BUỘC:
 
       initializeGeminiChat(apiKey, selectedModel);
 
+      const isHigherEd = HIGHER_ED_LEVELS.includes(userInfo.level);
+      const learnerTerm = isHigherEd ? 'sinh viên' : 'học sinh';
+      const teacherTerm = isHigherEd ? 'giảng viên' : 'giáo viên';
+      const schoolTerm = isHigherEd ? 'trường/học viện' : 'trường';
+      const textbookTerm = isHigherEd ? 'giáo trình' : 'SGK';
+
       const initMessage = `
 Bạn là chuyên gia giáo dục cấp quốc gia, có 20+ năm kinh nghiệm viết, thẩm định và chấm điểm Sáng kiến Kinh nghiệm (SKKN) đạt giải cấp Bộ, cấp tỉnh tại Việt Nam.
-
+${isHigherEd ? `
+⚠️ LƯU Ý QUAN TRỌNG: Đây là SKKN dành cho BẬC ${userInfo.level.toUpperCase()} - KHÔNG PHẢI PHỔ THÔNG.
+Phải sử dụng thuật ngữ phù hợp: "sinh viên" thay "học sinh", "giảng viên" thay "giáo viên", "giáo trình" thay "SGK", v.v.
+` : ''}
 NHIỆM VỤ CỦA BẠN:
 Lập DÀN Ý CHI TIẾT cho một đề tài SKKN dựa trên thông tin tôi cung cấp. Dàn ý phải đầy đủ, cụ thể, có độ sâu và đảm bảo 4 tiêu chí: Tính MỚI, Tính KHOA HỌC, Tính KHẢ THI, Tính HIỆU QUẢ.
 
@@ -360,6 +380,8 @@ Lập DÀN Ý CHI TIẾT cho một đề tài SKKN dựa trên thông tin tôi c
 
 BẮT ĐẦU phản hồi bằng MENU NAVIGATION trạng thái Bước 2 (Lập Dàn Ý - Đang thực hiện).
 
+${isHigherEd ? HIGHER_ED_SYSTEM_INSTRUCTION : ''}
+
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 THÔNG TIN ĐỀ TÀI:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -367,12 +389,12 @@ THÔNG TIN ĐỀ TÀI:
 • Tên đề tài: ${userInfo.topic}
 • Môn học: ${userInfo.subject}
 • Cấp học: ${userInfo.level}
-• Khối lớp: ${userInfo.grade}
-• Tên trường: ${userInfo.school}
+• Khối lớp / Đối tượng: ${userInfo.grade}
+• Tên ${schoolTerm}: ${userInfo.school}
 • Địa điểm: ${userInfo.location}
 • Điều kiện CSVC: ${userInfo.facilities}
-• Sách giáo khoa: ${userInfo.textbook || "Không đề cập"}
-• Đối tượng nghiên cứu: ${userInfo.researchSubjects || "Học sinh tại đơn vị"}
+• ${textbookTerm}: ${userInfo.textbook || "Không đề cập"}
+• Đối tượng nghiên cứu: ${userInfo.researchSubjects || (isHigherEd ? "Sinh viên tại đơn vị" : "Học sinh tại đơn vị")}
 • Thời gian thực hiện: ${userInfo.timeframe || "Năm học hiện tại"}
 • Đặc thù/Công nghệ/AI: ${userInfo.applyAI ? userInfo.applyAI : ''} ${userInfo.focus ? `- ${userInfo.focus}` : ''}
 
@@ -445,6 +467,171 @@ Các yêu cầu khác:
 3. KHÔNG viết dính liền (wall of text).
 4. Sử dụng gạch đầu dòng và tiêu đề rõ ràng.
 
+${isHigherEd ? `
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+CẤU TRÚC SKKN BẬC CAO (TRUNG CẤP / CAO ĐẲNG / ĐẠI HỌC):
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📋 MÔ TẢ SÁNG KIẾN
+
+1. BỐI CẢNH VÀ LÝ DO NGHIÊN CỨU (3-4 trang)
+
+   1.1. Bối cảnh giáo dục đại học Việt Nam hiện nay
+        → Nghị quyết 29-NQ/TW về đổi mới căn bản, toàn diện giáo dục
+        → Luật Giáo dục đại học 2018 (sửa đổi 2024)
+        → Yêu cầu đổi mới phương pháp giảng dạy ${userInfo.subject} bậc ${userInfo.level}
+        → Xu hướng chuyển đổi số, chuẩn đầu ra CDIO/ABET
+        → Cách mạng công nghiệp 4.0 và yêu cầu nguồn nhân lực chất lượng cao
+        
+   1.2. Xuất phát từ thực tiễn giảng dạy
+        → Thực trạng giảng dạy ${userInfo.subject} tại ${userInfo.school}
+        → Đặc điểm ${userInfo.grade}: năng lực đầu vào, động lực học tập
+        → Hạn chế của phương pháp giảng dạy truyền thống ở bậc ${userInfo.level}
+        → Khoảng cách giữa đào tạo và nhu cầu thị trường lao động
+
+2. TỔNG QUAN TÀI LIỆU & CƠ SỞ LÝ LUẬN (5-7 trang)
+
+   2.1. Tổng quan nghiên cứu (Literature Review)
+        → Các nghiên cứu trong nước liên quan (ít nhất 3-5 nghiên cứu)
+        → Các nghiên cứu quốc tế liên quan (ít nhất 3-5 nghiên cứu)
+        → Phân tích khoảng trống nghiên cứu (Research Gap)
+        → Trích dẫn chuẩn APA: (Tác giả, Năm)
+        
+   2.2. Khung lý thuyết (Theoretical Framework)
+        → Andragogy - Lý thuyết học tập người lớn (Knowles)
+        → Experiential Learning - Học qua trải nghiệm (Kolb)
+        → Constructive Alignment - Căn chỉnh kiến tạo (Biggs)
+        → Bloom's Taxonomy bậc cao (Analyze, Evaluate, Create)
+        → Outcome-based Education (OBE)
+        [Phân tích sâu + Liên hệ đề tài tại ${userInfo.school}]
+        
+   2.3. Cơ sở pháp lý
+        → Luật Giáo dục đại học 2018, sửa đổi bổ sung
+        → Thông tư quy định về chuẩn chương trình đào tạo
+        → Quy chế đào tạo trình độ ${userInfo.level}
+
+3. PHÂN TÍCH HIỆN TRẠNG & ĐÁNH GIÁ NHU CẦU (5-6 trang)
+
+   3.1. Hiện trạng tổng quan
+        → Điều kiện CSVC tại ${userInfo.school} (${userInfo.facilities})
+        → Đặc thù đào tạo ngành/chuyên ngành liên quan
+        → Chuẩn đầu ra chương trình đào tạo hiện hành
+        
+   3.2. Khảo sát giảng viên
+        → Bảng khảo sát giảng viên (n=X, sử dụng thang Likert 5 điểm)
+        → Phương pháp giảng dạy hiện tại
+        → Thuận lợi - Khó khăn trong giảng dạy bậc ${userInfo.level}
+        → Cronbach's Alpha kiểm tra độ tin cậy
+        
+   3.3. Khảo sát sinh viên
+        → Bảng khảo sát sinh viên ${userInfo.grade} (n=Y)  
+        → Kết quả học tập trước khi áp dụng sáng kiến
+        → Mức độ hài lòng, động lực học tập
+        → Kỹ năng tự học, nghiên cứu
+        → Nhu cầu đổi mới phương pháp
+        
+   → Phân tích nguyên nhân bằng mô hình Fishbone/SWOT
+
+4. CÁC GIẢI PHÁP, BIỆN PHÁP THỰC HIỆN (12-18 trang - PHẦN QUAN TRỌNG NHẤT)
+
+   ⚠️ MỖI GIẢI PHÁP PHẢI CÓ CƠ SỞ NGHIÊN CỨU KHOA HỌC RÕ RÀNG.
+
+   GIẢI PHÁP 1: [Tên giải pháp - dựa trên nghiên cứu khoa học]
+   
+        1.1. Mục tiêu giải pháp (gắn với Chuẩn đầu ra / Learning Outcomes)
+             → Mục tiêu về kiến thức chuyên ngành
+             → Mục tiêu về năng lực nghề nghiệp
+             → Mục tiêu về kỹ năng mềm, tư duy phản biện
+             
+        1.2. Cơ sở khoa học & Nghiên cứu liên quan
+             → Trích dẫn 2-3 nghiên cứu hỗ trợ (APA)
+             → Phân tích mô hình quốc tế tương tự
+             → Điểm mới, sáng tạo so với nghiên cứu trước
+             
+        1.3. Thiết kế nghiên cứu & Quy trình
+             → Thiết kế: thực nghiệm/bán thực nghiệm/nghiên cứu hành động
+             → Nhóm thực nghiệm (n=?) và nhóm đối chứng (n=?)
+             → Quy trình thực hiện chi tiết (5-7 bước)
+             → Công cụ đánh giá: rubric, bài thi, khảo sát
+             
+        1.4. Ví dụ minh họa cụ thể
+             → Bài giảng/học phần cụ thể trong giáo trình ${userInfo.textbook || "hiện hành"}
+             → Hoạt động giảng dạy chi tiết
+             → Sản phẩm sinh viên mẫu / Đồ án / Tiểu luận
+             
+        1.5. Điều kiện thực hiện & Hạn chế
+             → Yêu cầu về CSVC (tận dụng ${userInfo.facilities})
+             → Hạn chế của phương pháp (phản biện)
+             → Điều kiện nhân rộng
+
+   GIẢI PHÁP 2: [Tên giải pháp - dựa trên nghiên cứu khoa học]
+        [Cấu trúc tương tự, triển khai đầy đủ 5 mục]
+
+   GIẢI PHÁP 3: [Tên giải pháp - dựa trên nghiên cứu khoa học]
+        [Cấu trúc tương tự, triển khai đầy đủ 5 mục]
+   ${userInfo.includeSolution4_5 ? `
+   GIẢI PHÁP 4: [Tên giải pháp nâng cao - ứng dụng công nghệ]
+        [Giải pháp tích hợp LMS, AI, Virtual Lab...]
+
+   GIẢI PHÁP 5: [Tên giải pháp phát triển - hợp tác doanh nghiệp]
+        [Giải pháp gắn kết đào tạo với thị trường lao động]
+   ` : ''}
+   → MỐI LIÊN HỆ HỆ THỐNG GIỮA CÁC GIẢI PHÁP
+
+5. KẾT QUẢ NGHIÊN CỨU & ĐÁNH GIÁ (5-6 trang)
+
+   5.1. Mục đích & Phương pháp đánh giá
+        → Thiết kế thực nghiệm: Pre-test / Post-test
+        → Công cụ thu thập dữ liệu: Bài thi, bảng hỏi Likert, phỏng vấn sâu
+        
+   5.2. Kết quả định lượng
+        → Đối tượng: ${userInfo.researchSubjects || "Sinh viên tại đơn vị"}
+        → Thời gian: ${userInfo.timeframe || "Năm học hiện tại"}
+        → Bảng kết quả kèm phân tích thống kê (Mean, SD, t-value, p-value)
+        → Effect size (Cohen's d)
+        → Biểu đồ so sánh nhóm thực nghiệm vs đối chứng
+        
+   5.3. Kết quả định tính
+        → Phỏng vấn sinh viên, giảng viên
+        → Quan sát lớp học / giảng đường
+        → Phân tích sản phẩm sinh viên
+        → Ý kiến phản hồi từ chuyên gia, đồng nghiệp
+
+6. ĐIỀU KIỆN NHÂN RỘNG & PHÁT TRIỂN (1-2 trang)
+
+   → Điều kiện về CSVC, công nghệ
+   → Điều kiện về năng lực giảng viên, bồi dưỡng
+   → Phạm vi áp dụng: các trường ${userInfo.level} khác
+   → Hướng nghiên cứu phát triển tiếp theo
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📌 KẾT LUẬN VÀ KHUYẾN NGHỊ (2-3 trang)
+
+1. Kết luận
+   → Tóm tắt đóng góp chính của sáng kiến
+   → Tính mới và giá trị khoa học
+   → Giá trị thực tiễn cho đào tạo bậc ${userInfo.level}
+
+2. Khuyến nghị  
+   → Với nhà trường / Ban giám hiệu
+   → Với khoa / bộ môn
+   → Với giảng viên
+   → Với Bộ GD&ĐT / Hội đồng khoa học
+   → Hướng nghiên cứu phát triển tiếp
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📚 TÀI LIỆU THAM KHẢO
+   → Liệt kê 10-15 tài liệu theo chuẩn APA (gồm tiếng Việt và tiếng Anh)
+
+📎 PHỤ LỤC
+   → Phiếu khảo sát (Likert scale)
+   → Đề cương bài giảng minh họa
+   → Rubric đánh giá
+   → Sản phẩm sinh viên
+   → Kết quả phân tích thống kê chi tiết
+` : `
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 CẤU TRÚC SKKN CHUẨN (ÁP DỤNG KHI KHÔNG CÓ MẪU RIÊNG):
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -598,29 +785,34 @@ CẤU TRÚC SKKN CHUẨN (ÁP DỤNG KHI KHÔNG CÓ MẪU RIÊNG):
    → Giáo án minh họa
    → Hình ảnh hoạt động
    → Sản phẩm học sinh
+`}
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-YÊU CẦU DÀN Ý (NGẮN GỌN - CHỈ ĐẦU MỤC):
+YÊU CẦU DÀN Ý(NGẮN GỌN - CHỈ ĐẦU MỤC):
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 ⚠️ QUAN TRỌNG: Dàn ý phải NGẮN GỌN, chỉ liệt kê CÁC ĐẦU MỤC CHÍNH.
 Nội dung chi tiết sẽ được triển khai ở các bước viết sau.
 
 ✓ ${userInfo.includeSolution4_5 ? '5 GIẢI PHÁP (bao gồm 2 giải pháp mở rộng/nâng cao)' : 'CHỈ 3 GIẢI PHÁP'} - liệt kê TÊN giải pháp, không triển khai chi tiết
-✓ Mỗi phần chỉ ghi tiêu đề mục và các ý chính (1-2 dòng mỗi ý)
+✓ Mỗi phần chỉ ghi tiêu đề mục và các ý chính(1 - 2 dòng mỗi ý)
 ✓ KHÔNG viết đoạn văn dài trong dàn ý
 ✓ KHÔNG triển khai chi tiết nội dung - chỉ gợi ý hướng đi
-✓ Gợi ý danh sách phụ lục cần tạo (dựa trên các giải pháp)
+✓ Gợi ý danh sách phụ lục cần tạo(dựa trên các giải pháp)
 ✓ Phù hợp với đặc thù môn ${userInfo.subject} và cấp ${userInfo.level}
+${isHigherEd ? `✓ SỬ DỤNG THUẬT NGỮ BẬC CAO: "sinh viên", "giảng viên", "giáo trình", "học phần", "chuẩn đầu ra"
+✓ Giải pháp phải có CƠ SỞ NGHIÊN CỨU KHOA HỌC, trích dẫn APA
+✓ Cấu trúc chặt chẽ hơn: có Literature Review, Thiết kế nghiên cứu, Phân tích thống kê` : ''
+        }
 ✓ Có thể triển khai ngay ở các bước sau
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ĐỊNH DẠNG ĐẦU RA:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-Trình bày theo cấu trúc phân cấp rõ ràng (Markdown):
+Trình bày theo cấu trúc phân cấp rõ ràng(Markdown):
 1. TÊN PHẦN LỚN
-   1.1. Tên mục nhỏ
+1.1.Tên mục nhỏ
         • Ý chi tiết 1
         • Ý chi tiết 2
 
@@ -628,10 +820,10 @@ Trình bày theo cấu trúc phân cấp rõ ràng (Markdown):
 Sử dụng icon để dễ nhìn: ✓ → • ○ ▪ ■
 
 QUAN TRỌNG:
-1. HIỂN THỊ "📱 MENU NAVIGATION" ĐẦU TIÊN (Bước 2: Đang thực hiện).
+1. HIỂN THỊ "📱 MENU NAVIGATION" ĐẦU TIÊN(Bước 2: Đang thực hiện).
 2. Cuối dàn ý, hiển thị hộp thoại xác nhận:
 ┌─────────────────────────────────┐
-│ ✅ Đồng ý dàn ý này?            │
+│ ✅ Đồng ý dàn ý này ?            │
 │ ✏️ Bạn có thể CHỈNH SỬA trực   │
 │    tiếp bằng nút "Chỉnh sửa"    │
 └─────────────────────────────────┘
@@ -661,25 +853,25 @@ QUAN TRỌNG:
       setState(prev => ({ ...prev, isStreaming: true, error: null, fullDocument: '' }));
 
       const feedbackMessage = `
-      BẮT ĐẦU phản hồi bằng MENU NAVIGATION trạng thái Bước 2 (Lập Dàn Ý - Đang thực hiện).
+      BẮT ĐẦU phản hồi bằng MENU NAVIGATION trạng thái Bước 2(Lập Dàn Ý - Đang thực hiện).
 
       Dựa trên dàn ý đã lập, người dùng có yêu cầu chỉnh sửa sau:
-      "${outlineFeedback}"
+"${outlineFeedback}"
       
       Hãy viết lại TOÀN BỘ Dàn ý chi tiết mới đã được cập nhật theo yêu cầu trên. 
       Vẫn đảm bảo cấu trúc chuẩn SKKN.
       
       Lưu ý các quy tắc định dạng:
-      - Xuống dòng sau mỗi câu.
+- Xuống dòng sau mỗi câu.
       - Tách đoạn rõ ràng.
       
       Kết thúc phần dàn ý, hãy xuống dòng và hiển thị hộp thoại:
       ┌─────────────────────────────────┐
-      │ ✅ Đồng ý dàn ý này?            │
+      │ ✅ Đồng ý dàn ý này ?            │
       │ ✏️ Bạn có thể CHỈNH SỬA trực   │
       │    tiếp bằng nút "Chỉnh sửa"    │
       └─────────────────────────────────┘
-      `;
+`;
 
       let generatedText = "";
       await sendMessageStream(feedbackMessage, (chunk) => {
@@ -708,27 +900,27 @@ QUAN TRỌNG:
       // We inject the CURRENT fullDocument (which might have been edited by user) into the prompt
       // This ensures the AI uses the user's finalized outline.
       currentStepPrompt = `
-        BẮT ĐẦU phản hồi bằng MENU NAVIGATION trạng thái Bước 3 (Viết Phần I & II - Đang thực hiện).
+        BẮT ĐẦU phản hồi bằng MENU NAVIGATION trạng thái Bước 3(Viết Phần I & II - Đang thực hiện).
         
-        Đây là bản DÀN Ý CHÍNH THỨC mà tôi đã chốt (tôi có thể đã chỉnh sửa trực tiếp). 
+        Đây là bản DÀN Ý CHÍNH THỨC mà tôi đã chốt(tôi có thể đã chỉnh sửa trực tiếp). 
         Hãy DÙNG CHÍNH XÁC NỘI DUNG NÀY để làm cơ sở triển khai các phần tiếp theo, không tự ý thay đổi cấu trúc của nó:
 
-        --- BẮT ĐẦU DÀN Ý CHÍNH THỨC ---
-        ${state.fullDocument}
-        --- KẾT THÚC DÀN Ý CHÍNH THỨC ---
+--- BẮT ĐẦU DÀN Ý CHÍNH THỨC-- -
+  ${state.fullDocument}
+--- KẾT THÚC DÀN Ý CHÍNH THỨC-- -
 
-        NHIỆM VỤ TIẾP THEO:
-        Hãy tiếp tục BƯỚC 3: Viết chi tiết PHẦN I (Đặt vấn đề) và PHẦN II (Cơ sở lý luận). 
+  NHIỆM VỤ TIẾP THEO:
+        Hãy tiếp tục BƯỚC 3: Viết chi tiết PHẦN I(Đặt vấn đề) và PHẦN II(Cơ sở lý luận). 
         
-        ⚠️ LƯU Ý FORMAT: 
-        - Viết từng câu xuống dòng riêng.
+        ⚠️ LƯU Ý FORMAT:
+- Viết từng câu xuống dòng riêng.
         - Tách đoạn rõ ràng.
         - Không viết dính chữ.
-        - Menu Navigation: Đánh dấu Bước 2 đã xong (✅), Bước 3 đang làm (🔵).
+        - Menu Navigation: Đánh dấu Bước 2 đã xong(✅), Bước 3 đang làm(🔵).
         
-        Viết sâu sắc, học thuật, đúng cấu trúc đã đề ra. Lưu ý bám sát thông tin về trường và địa phương đã cung cấp.
-        
-        ${getPageLimitPrompt()}`;
+        Viết sâu sắc, học thuật, đúng cấu trúc đã đề ra.Lưu ý bám sát thông tin về trường và địa phương đã cung cấp.
+
+  ${getPageLimitPrompt()} `;
 
       nextStepEnum = GenerationStep.PART_I_II;
     } else {
@@ -736,65 +928,65 @@ QUAN TRỌNG:
       const nextStepMap: Record<number, { prompt: string, nextStep: GenerationStep }> = {
         [GenerationStep.PART_I_II]: {
           prompt: `
-              BẮT ĐẦU phản hồi bằng MENU NAVIGATION trạng thái Bước 4 (Viết Phần III - Đang thực hiện).
+              BẮT ĐẦU phản hồi bằng MENU NAVIGATION trạng thái Bước 4(Viết Phần III - Đang thực hiện).
 
-              Tiếp tục BƯỚC 3 (tiếp): Viết chi tiết PHẦN III (Thực trạng vấn đề). 
+              Tiếp tục BƯỚC 3(tiếp): Viết chi tiết PHẦN III(Thực trạng vấn đề). 
               Nhớ tạo bảng số liệu khảo sát giả định logic phù hợp với đối tượng nghiên cứu là: ${userInfo.researchSubjects || "Học sinh"}.
               Phân tích nguyên nhân và thực trạng tại ${userInfo.school}, ${userInfo.location} và điều kiện CSVC thực tế: ${userInfo.facilities}.
               
-              ⚠️ LƯU Ý FORMAT: 
-              - Viết từng câu xuống dòng riêng.
+              ⚠️ LƯU Ý FORMAT:
+- Viết từng câu xuống dòng riêng.
               - Tách đoạn rõ ràng.
               - Bảng số liệu phải tuân thủ format Markdown chuẩn: | Tiêu đề | Số liệu |.
               
-              🖼️ GỢI Ý HÌNH ẢNH MINH HỌA (BẮT BUỘC):
-              Trong phần Thực trạng, hãy gợi ý 1-2 vị trí nên đặt hình ảnh minh họa với format:
-              **[🖼️ GỢI Ý HÌNH ẢNH: Mô tả chi tiết hình ảnh cần chụp/tạo - Đặt sau phần nào]**
-              Ví dụ:
-              **[🖼️ GỢI Ý HÌNH ẢNH: Biểu đồ cột thể hiện tỉ lệ học sinh yếu/trung bình/khá/giỏi trước khi áp dụng sáng kiến - Đặt sau bảng khảo sát đầu năm]**
-              **[🖼️ GỢI Ý HÌNH ẢNH: Ảnh chụp thực tế lớp học/phòng thí nghiệm tại ${userInfo.school} - Đặt phần đặc điểm nhà trường]**
-              
-              ${getPageLimitPrompt()}`,
+              🖼️ GỢI Ý HÌNH ẢNH MINH HỌA(BẮT BUỘC):
+              Trong phần Thực trạng, hãy gợi ý 1 - 2 vị trí nên đặt hình ảnh minh họa với format:
+              ** [🖼️ GỢI Ý HÌNH ẢNH: Mô tả chi tiết hình ảnh cần chụp / tạo - Đặt sau phần nào] **
+  Ví dụ:
+              ** [🖼️ GỢI Ý HÌNH ẢNH: Biểu đồ cột thể hiện tỉ lệ học sinh yếu / trung bình / khá / giỏi trước khi áp dụng sáng kiến - Đặt sau bảng khảo sát đầu năm] **
+              ** [🖼️ GỢI Ý HÌNH ẢNH: Ảnh chụp thực tế lớp học / phòng thí nghiệm tại ${userInfo.school} - Đặt phần đặc điểm nhà trường] **
+
+  ${getPageLimitPrompt()} `,
           nextStep: GenerationStep.PART_III
         },
         [GenerationStep.PART_III]: {
           // ULTRA MODE INJECTION FOR PART IV START
           prompt: `
-              BẮT ĐẦU phản hồi bằng MENU NAVIGATION trạng thái Bước 5 (Viết Phần IV - Đang thực hiện).
+              BẮT ĐẦU phản hồi bằng MENU NAVIGATION trạng thái Bước 5(Viết Phần IV - Đang thực hiện).
 
-              ${SOLUTION_MODE_PROMPT}
+  ${SOLUTION_MODE_PROMPT}
       
               ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-              🚀 THỰC THI NHIỆM VỤ (PHẦN IV - GIẢI PHÁP 1)
+              🚀 THỰC THI NHIỆM VỤ(PHẦN IV - GIẢI PHÁP 1)
               ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
               
               Thông tin đề tài: "${userInfo.topic}"
-              Môn: ${userInfo.subject} - Lớp: ${userInfo.grade}
-              Trường: ${userInfo.school}
-              SGK: ${userInfo.textbook}
-              Công nghệ/AI: ${userInfo.applyAI}
+Môn: ${userInfo.subject} - Lớp: ${userInfo.grade}
+Trường: ${userInfo.school}
+SGK: ${userInfo.textbook}
+              Công nghệ / AI: ${userInfo.applyAI}
               CSVC hiện có: ${userInfo.facilities}
               
               YÊU CẦU:
-              Hãy viết chi tiết GIẢI PHÁP 1 (Giải pháp trọng tâm nhất) tuân thủ nghiêm ngặt 10 NGUYÊN TẮC VÀNG.
+              Hãy viết chi tiết GIẢI PHÁP 1(Giải pháp trọng tâm nhất) tuân thủ nghiêm ngặt 10 NGUYÊN TẮC VÀNG.
               Giải pháp phải khả thi với điều kiện CSVC: ${userInfo.facilities}.
               
               QUAN TRỌNG: Tuân thủ "YÊU CẦU ĐỊNH DẠNG OUTPUT" vừa cung cấp:
-              1. Xuống dòng sau mỗi câu.
+1. Xuống dòng sau mỗi câu.
               2. Xuống 2 dòng sau mỗi đoạn.
               3. Sử dụng Format "KẾT THÚC GIẢI PHÁP" ở cuối.
               
-              Lưu ý đặc biệt: Phải có VÍ DỤ MINH HỌA (Giáo án/Hoạt động) cụ thể theo SGK ${userInfo.textbook}.
-              Menu Navigation: Đánh dấu Bước 5 đang làm (🔵).
+              Lưu ý đặc biệt: Phải có VÍ DỤ MINH HỌA(Giáo án / Hoạt động) cụ thể theo SGK ${userInfo.textbook}.
+              Menu Navigation: Đánh dấu Bước 5 đang làm(🔵).
               
-              🖼️ GỢI Ý HÌNH ẢNH MINH HỌA (BắT BUỘC):
-              Trong GIẢI PHÁP 1, hãy gợi ý 1-2 vị trí nên đặt hình ảnh minh họa với format:
-              **[🖼️ GỢI Ý HÌNH ẢNH: Mô tả chi tiết hình ảnh - Đặt sau phần nào]**
-              Ví dụ gợi ý cho Giải pháp 1:
-              **[🖼️ GỢI Ý HÌNH ẢNH: Sơ đồ quy trình thực hiện giải pháp (5-7 bước) dạng flowchart - Đặt đầu mục Quy trình thực hiện]**
-              **[🖼️ GỢI Ý HÌNH ẢNH: Ảnh chụp học sinh thực hiện hoạt động/Ảnh miền họa hoạt động mẫu - Đặt trong phần Ví dụ minh họa]**
-              
-              ${getPageLimitPrompt()}`,
+              🖼️ GỢI Ý HÌNH ẢNH MINH HỌA(BắT BUỘC):
+              Trong GIẢI PHÁP 1, hãy gợi ý 1 - 2 vị trí nên đặt hình ảnh minh họa với format:
+              ** [🖼️ GỢI Ý HÌNH ẢNH: Mô tả chi tiết hình ảnh - Đặt sau phần nào] **
+  Ví dụ gợi ý cho Giải pháp 1:
+              ** [🖼️ GỢI Ý HÌNH ẢNH: Sơ đồ quy trình thực hiện giải pháp(5 - 7 bước) dạng flowchart - Đặt đầu mục Quy trình thực hiện] **
+              ** [🖼️ GỢI Ý HÌNH ẢNH: Ảnh chụp học sinh thực hiện hoạt động / Ảnh miền họa hoạt động mẫu - Đặt trong phần Ví dụ minh họa] **
+
+  ${getPageLimitPrompt()} `,
           nextStep: GenerationStep.PART_IV_SOL1
         },
         [GenerationStep.PART_IV_SOL1]: {
@@ -805,26 +997,26 @@ QUAN TRỌNG:
         // GP1 Review → GP2
         [GenerationStep.PART_IV_SOL1_REVIEW]: {
           prompt: `
-              BẮT ĐẦU phản hồi bằng MENU NAVIGATION trạng thái (Viết Giải pháp 2 - Đang thực hiện).
+              BẮT ĐẦU phản hồi bằng MENU NAVIGATION trạng thái(Viết Giải pháp 2 - Đang thực hiện).
 
-              Tiếp tục giữ vững vai trò CHUYÊN GIA GIÁO DỤC (ULTRA MODE).
+              Tiếp tục giữ vững vai trò CHUYÊN GIA GIÁO DỤC(ULTRA MODE).
               
               Nhiệm vụ: Viết chi tiết GIẢI PHÁP 2 cho đề tài: "${userInfo.topic}".
               
               Yêu cầu:
-              1. Nội dung độc đáo, KHÔNG trùng lặp với Giải pháp 1.
-              2. Tận dụng tối đa CSVC: ${userInfo.facilities}.
-              3. BẮT BUỘC TUÂN THỦ FORMAT "YÊU CẦU ĐỊNH DẠNG OUTPUT":
-                 - Xuống dòng sau mỗi câu.
+1. Nội dung độc đáo, KHÔNG trùng lặp với Giải pháp 1.
+2. Tận dụng tối đa CSVC: ${userInfo.facilities}.
+3. BẮT BUỘC TUÂN THỦ FORMAT "YÊU CẦU ĐỊNH DẠNG OUTPUT":
+- Xuống dòng sau mỗi câu.
                  - Xuống 2 dòng sau mỗi đoạn.
                  - Có khung "KẾT THÚC GIẢI PHÁP" ở cuối.
               4. Phải có VÍ DỤ MINH HỌA cụ thể theo SGK ${userInfo.textbook}.
               
-              🖼️ GỢI Ý HÌNH ẢNH MINH HỌA (BẮT BUỘC):
-              Trong GIẢI PHÁP 2, hãy gợi ý 1-2 vị trí nên đặt hình ảnh minh họa với format:
-              **[🖼️ GỢI Ý HÌNH ẢNH: Mô tả chi tiết hình ảnh - Đặt sau phần nào]**
-              
-              ${getPageLimitPrompt()}`,
+              🖼️ GỢI Ý HÌNH ẢNH MINH HỌA(BẮT BUỘC):
+              Trong GIẢI PHÁP 2, hãy gợi ý 1 - 2 vị trí nên đặt hình ảnh minh họa với format:
+              ** [🖼️ GỢI Ý HÌNH ẢNH: Mô tả chi tiết hình ảnh - Đặt sau phần nào] **
+
+  ${getPageLimitPrompt()} `,
           nextStep: GenerationStep.PART_IV_SOL2
         },
         // GP2 → GP2 Review (KHÔNG viết GP3 ở đây)
@@ -835,25 +1027,25 @@ QUAN TRỌNG:
         // GP2 Review → GP3 (Viết GP3 sau khi approve GP2)
         [GenerationStep.PART_IV_SOL2_REVIEW]: {
           prompt: `
-              BẮT ĐẦU phản hồi bằng MENU NAVIGATION trạng thái (Viết Giải pháp 3 - Đang thực hiện).
+              BẮT ĐẦU phản hồi bằng MENU NAVIGATION trạng thái(Viết Giải pháp 3 - Đang thực hiện).
 
-              Tiếp tục giữ vững vai trò CHUYÊN GIA GIÁO DỤC (ULTRA MODE).
+              Tiếp tục giữ vững vai trò CHUYÊN GIA GIÁO DỤC(ULTRA MODE).
               
               Nhiệm vụ: Viết chi tiết GIẢI PHÁP 3 cho đề tài: "${userInfo.topic}".
               
               Yêu cầu:
-              1. Nội dung độc đáo, KHÔNG trùng lặp với Giải pháp 1 và 2.
-              2. Tận dụng tối đa CSVC: ${userInfo.facilities}.
-              3. BẮT BUỘC TUÂN THỦ FORMAT "YÊU CẦU ĐỊNH DẠNG OUTPUT":
-                 - Xuống dòng sau mỗi câu.
+1. Nội dung độc đáo, KHÔNG trùng lặp với Giải pháp 1 và 2.
+2. Tận dụng tối đa CSVC: ${userInfo.facilities}.
+3. BẮT BUỘC TUÂN THỦ FORMAT "YÊU CẦU ĐỊNH DẠNG OUTPUT":
+- Xuống dòng sau mỗi câu.
                  - Xuống 2 dòng sau mỗi đoạn.
                  - Có khung "KẾT THÚC GIẢI PHÁP" ở cuối.
               4. Phải có VÍ DỤ MINH HỌA cụ thể theo SGK ${userInfo.textbook}.
               
-              🖼️ GỢI Ý HÌNH ẢNH MINH HỌA (BẮT BUỘC):
-              Trong GIẢI PHÁP 3, hãy gợi ý 1-2 vị trí nên đặt hình ảnh minh họa.
-              
-              ${getPageLimitPrompt()}`,
+              🖼️ GỢI Ý HÌNH ẢNH MINH HỌA(BẮT BUỘC):
+              Trong GIẢI PHÁP 3, hãy gợi ý 1 - 2 vị trí nên đặt hình ảnh minh họa.
+
+  ${getPageLimitPrompt()} `,
           nextStep: GenerationStep.PART_IV_SOL3
         },
         // GP3 → GP3 Review (KHÔNG viết GP4 hoặc Phần V-VI ở đây)
@@ -865,46 +1057,46 @@ QUAN TRỌNG:
         [GenerationStep.PART_IV_SOL3_REVIEW]: userInfo.includeSolution4_5
           ? {
             prompt: `
-                BẮT ĐẦU phản hồi bằng MENU NAVIGATION trạng thái (Viết Giải pháp 4 - Đang thực hiện).
+                BẮT ĐẦU phản hồi bằng MENU NAVIGATION trạng thái(Viết Giải pháp 4 - Đang thực hiện).
 
-                Tiếp tục giữ vững vai trò CHUYÊN GIA GIÁO DỤC (ULTRA MODE).
+                Tiếp tục giữ vững vai trò CHUYÊN GIA GIÁO DỤC(ULTRA MODE).
                 
-                Nhiệm vụ: Viết chi tiết GIẢI PHÁP 4 (Mở rộng/Nâng cao) cho đề tài: "${userInfo.topic}".
+                Nhiệm vụ: Viết chi tiết GIẢI PHÁP 4(Mở rộng / Nâng cao) cho đề tài: "${userInfo.topic}".
                 
                 ⚠️ LƯU Ý: Đây là giải pháp MỞ RỘNG và NÂNG CAO.
-                Có thể là: Ứng dụng công nghệ/AI nâng cao, phát triển mở rộng đối tượng...
+                Có thể là: Ứng dụng công nghệ / AI nâng cao, phát triển mở rộng đối tượng...
                 
                 Yêu cầu:
-                1. Nội dung độc đáo, KHÔNG trùng lặp với Giải pháp 1, 2, 3.
-                2. Tận dụng tối đa CSVC: ${userInfo.facilities}.
-                3. BẮT BUỘC TUÂN THỦ FORMAT.
+1. Nội dung độc đáo, KHÔNG trùng lặp với Giải pháp 1, 2, 3.
+2. Tận dụng tối đa CSVC: ${userInfo.facilities}.
+3. BẮT BUỘC TUÂN THỦ FORMAT.
                 4. Phải có VÍ DỤ MINH HỌA cụ thể.
-                
-                ${getPageLimitPrompt()}`,
+
+  ${getPageLimitPrompt()} `,
             nextStep: GenerationStep.PART_IV_SOL4
           }
           : {
             prompt: `
-                BẮT ĐẦU phản hồi bằng MENU NAVIGATION trạng thái (Kết luận & Khuyến nghị - Đang thực hiện).
+                BẮT ĐẦU phản hồi bằng MENU NAVIGATION trạng thái(Kết luận & Khuyến nghị - Đang thực hiện).
 
                 Tiếp tục viết:
+
+5. KẾT QUẢ ĐẠT ĐƯỢC(4 - 5 trang):
+- 5.1.Mục đích thực nghiệm
+  - 5.2.Nội dung thực nghiệm
+    - 5.3.Tổ chức thực nghiệm(Bảng so sánh TRƯỚC - SAU với số liệu lẻ)
+
+6. ĐIỀU KIỆN ĐỂ SÁNG KIẾN ĐƯỢC NHÂN RỘNG(1 - 2 trang)
                 
-                5. KẾT QUẢ ĐẠT ĐƯỢC (4-5 trang):
-                   - 5.1. Mục đích thực nghiệm
-                   - 5.2. Nội dung thực nghiệm  
-                   - 5.3. Tổ chức thực nghiệm (Bảng so sánh TRƯỚC-SAU với số liệu lẻ)
+                KẾT LUẬN VÀ KHUYẾN NGHỊ(2 - 3 trang)
                 
-                6. ĐIỀU KIỆN ĐỂ SÁNG KIẾN ĐƯỢC NHÂN RỘNG (1-2 trang)
+                TÀI LIỆU THAM KHẢO(8 - 12 tài liệu)
                 
-                KẾT LUẬN VÀ KHUYẾN NGHỊ (2-3 trang)
-                
-                TÀI LIỆU THAM KHẢO (8-12 tài liệu)
-                
-                Đảm bảo số liệu phần Kết quả phải LOGIC. Sử dụng số liệu lẻ (42.3%, 67.8%).
+                Đảm bảo số liệu phần Kết quả phải LOGIC.Sử dụng số liệu lẻ(42.3 %, 67.8 %).
                 
                 🖼️ GỢI Ý HÌNH ẢNH MINH HỌA.
-                
-                ${getPageLimitPrompt()}`,
+
+  ${getPageLimitPrompt()} `,
             nextStep: GenerationStep.PART_V_VI
           },
         // GP4 → GP4 Review (KHÔNG viết GP5 ở đây)
@@ -915,20 +1107,20 @@ QUAN TRỌNG:
         // GP4 Review → GP5 (Viết GP5 sau khi approve GP4)
         [GenerationStep.PART_IV_SOL4_REVIEW]: {
           prompt: `
-              BẮT ĐẦU phản hồi bằng MENU NAVIGATION trạng thái (Viết Giải pháp 5 - Đang thực hiện).
+              BẮT ĐẦU phản hồi bằng MENU NAVIGATION trạng thái(Viết Giải pháp 5 - Đang thực hiện).
 
-              Tiếp tục giữ vững vai trò CHUYÊN GIA GIÁO DỤC (ULTRA MODE).
+              Tiếp tục giữ vững vai trò CHUYÊN GIA GIÁO DỤC(ULTRA MODE).
               
-              Nhiệm vụ: Viết chi tiết GIẢI PHÁP 5 (Mở rộng/Nâng cao cuối cùng) cho đề tài: "${userInfo.topic}".
+              Nhiệm vụ: Viết chi tiết GIẢI PHÁP 5(Mở rộng / Nâng cao cuối cùng) cho đề tài: "${userInfo.topic}".
               
               ⚠️ LƯU Ý: Đây là giải pháp MỞ RỘNG cuối cùng.
               
               Yêu cầu:
-              1. Nội dung độc đáo, KHÔNG trùng lặp với các giải pháp trước.
-              2. Kết thúc bằng MỐI LIÊN HỆ GIỮA TẤT CẢ 5 GIẢI PHÁP (tính hệ thống, logic).
+1. Nội dung độc đáo, KHÔNG trùng lặp với các giải pháp trước.
+              2. Kết thúc bằng MỐI LIÊN HỆ GIỮA TẤT CẢ 5 GIẢI PHÁP(tính hệ thống, logic).
               3. BẮT BUỘC TUÂN THỦ FORMAT.
-              
-              ${getPageLimitPrompt()}`,
+
+  ${getPageLimitPrompt()} `,
           nextStep: GenerationStep.PART_IV_SOL5
         },
         // GP5 → GP5 Review (KHÔNG viết Phần V-VI ở đây)
@@ -939,26 +1131,26 @@ QUAN TRỌNG:
         // GP5 Review → PART_V_VI (Viết Phần V-VI sau khi approve GP5)
         [GenerationStep.PART_IV_SOL5_REVIEW]: {
           prompt: `
-              BẮT ĐẦU phản hồi bằng MENU NAVIGATION trạng thái (Kết luận & Khuyến nghị - Đang thực hiện).
+              BẮT ĐẦU phản hồi bằng MENU NAVIGATION trạng thái(Kết luận & Khuyến nghị - Đang thực hiện).
 
               Tiếp tục viết:
+
+5. KẾT QUẢ ĐẠT ĐƯỢC(4 - 5 trang):
+- 5.1.Mục đích thực nghiệm
+  - 5.2.Nội dung thực nghiệm
+    - 5.3.Tổ chức thực nghiệm(Bảng so sánh TRƯỚC - SAU với số liệu lẻ)
+
+6. ĐIỀU KIỆN ĐỂ SÁNG KIẾN ĐƯỢC NHÂN RỘNG(1 - 2 trang)
               
-              5. KẾT QUẢ ĐẠT ĐƯỢC (4-5 trang):
-                 - 5.1. Mục đích thực nghiệm
-                 - 5.2. Nội dung thực nghiệm  
-                 - 5.3. Tổ chức thực nghiệm (Bảng so sánh TRƯỚC-SAU với số liệu lẻ)
+              KẾT LUẬN VÀ KHUYẾN NGHỊ(2 - 3 trang)
               
-              6. ĐIỀU KIỆN ĐỂ SÁNG KIẾN ĐƯỢC NHÂN RỘNG (1-2 trang)
+              TÀI LIỆU THAM KHẢO(8 - 12 tài liệu)
               
-              KẾT LUẬN VÀ KHUYẾN NGHỊ (2-3 trang)
-              
-              TÀI LIỆU THAM KHẢO (8-12 tài liệu)
-              
-              Đảm bảo số liệu phần Kết quả phải LOGIC. Sử dụng số liệu lẻ.
+              Đảm bảo số liệu phần Kết quả phải LOGIC.Sử dụng số liệu lẻ.
               
               🖼️ GỢI Ý HÌNH ẢNH MINH HỌA.
-              
-              ${getPageLimitPrompt()}`,
+
+  ${getPageLimitPrompt()} `,
           nextStep: GenerationStep.PART_V_VI
         },
         // PART_V_VI → COMPLETED
@@ -970,9 +1162,9 @@ QUAN TRỌNG:
               Bao gồm: Đặt vấn đề, Cơ sở lý luận, Thực trạng, Giải pháp, Kết quả và Kết luận.
               
               📌 BÂY GIỜ BẠN CÓ THỂ:
-              1. Xuất file Word để chỉnh sửa chi tiết
-              2. Tạo PHỤ LỤC chi tiết bằng nút "TẠO PHỤ LỤC"
-              3. Kiểm tra lại nội dung và định dạng
+1. Xuất file Word để chỉnh sửa chi tiết
+2. Tạo PHỤ LỤC chi tiết bằng nút "TẠO PHỤ LỤC"
+3. Kiểm tra lại nội dung và định dạng
               
               Chúc mừng bạn đã hoàn thành bản thảo SKKN!`,
           nextStep: GenerationStep.COMPLETED
@@ -1050,7 +1242,7 @@ QUAN TRỌNG:
     // Lưu giải pháp đã duyệt
     setSolutionsState(prev => ({
       ...prev,
-      [`solution${solutionNum}`]: {
+      [`solution${solutionNum} `]: {
         content: currentSolutionContent,
         isApproved: true,
         revisionHistory: [],
@@ -1088,19 +1280,20 @@ QUAN TRỌNG:
         ---
         ${referenceDoc.substring(0, 5000)}
         ---
-        ` : ''}
+        ` : ''
+        }
         
-        ⚠️ NỘI DUNG CŨ (ĐỂ THAM KHẢO):
+        ⚠️ NỘI DUNG CŨ(ĐỂ THAM KHẢO):
         ${currentSolutionContent.substring(0, 3000)}
         
         Hãy viết lại GIẢI PHÁP ${solutionNum} hoàn toàn mới, đảm bảo:
-        1. Tuân thủ YÊU CẦU SỬA từ người dùng
-        2. Tham khảo tài liệu mới nếu có
-        3. Giữ nguyên cấu trúc: Mục tiêu - Cơ sở - Quy trình - Ví dụ - Công cụ - Lưu ý
-        4. Format chuẩn SKKN
+1. Tuân thủ YÊU CẦU SỬA từ người dùng
+2. Tham khảo tài liệu mới nếu có
+3. Giữ nguyên cấu trúc: Mục tiêu - Cơ sở - Quy trình - Ví dụ - Công cụ - Lưu ý
+4. Format chuẩn SKKN
         
         ${getPageLimitPrompt()}
-      `;
+`;
 
       let revisedContent = "";
       await sendMessageStream(revisionPrompt, (chunk) => {
@@ -1183,12 +1376,12 @@ QUAN TRỌNG:
       // Pattern tìm GIẢI PHÁP có nội dung chi tiết (separator + tiêu đề)
       const detailPatterns = [
         // Pattern cho format chuẩn SKKN (có separator và icon)
-        new RegExp(`━+\\s*\\n?\\s*📋\\s*GIẢI PHÁP\\s*${solutionNum}\\s*[-–:]`, 'i'),
-        new RegExp(`━+\\s*\\n?\\s*GIẢI PHÁP\\s*\\[?${solutionNum}\\]?\\s*[-–:]`, 'i'),
+        new RegExp(`━+\\s *\\n ?\\s *📋\\s * GIẢI PHÁP\\s * ${solutionNum} \\s * [-–: ]`, 'i'),
+        new RegExp(`━+\\s *\\n ?\\s * GIẢI PHÁP\\s *\\[?${solutionNum}\\] ?\\s * [-–: ]`, 'i'),
         // Pattern với số mục 4.1, 4.2 (trong phần IV)
-        new RegExp(`4\\.${solutionNum}[.:\\s]+GIẢI PHÁP\\s*${solutionNum}`, 'i'),
+        new RegExp(`4\\.${solutionNum} [.: \\s] + GIẢI PHÁP\\s * ${solutionNum} `, 'i'),
         // Pattern GIẢI PHÁP với tên tiêu đề (có dấu : hoặc -)
-        new RegExp(`GIẢI PHÁP\\s*${solutionNum}\\s*[:–-]\\s*[^\\n]{10,}`, 'i'),
+        new RegExp(`GIẢI PHÁP\\s * ${solutionNum} \\s * [:–-]\\s * [^\\n]{ 10,} `, 'i'),
       ];
 
       // Thử từng pattern chi tiết trước
@@ -1202,7 +1395,7 @@ QUAN TRỌNG:
 
       // Fallback: Tìm GIẢI PHÁP X với nội dung chi tiết (có ít nhất 1 mục con)
       if (startIdx === -1) {
-        const solutionMarker = `GIẢI PHÁP ${solutionNum}`;
+        const solutionMarker = `GIẢI PHÁP ${solutionNum} `;
         let searchStart = searchFromIdx;
 
         while (true) {
@@ -1248,7 +1441,7 @@ QUAN TRỌNG:
           }
         } else {
           // Không tìm thấy end marker - tìm GIẢI PHÁP tiếp theo hoặc "5. KẾT QUẢ" hoặc separator
-          const nextSolutionIdx = docContent.indexOf(`GIẢI PHÁP ${solutionNum + 1}`, startIdx + 100);
+          const nextSolutionIdx = docContent.indexOf(`GIẢI PHÁP ${solutionNum + 1} `, startIdx + 100);
           const nextPartIdx = docContent.search(/(?:5\.\s*KẾT QUẢ|Phần\s*V|PHẦN\s*V)/i);
           const nextSeparator = docContent.indexOf('━━━━━━━━━━━', startIdx + 500);
 
@@ -1269,7 +1462,7 @@ QUAN TRỌNG:
         for (let i = parts.length - 1; i >= 0; i--) {
           const part = parts[i].trim();
           // Kiểm tra phần này có phải nội dung giải pháp chi tiết không
-          if (part.includes(`GIẢI PHÁP ${solutionNum}`) &&
+          if (part.includes(`GIẢI PHÁP ${solutionNum} `) &&
             part.length > 500 &&
             (part.includes('MỤC TIÊU') || part.includes('QUY TRÌNH') || part.includes('Bước 1'))) {
             solutionContent = part;
@@ -1303,7 +1496,7 @@ QUAN TRỌNG:
 
     try {
       const appendixPrompt = `
-        BẮT ĐẦU phản hồi bằng MENU NAVIGATION trạng thái Bước 8 (Tạo Phụ lục chi tiết - Đang thực hiện).
+        BẮT ĐẦU phản hồi bằng MENU NAVIGATION trạng thái Bước 8(Tạo Phụ lục chi tiết - Đang thực hiện).
 
         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         📎 NHIỆM VỤ: TẠO ĐẦY ĐỦ CÁC TÀI LIỆU PHỤ LỤC
@@ -1311,10 +1504,10 @@ QUAN TRỌNG:
         
         ⚠️ QUAN TRỌNG: Bạn PHẢI dựa vào NỘI DUNG SKKN ĐÃ VIẾT bên dưới để tạo phụ lục.
         Các phụ lục phải KHỚP với nội dung, số liệu, giải pháp đã đề cập trong SKKN.
-        KHÔNG tạo phụ lục liên quan đến hình ảnh, video (vì không thể hiển thị).
+        KHÔNG tạo phụ lục liên quan đến hình ảnh, video(vì không thể hiển thị).
         
         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        📄 NỘI DUNG SKKN ĐÃ VIẾT (ĐỌC KỸ ĐỂ TẠO PHỤ LỤC PHÙ HỢP):
+        📄 NỘI DUNG SKKN ĐÃ VIẾT(ĐỌC KỸ ĐỂ TẠO PHỤ LỤC PHÙ HỢP):
         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         
         ${state.fullDocument}
@@ -1322,14 +1515,14 @@ QUAN TRỌNG:
         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         📋 THÔNG TIN ĐỀ TÀI:
         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        - Tên đề tài: ${userInfo.topic}
-        - Môn học: ${userInfo.subject}
-        - Cấp học: ${userInfo.level}
-        - Khối lớp: ${userInfo.grade}
-        - Trường: ${userInfo.school}
-        - Địa điểm: ${userInfo.location}
-        - CSVC: ${userInfo.facilities}
-        - SGK: ${userInfo.textbook || "Hiện hành"}
+- Tên đề tài: ${userInfo.topic}
+- Môn học: ${userInfo.subject}
+- Cấp học: ${userInfo.level}
+- Khối lớp: ${userInfo.grade}
+- Trường: ${userInfo.school}
+- Địa điểm: ${userInfo.location}
+- CSVC: ${userInfo.facilities}
+- SGK: ${userInfo.textbook || "Hiện hành"}
         
         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         📎 YÊU CẦU TẠO PHỤ LỤC:
@@ -1341,159 +1534,159 @@ QUAN TRỌNG:
         📋 PHỤ LỤC 1: PHIẾU KHẢO SÁT ĐÁNH GIÁ MỨC ĐỘ HỨNG THÚ VÀ HIỆU QUẢ HỌC TẬP CỦA HỌC SINH
         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         
-        **PHẦN A: PHIẾU KHẢO SÁT TRƯỚC KHI ÁP DỤNG SÁNG KIẾN**
-        
-        Tạo bảng khảo sát với format:
+        ** PHẦN A: PHIẾU KHẢO SÁT TRƯỚC KHI ÁP DỤNG SÁNG KIẾN **
+
+  Tạo bảng khảo sát với format:
         | STT | Nội dung khảo sát | 1 | 2 | 3 | 4 | 5 |
-        |-----|-------------------|---|---|---|---|---|
+        | -----| -------------------| ---| ---| ---| ---| ---|
         | 1 | [Nội dung câu hỏi về mức độ hứng thú với môn ${userInfo.subject}] | | | | | |
         | 2 | [Nội dung câu hỏi về khó khăn khi học] | | | | | |
         ...
         
         Ghi chú: 1 = Rất không đồng ý, 2 = Không đồng ý, 3 = Bình thường, 4 = Đồng ý, 5 = Rất đồng ý
         
-        Nội dung câu hỏi (10-12 câu):
-        - Mức độ hứng thú với môn học
-        - Cảm nhận về phương pháp dạy học hiện tại
-        - Mức độ tham gia hoạt động học tập
-        - Khả năng tự học, tự nghiên cứu
+        Nội dung câu hỏi(10 - 12 câu):
+- Mức độ hứng thú với môn học
+  - Cảm nhận về phương pháp dạy học hiện tại
+    - Mức độ tham gia hoạt động học tập
+      - Khả năng tự học, tự nghiên cứu
         - Mức độ khó khăn khi tiếp thu kiến thức
-        - Hiệu quả ghi nhớ kiến thức
-        - Kỹ năng vận dụng kiến thức vào thực tế
-        
-        **PHẦN B: PHIẾU KHẢO SÁT SAU KHI ÁP DỤNG SÁNG KIẾN**
-        
-        Tạo bảng khảo sát tương tự với 12-15 câu hỏi về:
-        - Mức độ hứng thú sau khi áp dụng sáng kiến
-        - Hiệu quả của phương pháp mới
-        - Khả năng tiếp thu kiến thức
-        - Sự cải thiện kết quả học tập
+          - Hiệu quả ghi nhớ kiến thức
+            - Kỹ năng vận dụng kiến thức vào thực tế
+
+              ** PHẦN B: PHIẾU KHẢO SÁT SAU KHI ÁP DỤNG SÁNG KIẾN **
+
+                Tạo bảng khảo sát tương tự với 12 - 15 câu hỏi về:
+- Mức độ hứng thú sau khi áp dụng sáng kiến
+  - Hiệu quả của phương pháp mới
+    - Khả năng tiếp thu kiến thức
+      - Sự cải thiện kết quả học tập
         - Mong muốn tiếp tục học theo phương pháp mới
 
         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         📋 PHỤ LỤC 2: PHIẾU KHẢO SÁT GIÁO VIÊN VỀ THỰC TRẠNG DẠY HỌC
         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        - Viết phiếu khảo sát HOÀN CHỈNH với 10-15 câu hỏi
-        - Dạng câu hỏi: Trắc nghiệm mức độ (Rất thường xuyên / Thường xuyên / Thỉnh thoảng / Hiếm khi / Không bao giờ)
-        - Nội dung: Khảo sát thực trạng sử dụng phương pháp/công nghệ liên quan đến "${userInfo.topic}"
-        - Format: Bảng Markdown chuẩn với đầy đủ các cột
+- Viết phiếu khảo sát HOÀN CHỈNH với 10 - 15 câu hỏi
+  - Dạng câu hỏi: Trắc nghiệm mức độ(Rất thường xuyên / Thường xuyên / Thỉnh thoảng / Hiếm khi / Không bao giờ)
+    - Nội dung: Khảo sát thực trạng sử dụng phương pháp / công nghệ liên quan đến "${userInfo.topic}"
+      - Format: Bảng Markdown chuẩn với đầy đủ các cột
         | STT | Nội dung | Rất thường xuyên | Thường xuyên | Thỉnh thoảng | Hiếm khi | Không bao giờ |
-        |-----|----------|------------------|--------------|--------------|----------|---------------|
+        | -----| ----------| ------------------| --------------| --------------| ----------| ---------------|
         
         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        📋 PHỤ LỤC 3: GIÁO ÁN MINH HỌA (Theo Công văn 5512/BGDĐT ngày 18/12/2020)
+        📋 PHỤ LỤC 3: GIÁO ÁN MINH HỌA(Theo Công văn 5512 / BGDĐT ngày 18 / 12 / 2020)
         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         
-        **KHUNG KẾ HOẠCH BÀI DẠY**
-        (Kèm theo Công văn số 5512/BGDĐT-GDTrH ngày 18 tháng 12 năm 2020 của Bộ GDĐT)
-        
-        Trường: ${userInfo.school}
-        Tổ: [Tổ chuyên môn]
+        ** KHUNG KẾ HOẠCH BÀI DẠY **
+  (Kèm theo Công văn số 5512 / BGDĐT - GDTrH ngày 18 tháng 12 năm 2020 của Bộ GDĐT)
+
+Trường: ${userInfo.school}
+Tổ: [Tổ chuyên môn]
         Họ và tên giáo viên: ……………………
         
-        **TÊN BÀI DẠY: [Chọn một bài cụ thể từ SGK ${userInfo.textbook || "hiện hành"} phù hợp với đề tài]**
-        Môn học: ${userInfo.subject}; Lớp: ${userInfo.grade}
+        ** TÊN BÀI DẠY: [Chọn một bài cụ thể từ SGK ${userInfo.textbook || "hiện hành"} phù hợp với đề tài] **
+  Môn học: ${userInfo.subject}; Lớp: ${userInfo.grade}
         Thời gian thực hiện: [Số tiết]
-        
-        **I. MỤC TIÊU**
-        
-        1. Về kiến thức: 
-           - Nêu cụ thể nội dung kiến thức học sinh cần học
-           
-        2. Về năng lực:
-           - Năng lực chung: [Tự chủ và tự học, giao tiếp và hợp tác, giải quyết vấn đề]
-           - Năng lực đặc thù: [Năng lực đặc thù môn ${userInfo.subject}]
-           
-        3. Về phẩm chất:
-           - Trách nhiệm, chăm chỉ, trung thực trong học tập
-        
-        **II. THIẾT BỊ DẠY HỌC VÀ HỌC LIỆU**
-        - Giáo viên: [Liệt kê thiết bị, tài liệu GV chuẩn bị]
-        - Học sinh: [Liệt kê những gì HS cần chuẩn bị]
+
+  ** I.MỤC TIÊU **
+
+    1. Về kiến thức:
+- Nêu cụ thể nội dung kiến thức học sinh cần học
+
+2. Về năng lực:
+- Năng lực chung: [Tự chủ và tự học, giao tiếp và hợp tác, giải quyết vấn đề]
+  - Năng lực đặc thù: [Năng lực đặc thù môn ${userInfo.subject}]
+
+3. Về phẩm chất:
+- Trách nhiệm, chăm chỉ, trung thực trong học tập
+
+  ** II.THIẾT BỊ DẠY HỌC VÀ HỌC LIỆU **
+    - Giáo viên: [Liệt kê thiết bị, tài liệu GV chuẩn bị]
+      - Học sinh: [Liệt kê những gì HS cần chuẩn bị]
         - Điều kiện CSVC: ${userInfo.facilities}
         
-        **III. TIẾN TRÌNH DẠY HỌC**
+        ** III.TIẾN TRÌNH DẠY HỌC **
         
-        **1. Hoạt động 1: Mở đầu/Khởi động (... phút)**
-        a) Mục tiêu: Tạo hứng thú, xác định vấn đề/nhiệm vụ học tập
+        ** 1. Hoạt động 1: Mở đầu / Khởi động(...phút) **
+  a) Mục tiêu: Tạo hứng thú, xác định vấn đề / nhiệm vụ học tập
         b) Nội dung: [Mô tả cụ thể hoạt động]
         c) Sản phẩm: [Kết quả học sinh đạt được]
         d) Tổ chức thực hiện:
-           - Giao nhiệm vụ: [GV giao nhiệm vụ cụ thể]
-           - Thực hiện: [HS thực hiện, GV theo dõi hỗ trợ]
-           - Báo cáo, thảo luận: [HS báo cáo, GV tổ chức thảo luận]
-           - Kết luận, nhận định: [GV kết luận, chuyển tiếp]
-        
-        **2. Hoạt động 2: Hình thành kiến thức mới (... phút)**
-        a) Mục tiêu: Giúp HS chiếm lĩnh kiến thức mới
+- Giao nhiệm vụ: [GV giao nhiệm vụ cụ thể]
+  - Thực hiện: [HS thực hiện, GV theo dõi hỗ trợ]
+    - Báo cáo, thảo luận: [HS báo cáo, GV tổ chức thảo luận]
+      - Kết luận, nhận định: [GV kết luận, chuyển tiếp]
+
+        ** 2. Hoạt động 2: Hình thành kiến thức mới(...phút) **
+          a) Mục tiêu: Giúp HS chiếm lĩnh kiến thức mới
         b) Nội dung: [Mô tả cụ thể các nhiệm vụ học tập]
         c) Sản phẩm: [Kiến thức, kỹ năng HS cần đạt được]
         d) Tổ chức thực hiện:
-           - Giao nhiệm vụ: [Chi tiết]
-           - Thực hiện: [Chi tiết - TÍCH HỢP CÔNG CỤ/PHƯƠNG PHÁP CỦA GIẢI PHÁP 1]
-           - Báo cáo, thảo luận: [Chi tiết]
-           - Kết luận, nhận định: [Chi tiết]
-        
-        **3. Hoạt động 3: Luyện tập (... phút)**
-        a) Mục tiêu: Củng cố, vận dụng kiến thức đã học
+- Giao nhiệm vụ: [Chi tiết]
+  - Thực hiện: [Chi tiết - TÍCH HỢP CÔNG CỤ / PHƯƠNG PHÁP CỦA GIẢI PHÁP 1]
+    - Báo cáo, thảo luận: [Chi tiết]
+      - Kết luận, nhận định: [Chi tiết]
+
+        ** 3. Hoạt động 3: Luyện tập(...phút) **
+          a) Mục tiêu: Củng cố, vận dụng kiến thức đã học
         b) Nội dung: [Hệ thống câu hỏi, bài tập]
         c) Sản phẩm: [Đáp án, lời giải của HS]
         d) Tổ chức thực hiện: [Chi tiết các bước]
-        
-        **4. Hoạt động 4: Vận dụng (... phút)**
-        a) Mục tiêu: Phát triển năng lực vận dụng vào thực tiễn
-        b) Nội dung: [Nhiệm vụ/tình huống thực tiễn]
+
+  ** 4. Hoạt động 4: Vận dụng(...phút) **
+    a) Mục tiêu: Phát triển năng lực vận dụng vào thực tiễn
+        b) Nội dung: [Nhiệm vụ / tình huống thực tiễn]
         c) Sản phẩm: [Báo cáo, sản phẩm của HS]
         d) Tổ chức thực hiện: [Giao về nhà hoặc thực hiện trên lớp]
 
         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         📋 PHỤ LỤC 4: PHIẾU HỌC TẬP / RUBRIC ĐÁNH GIÁ
         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        - Phiếu học tập mẫu cho hoạt động nhóm
-        - Rubric đánh giá sản phẩm học sinh (theo 4 mức: Tốt, Khá, Đạt, Chưa đạt)
-        - Bảng tiêu chí đánh giá với các mức độ rõ ràng
+- Phiếu học tập mẫu cho hoạt động nhóm
+  - Rubric đánh giá sản phẩm học sinh(theo 4 mức: Tốt, Khá, Đạt, Chưa đạt)
+    - Bảng tiêu chí đánh giá với các mức độ rõ ràng
 
         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         📋 PHỤ LỤC 5: BÀI TẬP MẪU / CÂU HỎI ÔN TẬP
         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        - 5-7 bài tập mẫu/câu hỏi ôn tập
-        - Có đáp án và hướng dẫn chấm điểm
-        - Nếu môn Toán: Sử dụng LaTeX cho công thức
+- 5 - 7 bài tập mẫu / câu hỏi ôn tập
+  - Có đáp án và hướng dẫn chấm điểm
+    - Nếu môn Toán: Sử dụng LaTeX cho công thức
 
         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        📋 PHỤ LỤC 6: BẢNG TỔNG HỢP KẾT QUẢ KHẢO SÁT (MINH CHỨNG CHO BẢNG DỮ LIỆU SKKN)
+        📋 PHỤ LỤC 6: BẢNG TỔNG HỢP KẾT QUẢ KHẢO SÁT(MINH CHỨNG CHO BẢNG DỮ LIỆU SKKN)
         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        - Bảng tổng hợp kết quả khảo sát TRƯỚC thực nghiệm (số lượng, tỷ lệ %)
-        - Bảng tổng hợp kết quả khảo sát SAU thực nghiệm
-        - Bảng so sánh kết quả TRƯỚC-SAU để minh chứng cho các bảng số liệu trong SKKN
-        - Số liệu phải LOGIC và KHỚP với các bảng trong phần Kết quả của SKKN
+- Bảng tổng hợp kết quả khảo sát TRƯỚC thực nghiệm(số lượng, tỷ lệ %)
+  - Bảng tổng hợp kết quả khảo sát SAU thực nghiệm
+    - Bảng so sánh kết quả TRƯỚC - SAU để minh chứng cho các bảng số liệu trong SKKN
+      - Số liệu phải LOGIC và KHỚP với các bảng trong phần Kết quả của SKKN
 
         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        ⚠️ YÊU CẦU FORMAT VÀ NỘI DUNG (BẮT BUỘC):
+        ⚠️ YÊU CẦU FORMAT VÀ NỘI DUNG(BẮT BUỘC):
         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         
         📌 VỀ NỘI DUNG:
-        - VIẾT ĐẦY ĐỦ NỘI DUNG thực tế cho từng phụ lục, KHÔNG viết tắt hay bỏ sót
-        - Phiếu khảo sát phải có ĐẦY ĐỦ 10-15 câu hỏi cụ thể (không ghi "...")
-        - Giáo án minh họa phải VIẾT CHI TIẾT từng hoạt động, có lời thoại GV-HS mẫu
-        - Rubric phải có ĐẦY ĐỦ tiêu chí và mô tả các mức độ
-        - Bài tập mẫu phải có ĐẦY ĐỦ đề bài và đáp án/hướng dẫn giải
-        - Số liệu bảng tổng hợp phải KHỚP với số liệu trong phần Kết quả SKKN
-        - Nếu dàn ý SKKN có đề cập phụ lục khác (chưa liệt kê ở trên), hãy TẠO THÊM
+- VIẾT ĐẦY ĐỦ NỘI DUNG thực tế cho từng phụ lục, KHÔNG viết tắt hay bỏ sót
+  - Phiếu khảo sát phải có ĐẦY ĐỦ 10 - 15 câu hỏi cụ thể(không ghi "...")
+    - Giáo án minh họa phải VIẾT CHI TIẾT từng hoạt động, có lời thoại GV - HS mẫu
+      - Rubric phải có ĐẦY ĐỦ tiêu chí và mô tả các mức độ
+        - Bài tập mẫu phải có ĐẦY ĐỦ đề bài và đáp án / hướng dẫn giải
+          - Số liệu bảng tổng hợp phải KHỚP với số liệu trong phần Kết quả SKKN
+            - Nếu dàn ý SKKN có đề cập phụ lục khác(chưa liệt kê ở trên), hãy TẠO THÊM
         
         📌 VỀ FORMAT:
-        - Markdown chuẩn, bảng dùng |---|
-        - BẢNG PHẢI CÓ ĐẦY ĐỦ TẤT CẢ CÁC CỘT, không được bỏ sót cột nào
-        - Mỗi hàng trong bảng phải có đủ số ô tương ứng với số cột ở header
-        - Bảng phải bắt đầu từ đầu dòng (không thụt lề)
+- Markdown chuẩn, bảng dùng | ---|
+  - BẢNG PHẢI CÓ ĐẦY ĐỦ TẤT CẢ CÁC CỘT, không được bỏ sót cột nào
+    - Mỗi hàng trong bảng phải có đủ số ô tương ứng với số cột ở header
+      - Bảng phải bắt đầu từ đầu dòng(không thụt lề)
         - Xuống dòng sau mỗi câu
-        - Tách đoạn rõ ràng
-        - Đánh số phụ lục rõ ràng: PHỤ LỤC 1, PHỤ LỤC 2...
+          - Tách đoạn rõ ràng
+            - Đánh số phụ lục rõ ràng: PHỤ LỤC 1, PHỤ LỤC 2...
         - KHÔNG ghi "...", "[nội dung]", "[điền vào]" - phải viết nội dung thực tế
         
         📌 KHÔNG TẠO:
-        - Phụ lục hình ảnh, video, ảnh chụp màn hình (không thể hiển thị)
-        - Phụ lục yêu cầu file đính kèm
+- Phụ lục hình ảnh, video, ảnh chụp màn hình(không thể hiển thị)
+  - Phụ lục yêu cầu file đính kèm
         
         📍 KẾT THÚC bằng dòng:
         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -1580,10 +1773,10 @@ QUAN TRỌNG:
               <div
                 key={key}
                 onClick={handleStepClick}
-                className={`flex items-start pl-4 border-l-2 ${statusColor.includes('border-sky') ? 'border-sky-500' : statusColor.includes('border-red') ? 'border-red-500' : 'border-gray-200'} py-1 transition-all ${isClickable ? 'cursor-pointer hover:bg-sky-50 rounded-r-lg' : ''}`}
+                className={`flex items - start pl - 4 border - l - 2 ${statusColor.includes('border-sky') ? 'border-sky-500' : statusColor.includes('border-red') ? 'border-red-500' : 'border-gray-200'} py - 1 transition - all ${isClickable ? 'cursor-pointer hover:bg-sky-50 rounded-r-lg' : ''} `}
               >
                 <div className="flex-1">
-                  <h4 className={`text-sm ${statusColor.includes('text-sky') ? 'text-sky-900' : statusColor.includes('text-red') ? 'text-red-700' : 'text-gray-500'} font-medium`}>
+                  <h4 className={`text - sm ${statusColor.includes('text-sky') ? 'text-sky-900' : statusColor.includes('text-red') ? 'text-red-700' : 'text-gray-500'} font - medium`}>
                     {state.error && state.step === stepNum ? "Đã dừng do lỗi" : info.label}
                   </h4>
                   <p className="text-xs text-gray-400">{info.description}</p>
