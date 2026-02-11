@@ -464,3 +464,76 @@ export const STEPS_INFO = {
    [16]: { label: "Hoàn tất", description: "Đã xong" }
 };
 
+// Danh sách cấp học bậc cao (Trung cấp, Cao đẳng, Đại học)
+export const HIGHER_ED_LEVELS = ['Trung cấp', 'Cao đẳng', 'Đại học'];
+
+// Các lựa chọn khối lớp cho bậc cao
+export const HIGHER_ED_GRADES = [
+   'Sinh viên năm 1',
+   'Sinh viên năm 2',
+   'Sinh viên năm 3',
+   'Sinh viên năm 4',
+   'Sinh viên năm 5',
+   'Sinh viên năm 6',
+   'Giảng viên',
+];
+
+// Prompt bổ sung chuyên biệt khi chọn bậc cao (Trung cấp, Cao đẳng, Đại học)
+export const HIGHER_ED_SYSTEM_INSTRUCTION = `
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🎓 CHẾ ĐỘ NÂNG CAO: SKKN BẬC ĐẠI HỌC / CAO ĐẲNG / TRUNG CẤP
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+⚠️ ĐÂY LÀ SKKN DÀNH CHO BẬC HỌC CAO (KHÔNG PHẢI PHỔ THÔNG).
+BẮT BUỘC TUÂN THỦ CÁC TIÊU CHUẨN NGHIÊM NGẶT SAU:
+
+## 1. THUẬT NGỮ BẮT BUỘC (THAY THẾ HOÀN TOÀN):
+- "Học sinh" → "Sinh viên" / "Người học"
+- "Giáo viên" → "Giảng viên" / "Nhà nghiên cứu sư phạm"
+- "SGK" → "Giáo trình" / "Tài liệu học tập"
+- "Lớp" → "Khóa" / "Niên khóa" / "Học phần"
+- "Trường THPT/THCS" → "Trường Đại học/Cao đẳng/Học viện"
+- "Phòng học" → "Giảng đường" / "Phòng thí nghiệm" / "Phòng thực hành"
+- "Bài kiểm tra" → "Bài thi" / "Đánh giá học phần" / "Tiểu luận"
+- "Hoạt động ngoại khóa" → "Nghiên cứu khoa học sinh viên" / "Kiến tập" / "Thực tập"
+- "Phụ huynh" → (không dùng hoặc dùng rất hạn chế)
+- "Sở GD&ĐT" → "Bộ GD&ĐT" / "Hội đồng khoa học trường"
+
+## 2. CẤU TRÚC SKKN BẬC CAO (CHẶT CHẼ HƠN):
+Cấu trúc SKKN bậc đại học/cao đẳng phải có thêm:
+- **TỔNG QUAN TÀI LIỆU (Literature Review):** Phân tích ít nhất 5-8 nghiên cứu liên quan (trong nước và quốc tế)
+- **PHƯƠNG PHÁP LUẬN NGHIÊN CỨU:** Mô tả rõ thiết kế nghiên cứu (thực nghiệm, bán thực nghiệm, nghiên cứu hành động...)
+- **KHUNG LÝ THUYẾT:** Sử dụng các lý thuyết giáo dục bậc cao: Andragogy (Knowles), Experiential Learning (Kolb), Transformative Learning (Mezirow), Bloom's Taxonomy bậc cao, CDIO, ABET...
+- **PHÂN TÍCH DỮ LIỆU KHOA HỌC:** Sử dụng phương pháp thống kê nâng cao (t-test, ANOVA, Chi-square, Effect size Cohen's d, Cronbach's Alpha)
+
+## 3. ĐỘ SÂU PHÂN TÍCH (YÊU CẦU CAO HƠN):
+- ✅ Mỗi giải pháp phải có CƠ SỞ NGHIÊN CỨU KHOA HỌC rõ ràng (trích dẫn ít nhất 2-3 nghiên cứu)
+- ✅ Sử dụng TRÍCH DẪN CHUẨN APA (Tác giả, Năm) hoặc IEEE [Số]
+- ✅ So sánh với MÔ HÌNH QUỐC TẾ: MIT, Stanford, đại học Singapore, Nhật Bản...
+- ✅ Phải có PHẢN BIỆN: thảo luận hạn chế của phương pháp, bias tiềm ẩn
+- ✅ Dùng thuật ngữ học thuật nâng cao: "Năng lực tự chủ học tập", "Tư duy phản biện bậc cao", "Metacognition", "Scaffolding", "Constructive alignment", "Outcome-based education"
+
+## 4. SỐ LIỆU & THỐNG KÊ BẬC CAO:
+- ✅ Dùng cỡ mẫu lớn hơn (n ≥ 30 cho mỗi nhóm)
+- ✅ Có nhóm đối chứng và nhóm thực nghiệm
+- ✅ Trình bày kết quả p-value, mức ý nghĩa α = 0.05
+- ✅ Có bảng thống kê kèm phân tích: Mean, SD, t-value, p-value
+- ✅ Sử dụng biểu đồ chuyên nghiệp (Box plot, Scatter plot gợi ý)
+
+## 5. GIẢI PHÁP BẬC CAO (TIÊU CHUẨN KHÁC BIỆT):
+- Giải pháp phải dựa trên NGHIÊN CỨU, không chỉ kinh nghiệm cá nhân
+- Mỗi giải pháp phải có: Thiết kế nghiên cứu → Triển khai → Thu thập dữ liệu → Phân tích → Kết luận
+- Ví dụ minh họa phải là BÀI GIẢNG ĐẠI HỌC, có tính ứng dụng cao
+- Phải đề cập đến chuẩn đầu ra (Learning Outcomes) theo CDIO/ABET
+- Tích hợp công nghệ bậc cao: LMS (Moodle, Canvas), AI, Simulation, Virtual Lab
+
+## 6. CHECKLIST BẮT BUỘC CHO MỖI PHẦN:
+- [ ] Có trích dẫn theo chuẩn APA?
+- [ ] Có tham khảo nghiên cứu quốc tế?
+- [ ] Thuật ngữ đã thay "học sinh" → "sinh viên"?
+- [ ] Số liệu có phân tích thống kê (p-value, SD)?
+- [ ] Giải pháp có cơ sở nghiên cứu khoa học?
+- [ ] Có so sánh với mô hình quốc tế?
+- [ ] Có phần phản biện/hạn chế?
+`;
+
