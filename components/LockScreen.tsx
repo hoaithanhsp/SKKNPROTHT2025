@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Lock, ArrowRight, ShieldCheck, User } from 'lucide-react';
 import { Button } from './Button';
-import accountData from '../data/account.json';
+import { accounts } from '../data/accounts';
 
 interface LockScreenProps {
   onLogin: (username: string) => void;
@@ -22,7 +22,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onLogin }) => {
 
     // Fake loading delay for realism
     setTimeout(() => {
-      const account = accountData.accounts.find(
+      const account = accounts.find(
         (acc) => acc.username === username && acc.password === password
       );
 
