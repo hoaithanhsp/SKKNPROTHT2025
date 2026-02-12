@@ -45,6 +45,8 @@ const InputGroup: React.FC<InputGroupProps> = ({ label, icon: Icon, required, ch
   </div>
 );
 
+const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB
+
 export const SKKNForm: React.FC<Props> = ({ userInfo, onChange, onSubmit, onManualSubmit, isSubmitting, apiKey, selectedModel }) => {
   const [mode, setMode] = useState<'ai' | 'manual'>('ai');
   const [manualContent, setManualContent] = useState('');
@@ -99,6 +101,11 @@ export const SKKNForm: React.FC<Props> = ({ userInfo, onChange, onSubmit, onManu
     const file = e.target.files?.[0];
     if (!file) return;
 
+    if (file.size > MAX_FILE_SIZE) {
+      alert(`File "${file.name}" có dung lượng ${(file.size / 1024 / 1024).toFixed(1)}MB, vượt quá giới hạn 100MB. Vui lòng chọn file nhỏ hơn.`);
+      return;
+    }
+
     setIsProcessingFile(true);
     try {
       const arrayBuffer = await file.arrayBuffer();
@@ -141,6 +148,14 @@ export const SKKNForm: React.FC<Props> = ({ userInfo, onChange, onSubmit, onManu
   const handleRefFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
+
+    // Kiểm tra kích thước từng file
+    for (let i = 0; i < files.length; i++) {
+      if (files[i].size > MAX_FILE_SIZE) {
+        alert(`File "${files[i].name}" có dung lượng ${(files[i].size / 1024 / 1024).toFixed(1)}MB, vượt quá giới hạn 100MB. Vui lòng chọn file nhỏ hơn.`);
+        return;
+      }
+    }
 
     setIsProcessingRefFiles(true);
     try {
@@ -195,6 +210,11 @@ export const SKKNForm: React.FC<Props> = ({ userInfo, onChange, onSubmit, onManu
   const handleTemplateUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    if (file.size > MAX_FILE_SIZE) {
+      alert(`File "${file.name}" có dung lượng ${(file.size / 1024 / 1024).toFixed(1)}MB, vượt quá giới hạn 100MB. Vui lòng chọn file nhỏ hơn.`);
+      return;
+    }
 
     setIsProcessingTemplateFile(true);
     setParsedTemplate(null); // Reset template khi upload file mới
