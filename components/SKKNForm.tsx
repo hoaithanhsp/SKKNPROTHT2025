@@ -102,7 +102,7 @@ export const SKKNForm: React.FC<Props> = ({ userInfo, onChange, onSubmit, onManu
     if (!file) return;
 
     if (file.size > MAX_FILE_SIZE) {
-      alert(`File "${file.name}" có dung lượng ${(file.size / 1024 / 1024).toFixed(1)}MB, vượt quá giới hạn 100MB. Vui lòng chọn file nhỏ hơn.`);
+      alert(`File "${file.name}" có dung lượng ${(file.size / 1024 / 1024).toFixed(1)}MB, vượt quá giới hạn 200MB. Vui lòng chọn file nhỏ hơn.`);
       return;
     }
 
