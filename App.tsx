@@ -61,8 +61,9 @@ const App: React.FC = () => {
     }
   };
 
-  const handleUnlock = () => {
+  const handleLogin = (username: string) => {
     localStorage.setItem('skkn_app_unlocked', 'true');
+    localStorage.setItem('skkn_logged_user', username);
     setIsUnlocked(true);
   };
 
@@ -1881,7 +1882,7 @@ Tổ: [Tổ chuyên môn]
   }
 
   if (!isUnlocked) {
-    return <LockScreen onUnlock={handleUnlock} />;
+    return <LockScreen onLogin={handleLogin} />;
   }
 
   return (
