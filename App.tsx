@@ -11,6 +11,23 @@ import { Download, ChevronRight, Wand2, FileText, CheckCircle, RefreshCw, Settin
 
 import { LockScreen } from './components/LockScreen';
 
+// Helper: Truncate text dài cho AI prompt - giữ phần đầu (nội dung chính) và thông báo lược bớt
+const MAX_REF_DOCS_FOR_PROMPT = 80000; // ~80K ký tự tối đa cho tài liệu tham khảo trong prompt
+
+const truncateForPrompt = (text: string, maxChars: number = MAX_REF_DOCS_FOR_PROMPT): string => {
+  if (!text || text.length <= maxChars) return text;
+
+  const truncated = text.substring(0, maxChars);
+  const removedChars = text.length - maxChars;
+  const estimatedPages = Math.round(removedChars / 2500); // ~2500 ký tự/trang A4
+
+  return truncated + `\n\n[... ĐÃ LƯỢC BỚT ${removedChars.toLocaleString()} KÝ TỰ (~${estimatedPages} trang) DO QUÁ DÀI. Nội dung phía trên đã đủ để tham khảo các ý chính ...]`;
+};
+
+// SessionStorage key cho tài liệu tham khảo lớn
+const SESSION_REF_DOCS_KEY = 'skkn_ref_docs';
+const SESSION_REF_NAMES_KEY = 'skkn_ref_file_names';
+
 const App: React.FC = () => {
   // Lock Screen State
   const [isUnlocked, setIsUnlocked] = useState(false);
@@ -90,6 +107,32 @@ const App: React.FC = () => {
     includeSolution4_5: false, // Mặc định chỉ viết 3 giải pháp
     customTemplate: undefined // Cấu trúc mẫu SKKN tùy chỉnh (đã trích xuất)
   });
+
+  // Khôi phục referenceDocuments từ sessionStorage khi mount
+  useEffect(() => {
+    try {
+      const savedRefDocs = sessionStorage.getItem(SESSION_REF_DOCS_KEY);
+      if (savedRefDocs && !userInfo.referenceDocuments) {
+        setUserInfo(prev => ({ ...prev, referenceDocuments: savedRefDocs }));
+        console.log(`📄 Đã khôi phục tài liệu tham khảo từ session (${(savedRefDocs.length / 1024).toFixed(1)}KB)`);
+      }
+    } catch (e) {
+      console.warn('Không thể khôi phục tài liệu tham khảo:', e);
+    }
+  }, []);
+
+  // Lưu referenceDocuments vào sessionStorage khi thay đổi
+  useEffect(() => {
+    try {
+      if (userInfo.referenceDocuments) {
+        sessionStorage.setItem(SESSION_REF_DOCS_KEY, userInfo.referenceDocuments);
+      } else {
+        sessionStorage.removeItem(SESSION_REF_DOCS_KEY);
+      }
+    } catch (e) {
+      console.warn('Text quá lớn cho sessionStorage, bỏ qua persistence:', e);
+    }
+  }, [userInfo.referenceDocuments]);
 
   const [state, setState] = useState<GenerationState>({
     step: GenerationStep.INPUT_FORM,
@@ -404,7 +447,7 @@ TÀI LIỆU THAM KHẢO (DO GIÁO VIÊN CUNG CẤP):
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 Dưới đây là nội dung các tài liệu tham khảo mà giáo viên đã tải lên. BẮT BUỘC phải bám sát vào nội dung này để viết SKKN phù hợp và chính xác:
 
-${userInfo.referenceDocuments}
+${truncateForPrompt(userInfo.referenceDocuments)}
 
 [HẾT TÀI LIỆU THAM KHẢO]
 ` : ''}
