@@ -53,7 +53,13 @@ export const SKKNForm: React.FC<Props> = ({ userInfo, onChange, onSubmit, onManu
   const [isProcessingFile, setIsProcessingFile] = useState(false);
   const [isProcessingRefFiles, setIsProcessingRefFiles] = useState(false);
   const [isProcessingTemplateFile, setIsProcessingTemplateFile] = useState(false);
-  const [refFileNames, setRefFileNames] = useState<string[]>([]); // Danh sách tên file đã tải
+  const [refFileNames, setRefFileNames] = useState<string[]>(() => {
+    // Khôi phục danh sách file từ sessionStorage
+    try {
+      const saved = sessionStorage.getItem('skkn_ref_file_names');
+      return saved ? JSON.parse(saved) : [];
+    } catch { return []; }
+  }); // Danh sách tên file đã tải
   const [templateFileName, setTemplateFileName] = useState<string>(''); // Tên file mẫu SKKN
   // State cho phân tích tài liệu
   const [isAnalyzingRef, setIsAnalyzingRef] = useState(false);
@@ -84,6 +90,13 @@ export const SKKNForm: React.FC<Props> = ({ userInfo, onChange, onSubmit, onManu
     // Gọi submit gốc
     onSubmit();
   };
+
+  // Lưu refFileNames vào sessionStorage khi thay đổi
+  useEffect(() => {
+    try {
+      sessionStorage.setItem('skkn_ref_file_names', JSON.stringify(refFileNames));
+    } catch (e) { /* ignore */ }
+  }, [refFileNames]);
 
   // Trích xuất text từ PDF - hỗ trợ file lớn bằng cách xử lý theo batch
   const extractTextFromPdf = async (arrayBuffer: ArrayBuffer, onProgress?: (msg: string) => void): Promise<string> => {
@@ -340,6 +353,10 @@ export const SKKNForm: React.FC<Props> = ({ userInfo, onChange, onSubmit, onManu
   const clearRefDocuments = () => {
     onChange('referenceDocuments', '');
     setRefFileNames([]);
+    try {
+      sessionStorage.removeItem('skkn_ref_docs');
+      sessionStorage.removeItem('skkn_ref_file_names');
+    } catch (e) { /* ignore */ }
   };
 
   // Clear template
@@ -709,6 +726,23 @@ export const SKKNForm: React.FC<Props> = ({ userInfo, onChange, onSubmit, onManu
                       </span>
                     ))}
                   </div>
+                  {/* Hiển thị thông tin kích thước text đã extract */}
+                  {userInfo.referenceDocuments && (
+                    <div className={`mt-2 p-2 rounded text-xs ${userInfo.referenceDocuments.length > 80000
+                        ? 'bg-amber-50 border border-amber-200 text-amber-700'
+                        : 'bg-green-50 border border-green-200 text-green-700'
+                      }`}>
+                      <p className="font-medium">
+                        📊 {(userInfo.referenceDocuments.length / 1000).toFixed(0)}K ký tự
+                        (~{Math.round(userInfo.referenceDocuments.length / 2500)} trang A4)
+                      </p>
+                      {userInfo.referenceDocuments.length > 80000 && (
+                        <p className="mt-1 text-[11px]">
+                          ⚠️ Nội dung lớn sẽ được tóm tắt (~80K ký tự đầu) khi gửi AI để đảm bảo chất lượng xử lý.
+                        </p>
+                      )}
+                    </div>
+                  )}
                   {/* Nút Phân tích sơ bộ */}
                   <button
                     onClick={handleAnalyzeRefDocs}
