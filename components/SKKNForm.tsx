@@ -66,6 +66,9 @@ export const SKKNForm: React.FC<Props> = ({ userInfo, onChange, onSubmit, onManu
   const [isAnalyzingTitle, setIsAnalyzingTitle] = useState(false);
   const [titleAnalysis, setTitleAnalysis] = useState<TitleAnalysisResult | null>(null);
 
+  // State cho tiến trình xử lý file
+  const [fileProgress, setFileProgress] = useState('');
+
   const fileInputRef = useRef<HTMLInputElement>(null);
   const refFileInputRef = useRef<HTMLInputElement>(null);
   const templateFileInputRef = useRef<HTMLInputElement>(null);
@@ -82,18 +85,56 @@ export const SKKNForm: React.FC<Props> = ({ userInfo, onChange, onSubmit, onManu
     onSubmit();
   };
 
-  const extractTextFromPdf = async (arrayBuffer: ArrayBuffer): Promise<string> => {
-    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+  // Trích xuất text từ PDF - hỗ trợ file lớn bằng cách xử lý theo batch
+  const extractTextFromPdf = async (arrayBuffer: ArrayBuffer, onProgress?: (msg: string) => void): Promise<string> => {
+    const BATCH_SIZE = 10; // Số trang xử lý mỗi batch
+
+    // Copy arrayBuffer vì pdfjs có thể transfer ownership
+    const dataCopy = new Uint8Array(arrayBuffer);
+
+    const loadingTask = pdfjsLib.getDocument({
+      data: dataCopy,
+      // Tối ưu cho file lớn
+      disableAutoFetch: true,
+      disableStream: false,
+    });
+
+    const pdf = await loadingTask.promise;
+    const totalPages = pdf.numPages;
     let fullText = '';
 
-    for (let i = 1; i <= pdf.numPages; i++) {
-      const page = await pdf.getPage(i);
-      const textContent = await page.getTextContent();
-      const pageText = textContent.items
-        .map((item: any) => item.str)
-        .join(' ');
-      fullText += pageText + '\n\n';
+    onProgress?.(`Đang đọc PDF: 0/${totalPages} trang...`);
+
+    // Xử lý từng batch để tránh tràn bộ nhớ
+    for (let batchStart = 1; batchStart <= totalPages; batchStart += BATCH_SIZE) {
+      const batchEnd = Math.min(batchStart + BATCH_SIZE - 1, totalPages);
+
+      for (let i = batchStart; i <= batchEnd; i++) {
+        try {
+          const page = await pdf.getPage(i);
+          const textContent = await page.getTextContent();
+          const pageText = textContent.items
+            .map((item: any) => item.str)
+            .join(' ');
+          fullText += pageText + '\n\n';
+          // Giải phóng tài nguyên trang
+          page.cleanup();
+        } catch (pageError) {
+          console.warn(`Không thể đọc trang ${i}:`, pageError);
+          fullText += `[Không đọc được trang ${i}]\n\n`;
+        }
+      }
+
+      onProgress?.(`Đang đọc PDF: ${batchEnd}/${totalPages} trang...`);
+
+      // Cho phép UI cập nhật giữa các batch
+      await new Promise(resolve => setTimeout(resolve, 0));
     }
+
+    // Giải phóng tài nguyên PDF  
+    pdf.cleanup();
+    pdf.destroy();
+
     return fullText;
   };
 
@@ -102,17 +143,18 @@ export const SKKNForm: React.FC<Props> = ({ userInfo, onChange, onSubmit, onManu
     if (!file) return;
 
     if (file.size > MAX_FILE_SIZE) {
-      alert(`File "${file.name}" có dung lượng ${(file.size / 1024 / 1024).toFixed(1)}MB, vượt quá giới hạn 200MB. Vui lòng chọn file nhỏ hơn.`);
+      alert(`File "${file.name}" có dung lượng ${(file.size / 1024 / 1024).toFixed(1)}MB, vượt quá giới hạn 100MB. Vui lòng chọn file nhỏ hơn.`);
       return;
     }
 
     setIsProcessingFile(true);
+    setFileProgress(`Đang đọc file ${file.name} (${(file.size / 1024 / 1024).toFixed(1)}MB)...`);
     try {
       const arrayBuffer = await file.arrayBuffer();
       let extractedText = '';
 
       if (file.type === 'application/pdf') {
-        extractedText = await extractTextFromPdf(arrayBuffer);
+        extractedText = await extractTextFromPdf(arrayBuffer, setFileProgress);
       } else if (
         file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
         file.name.endsWith('.docx')
@@ -137,6 +179,7 @@ export const SKKNForm: React.FC<Props> = ({ userInfo, onChange, onSubmit, onManu
       alert("Không thể đọc file. Vui lòng thử lại hoặc copy nội dung thủ công.");
     } finally {
       setIsProcessingFile(false);
+      setFileProgress('');
       // Reset input value to allow re-uploading the same file if needed
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
@@ -164,29 +207,39 @@ export const SKKNForm: React.FC<Props> = ({ userInfo, onChange, onSubmit, onManu
 
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
-        const arrayBuffer = await file.arrayBuffer();
-        let extractedText = '';
+        setFileProgress(`Đang đọc file ${i + 1}/${files.length}: ${file.name} (${(file.size / 1024 / 1024).toFixed(1)}MB)...`);
 
-        if (file.type === 'application/pdf') {
-          extractedText = await extractTextFromPdf(arrayBuffer);
-        } else if (
-          file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
-          file.name.endsWith('.docx')
-        ) {
-          const result = await mammoth.extractRawText({ arrayBuffer });
-          extractedText = result.value;
-        } else {
-          // Fallback for text files
-          extractedText = await new Promise<string>((resolve) => {
-            const reader = new FileReader();
-            reader.onload = (e) => resolve(e.target?.result as string);
-            reader.readAsText(file);
-          });
-        }
+        try {
+          const arrayBuffer = await file.arrayBuffer();
+          let extractedText = '';
 
-        if (extractedText.trim()) {
-          allExtractedText += `\n\n=== TÀI LIỆU: ${file.name} ===\n${extractedText}`;
-          newFileNames.push(file.name);
+          if (file.type === 'application/pdf') {
+            extractedText = await extractTextFromPdf(arrayBuffer, (msg) => {
+              setFileProgress(`File ${i + 1}/${files.length} - ${msg}`);
+            });
+          } else if (
+            file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
+            file.name.endsWith('.docx')
+          ) {
+            const result = await mammoth.extractRawText({ arrayBuffer });
+            extractedText = result.value;
+          } else {
+            // Fallback for text files
+            extractedText = await new Promise<string>((resolve) => {
+              const reader = new FileReader();
+              reader.onload = (e) => resolve(e.target?.result as string);
+              reader.readAsText(file);
+            });
+          }
+
+          if (extractedText.trim()) {
+            allExtractedText += `\n\n=== TÀI LIỆU: ${file.name} ===\n${extractedText}`;
+            newFileNames.push(file.name);
+          }
+        } catch (fileError) {
+          console.error(`Error reading file ${file.name}:`, fileError);
+          // Tiếp tục với file khác thay vì dừng hết
+          alert(`Không thể đọc file "${file.name}" (${(file.size / 1024 / 1024).toFixed(1)}MB). File này sẽ bị bỏ qua.`);
         }
       }
 
@@ -197,6 +250,7 @@ export const SKKNForm: React.FC<Props> = ({ userInfo, onChange, onSubmit, onManu
       alert("Không thể đọc một số file tài liệu. Vui lòng thử lại.");
     } finally {
       setIsProcessingRefFiles(false);
+      setFileProgress('');
       if (refFileInputRef.current) {
         refFileInputRef.current.value = '';
       }
@@ -218,12 +272,13 @@ export const SKKNForm: React.FC<Props> = ({ userInfo, onChange, onSubmit, onManu
 
     setIsProcessingTemplateFile(true);
     setParsedTemplate(null); // Reset template khi upload file mới
+    setFileProgress(`Đang đọc mẫu ${file.name} (${(file.size / 1024 / 1024).toFixed(1)}MB)...`);
     try {
       const arrayBuffer = await file.arrayBuffer();
       let extractedText = '';
 
       if (file.type === 'application/pdf') {
-        extractedText = await extractTextFromPdf(arrayBuffer);
+        extractedText = await extractTextFromPdf(arrayBuffer, setFileProgress);
       } else if (
         file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
         file.name.endsWith('.docx')
@@ -274,6 +329,7 @@ export const SKKNForm: React.FC<Props> = ({ userInfo, onChange, onSubmit, onManu
       alert("Không thể đọc file mẫu SKKN. Vui lòng thử lại.");
     } finally {
       setIsProcessingTemplateFile(false);
+      setFileProgress('');
       if (templateFileInputRef.current) {
         templateFileInputRef.current.value = '';
       }
@@ -607,7 +663,7 @@ export const SKKNForm: React.FC<Props> = ({ userInfo, onChange, onSubmit, onManu
                 <div className="absolute inset-0 bg-white/80 flex items-center justify-center z-10 backdrop-blur-sm rounded-lg">
                   <div className="flex flex-col items-center gap-2">
                     <Loader2 className="w-8 h-8 text-sky-600 animate-spin" />
-                    <p className="text-sm font-medium text-sky-700">Đang đọc tài liệu...</p>
+                    <p className="text-sm font-medium text-sky-700">{fileProgress || 'Đang đọc tài liệu...'}</p>
                   </div>
                 </div>
               )}
@@ -695,7 +751,7 @@ export const SKKNForm: React.FC<Props> = ({ userInfo, onChange, onSubmit, onManu
                 <div className="absolute inset-0 bg-white/80 flex items-center justify-center z-10 backdrop-blur-sm rounded-lg">
                   <div className="flex flex-col items-center gap-2">
                     <Loader2 className="w-8 h-8 text-amber-600 animate-spin" />
-                    <p className="text-sm font-medium text-amber-700">Đang đọc mẫu...</p>
+                    <p className="text-sm font-medium text-amber-700">{fileProgress || 'Đang đọc mẫu...'}</p>
                   </div>
                 </div>
               )}
@@ -991,7 +1047,7 @@ export const SKKNForm: React.FC<Props> = ({ userInfo, onChange, onSubmit, onManu
                   <div className="absolute inset-0 bg-white/80 flex items-center justify-center z-10 backdrop-blur-sm rounded-lg">
                     <div className="flex flex-col items-center gap-2">
                       <Loader2 className="w-8 h-8 text-sky-600 animate-spin" />
-                      <p className="text-sm font-medium text-sky-700">Đang đọc tài liệu...</p>
+                      <p className="text-sm font-medium text-sky-700">{fileProgress || 'Đang đọc tài liệu...'}</p>
                     </div>
                   </div>
                 )}
